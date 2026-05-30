@@ -3,21 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneVault.Domain", "TuneVault.Domain\TuneVault.Domain.csproj", "{3E2011FA-14D4-4558-9527-960B557ED1F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneVault.Domain", "backend\TuneVault.Domain\TuneVault.Domain.csproj", "{3E2011FA-14D4-4558-9527-960B557ED1F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneVault.Application", "TuneVault.Application\TuneVault.Application.csproj", "{EBF3761E-986B-41A7-B4AC-3D410E8E1BA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneVault.Application", "backend\TuneVault.Application\TuneVault.Application.csproj", "{EBF3761E-986B-41A7-B4AC-3D410E8E1BA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneVault.Infrastructure", "TuneVault.Infrastructure\TuneVault.Infrastructure.csproj", "{E1125A81-AA5C-41EC-B8DE-3CC4ADF3C1A1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneVault.Infrastructure", "backend\TuneVault.Infrastructure\TuneVault.Infrastructure.csproj", "{E1125A81-AA5C-41EC-B8DE-3CC4ADF3C1A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneVault.API", "TuneVault.API\TuneVault.API.csproj", "{4B18C894-FFC2-4C45-8376-71204FFCE7FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneVault.API", "backend\TuneVault.API\TuneVault.API.csproj", "{4B18C894-FFC2-4C45-8376-71204FFCE7FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3E2011FA-14D4-4558-9527-960B557ED1F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -36,5 +33,8 @@ Global
 		{4B18C894-FFC2-4C45-8376-71204FFCE7FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B18C894-FFC2-4C45-8376-71204FFCE7FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B18C894-FFC2-4C45-8376-71204FFCE7FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

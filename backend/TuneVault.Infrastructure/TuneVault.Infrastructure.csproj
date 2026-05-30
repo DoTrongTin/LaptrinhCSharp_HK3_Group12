@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\TuneVault.Application\TuneVault.Application.csproj" />
-    <ProjectReference Include="..\TuneVault.Domain\TuneVault.Domain.csproj" />
+    <ProjectReference Include="..\backend\TuneVault.Application\TuneVault.Application.csproj" />
+    <ProjectReference Include="..\backend\TuneVault.Domain\TuneVault.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
