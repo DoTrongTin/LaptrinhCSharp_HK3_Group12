@@ -1,0 +1,15 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+appsettings.Development.json
+
+# Node
+node_modules/
+dist/
+.env
+
+# Media uploads (không commit file thật)
+TuneVault.API/wwwroot/media/**
+!TuneVault.API/wwwroot/media/.gitkeep
