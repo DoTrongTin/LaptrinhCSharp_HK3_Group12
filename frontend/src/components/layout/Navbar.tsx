@@ -1,8 +1,23 @@
 import React, { useState } from 'react';
+// Import toàn bộ icon cần thiết từ thư viện
+import { 
+  MoreHorizontal, 
+  ChevronLeft, 
+  ChevronRight, 
+  Home, 
+  Search, 
+  Disc3, 
+  Bell, 
+  Settings, 
+  Minus, 
+  Square, 
+  X 
+} from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [isHomeHovered, setIsHomeHovered] = useState(false);
 
   const menuItems = ['Tệp', 'Sửa', 'Xem', 'Phát lại', 'Trợ giúp'];
 
@@ -14,22 +29,15 @@ const Navbar: React.FC = () => {
           style={styles.menuButton}
           title="Menu"
         >
-          •••
+          <MoreHorizontal size={24} />
         </button>
         
-        {/* Nhóm 2 mũi tên lại để dễ kiểm soát khoảng cách nội bộ */}
         <div style={styles.arrowsContainer}>
-          <button 
-            style={styles.arrowButton}
-            title="Back"
-          >
-            {'<'}
+          <button style={styles.arrowButton} title="Back">
+            <ChevronLeft size={28} />
           </button>
-          <button 
-            style={styles.arrowButton}
-            title="Forward"
-          >
-            {'>'}
+          <button style={styles.arrowButton} title="Forward">
+            <ChevronRight size={28} />
           </button>
         </div>
 
@@ -49,11 +57,23 @@ const Navbar: React.FC = () => {
       </div>
 
       <div style={styles.centerContent}>
-        <button style={styles.homeButton} title="Home">
-          🏠
+        <button
+          style={{
+            ...styles.iconButton,
+            ...styles.homeButton,
+            ...(isHomeHovered ? styles.homeButtonHover : {}),
+          }}
+          title="Home"
+          onMouseEnter={() => setIsHomeHovered(true)}
+          onMouseLeave={() => setIsHomeHovered(false)}
+        >
+          <Home size={24} strokeWidth={2.5} />
         </button>
+
         <div style={styles.searchContainer}>
-          <span style={styles.searchIcon}>🔍</span>
+          <span style={styles.searchIcon}>
+            <Search size={22} strokeWidth={2.4} />
+          </span>
           <input 
             type="text"
             placeholder="Bạn muốn phát nội dung gì?"
@@ -61,30 +81,31 @@ const Navbar: React.FC = () => {
             onChange={(e) => setSearchValue(e.target.value)}
             style={styles.searchInput}
           />
+          <span style={styles.searchDivider} />
+          <button style={styles.searchActionButton} title="Duyệt tìm">
+            <Disc3 size={22} strokeWidth={2.2} />
+          </button>
         </div>
-        <button style={styles.cartButton} title="Cart">
-          🛒
-        </button>
       </div>
 
       <div style={styles.rightContent}>
         <button style={styles.iconButton} title="Notifications">
-          🔔
+          <Bell size={20} />
         </button>
         <button style={styles.iconButton} title="Settings">
-          ⚙️
+          <Settings size={20} />
         </button>
         <button style={styles.profileButton}>
           T
         </button>
         <button style={styles.controlButton} title="Minimize">
-          −
+          <Minus size={18} />
         </button>
         <button style={styles.controlButton} title="Maximize">
-          ⧉
+          <Square size={14} />
         </button>
         <button style={styles.controlButton} title="Close">
-          ✕
+          <X size={18} />
         </button>
       </div>
     </header>
@@ -106,13 +127,13 @@ const styles = {
   leftContent: {
     display: 'flex',
     alignItems: 'center' as const,
-    gap: 24, // Khoảng cách lớn giữa nút Menu và cụm Mũi tên
+    gap: 24,
     position: 'relative' as const,
   },
   arrowsContainer: {
     display: 'flex',
     alignItems: 'center' as const,
-    gap: 16, // Khoảng cách đều giữa mũi tên trái và phải
+    gap: 16,
   },
   centerContent: {
     flex: 1,
@@ -124,73 +145,101 @@ const styles = {
   rightContent: {
     display: 'flex' as const,
     alignItems: 'center' as const,
-    gap: 12,
+    gap: 16, // Tăng nhẹ khoảng cách các nút bên phải cho thoáng
   },
   menuButton: {
     backgroundColor: 'transparent',
     border: 'none',
     color: '#ffffff',
-    fontSize: 20,
-    letterSpacing: 2, // Đẩy 3 dấu chấm ra xa nhau cho giống ảnh
     cursor: 'pointer' as const,
     padding: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   arrowButton: {
     backgroundColor: 'transparent',
     border: 'none',
     color: '#ffffff',
-    fontSize: 22, // Tăng kích thước mũi tên
-    opacity: 0.7, // Mũi tên Spotify thường hơi mờ khi chưa hover
+    opacity: 0.7,
     cursor: 'pointer' as const,
     padding: 0,
-  },
-  homeButton: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    fontSize: 18,
-    cursor: 'pointer' as const,
-    padding: 0,
-    color: '#ffffff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   searchContainer: {
     display: 'flex' as const,
     alignItems: 'center' as const,
-    backgroundColor: '#333333',
-    borderRadius: 24,
-    paddingLeft: 12,
-    paddingRight: 12,
-    height: 36,
-    width: 350,
+    backgroundColor: '#2a2a2a',
+    border: '1px solid transparent',
+    borderRadius: 999,
+    paddingLeft: 16,
+    paddingRight: 10,
+    height: 48,
+    width: 520,
+    maxWidth: '48vw',
+    boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.04)',
   },
   searchIcon: {
-    marginRight: 8,
-    fontSize: 14,
-    color: '#999999',
+    marginRight: 12,
+    color: '#b3b3b3',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   searchInput: {
     flex: 1,
     border: 'none',
     backgroundColor: 'transparent',
-    color: '#ffffff',
-    fontSize: 13,
+    color: '#f5f5f5',
+    fontSize: 15,
+    fontWeight: 500,
     outline: 'none',
     padding: 0,
   },
-  cartButton: {
-    backgroundColor: 'transparent',
+  searchDivider: {
+    width: 1,
+    height: 24,
+    marginLeft: 14,
+    marginRight: 10,
+    backgroundColor: '#5a5a5a',
+  },
+  searchActionButton: {
+    width: 34,
+    height: 34,
     border: 'none',
-    fontSize: 18,
+    borderRadius: '50%',
+    backgroundColor: 'transparent',
+    color: '#b3b3b3',
     cursor: 'pointer' as const,
     padding: 0,
-    color: '#ffffff',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
   iconButton: {
     backgroundColor: 'transparent',
     border: 'none',
-    fontSize: 18,
     cursor: 'pointer' as const,
     padding: 0,
     color: '#ffffff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: 0.8, // Giảm độ sáng một chút để khi hover sáng lên sẽ đẹp hơn
+  },
+  homeButton: {
+    width: 38,
+    height: 38,
+    borderRadius: '50%',
+    transition: 'background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease',
+  },
+  homeButtonHover: {
+    backgroundColor: '#333333',
+    color: '#ffffff',
+    opacity: 1,
+    transform: 'scale(1.06)',
   },
   profileButton: {
     backgroundColor: '#d946ef',
@@ -202,14 +251,19 @@ const styles = {
     cursor: 'pointer' as const,
     color: '#ffffff',
     fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   controlButton: {
     backgroundColor: 'transparent',
     border: 'none',
-    color: '#ffffff',
-    fontSize: 16,
+    color: '#b3b3b3', // Đổi màu các nút control (X, -, phóng to) thành xám
     cursor: 'pointer' as const,
     padding: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dropdownMenu: {
     position: 'absolute' as const,

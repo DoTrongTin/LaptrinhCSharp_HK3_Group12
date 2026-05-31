@@ -3,6 +3,7 @@ import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import RightPanel from './RightPanel';
 import Playbar from './Playbar';
+import MainContent from './MainContent';
 import '../../styles/globals.css';
 
 const MainLayout: React.FC = () => {
@@ -11,7 +12,7 @@ const MainLayout: React.FC = () => {
       <Navbar />
       <div style={{ display: 'flex', flex: 1 }}>
         <Sidebar />
-        <div style={{ flex: 1, backgroundColor: '#000000' }} />
+        <MainContent/>
         <RightPanel />
       </div>
       <Playbar />

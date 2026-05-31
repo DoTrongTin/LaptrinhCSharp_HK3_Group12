@@ -11,7 +11,7 @@ const Playbar: React.FC = () => {
 const styles = {
   playbar: {
     height: 70,
-    backgroundColor: '#1e90ff',
+    backgroundColor: '#1a1a1a',
     width: '100%',
   },
 };
