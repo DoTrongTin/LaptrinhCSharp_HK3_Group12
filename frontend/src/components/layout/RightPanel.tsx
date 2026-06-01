@@ -13,6 +13,8 @@ const styles = {
     width: 250,
     backgroundColor: '#9370db',
     height: '100%',
+    minHeight: 0,
+    flexShrink: 0,
     overflow: 'auto' as const,
   },
 };

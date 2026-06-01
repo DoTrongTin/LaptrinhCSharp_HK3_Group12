@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { ArrowRight, ListFilter, Library, Plus, Search, X } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   // Quản lý trạng thái đóng/mở của Sidebar (Mặc định cho mở để bạn dễ xem thiết kế)
   const [isExpanded, setIsExpanded] = useState(true);
   const [showBanner, setShowBanner] = useState(true); // Quản lý việc tắt banner quảng cáo
+  const [isListHovered, setIsListHovered] = useState(false);
 
   // Dữ liệu giả lập đã được bổ sung thêm Title và Subtitle
   const libraryItems = [
@@ -28,14 +30,18 @@ const Sidebar: React.FC = () => {
           style={styles.libraryToggleBtn}
           title={isExpanded ? "Thu gọn Thư viện" : "Mở rộng Thư viện"}
         >
-          <span style={styles.libraryIcon}>|||</span>
+          <Library size={24} strokeWidth={2.2} />
           {isExpanded && <span style={styles.libraryText}>Thư viện</span>}
         </button>
         
         {isExpanded && (
           <div style={styles.headerActions}>
-            <button style={styles.iconBtn}>+</button>
-            <button style={styles.iconBtn}>→</button>
+            <button style={styles.iconBtn} title="Tạo danh sách phát hoặc thư mục">
+              <Plus size={20} />
+            </button>
+            <button style={styles.iconBtn} title="Mở rộng thư viện">
+              <ArrowRight size={20} />
+            </button>
           </div>
         )}
       </div>
@@ -54,7 +60,9 @@ const Sidebar: React.FC = () => {
           {/* Banner quảng cáo chuyển nhạc */}
           {showBanner && (
             <div style={styles.promoBanner}>
-              <button style={styles.closeBannerBtn} onClick={() => setShowBanner(false)}>✕</button>
+              <button style={styles.closeBannerBtn} onClick={() => setShowBanner(false)} title="Đóng">
+                <X size={16} />
+              </button>
               <h4 style={{ margin: '0 0 4px 0', fontSize: 14 }}>Thêm nhạc từ ứng dụng khác</h4>
               <p style={{ margin: '0 0 12px 0', fontSize: 13, color: '#e5e5e5' }}>Mang theo danh sách phát, bài hát và nghệ sĩ bạn yêu thích.</p>
               <button style={styles.promoActionBtn}>Thêm thư viện</button>
@@ -63,14 +71,25 @@ const Sidebar: React.FC = () => {
 
           {/* Thanh Tìm kiếm & Sắp xếp */}
           <div style={styles.searchSortBar}>
-            <button style={styles.iconBtn}>🔍</button>
-            <button style={styles.sortBtn}>Gần đây ≡</button>
+            <button style={styles.iconBtn} title="Tìm kiếm trong thư viện">
+              <Search size={18} />
+            </button>
+            <button style={styles.sortBtn}>
+              Gần đây <ListFilter size={16} />
+            </button>
           </div>
         </div>
       )}
 
       {/* 3. KHU VỰC DANH SÁCH CUỘN */}
-      <div style={styles.scrollableList}>
+      <div
+        style={{
+          ...styles.scrollableList,
+          overflowY: isListHovered ? 'auto' : 'hidden',
+        }}
+        onMouseEnter={() => setIsListHovered(true)}
+        onMouseLeave={() => setIsListHovered(false)}
+      >
         {libraryItems.map((item) => (
           <div key={item.id} style={{
             ...styles.itemWrapper,
@@ -93,7 +112,7 @@ const Sidebar: React.FC = () => {
               <div style={styles.itemInfo}>
                 <span style={styles.itemTitle}>{item.title}</span>
                 <div style={styles.subtitleRow}>
-                  {item.isPinned && <span style={styles.pinIcon}>📌</span>}
+                  {item.isPinned && <span style={styles.pinIcon}>•</span>}
                   <span style={styles.itemSubtitle}>{item.subtitle}</span>
                 </div>
               </div>
@@ -110,6 +129,8 @@ const styles = {
     backgroundColor: '#121212',
     borderRadius: 8,
     height: '100%',
+    minHeight: 0,
+    flexShrink: 0,
     display: 'flex' as const,
     flexDirection: 'column' as const,
     transition: 'width 0.3s ease', // Hiệu ứng trượt mượt mà khi đổi kích thước
@@ -132,10 +153,6 @@ const styles = {
     padding: 0,
     color: '#b3b3b3',
   },
-  libraryIcon: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
   libraryText: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -152,6 +169,9 @@ const styles = {
     fontSize: 18,
     cursor: 'pointer',
     padding: 4,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
   // --- Expanded Content ---
   expandedContent: {
@@ -220,7 +240,7 @@ const styles = {
   // --- List Items ---
   scrollableList: {
     flex: 1,
-    overflowY: 'auto' as const,
+    overflowY: 'hidden' as const,
     display: 'flex' as const,
     flexDirection: 'column' as const,
     padding: '0 8px',

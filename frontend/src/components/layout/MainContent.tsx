@@ -19,6 +19,8 @@ const styles = {
     backgroundColor: '#06100fea', // Màu xám đen chuẩn vùng nội dung Spotify
     borderRadius: 8, // Bo tròn các góc
     height: '100%',
+    minHeight: 0,
+    minWidth: 0,
     margin: '0 10px', 
     overflowY: 'auto' as const, // Cho phép cuộn dọc nếu nội dung bên trong (danh sách bài hát) quá dài
     display: 'flex' as const,

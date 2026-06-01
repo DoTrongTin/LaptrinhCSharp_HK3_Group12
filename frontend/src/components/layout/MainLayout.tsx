@@ -8,9 +8,9 @@ import '../../styles/globals.css';
 
 const MainLayout: React.FC = () => {
   return (
-    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000000', display: 'flex', flexDirection: 'column' }}>
+    <div style={styles.layout}>
       <Navbar />
-      <div style={{ display: 'flex', flex: 1 }}>
+      <div style={styles.contentArea}>
         <Sidebar />
         <MainContent/>
         <RightPanel />
@@ -20,5 +20,23 @@ const MainLayout: React.FC = () => {
   );
 };
 
+const styles = {
+  layout: {
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: '#000000',
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    overflow: 'hidden',
+  },
+  contentArea: {
+    display: 'flex' as const,
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+  },
+};
+
 export default MainLayout;
+
 
