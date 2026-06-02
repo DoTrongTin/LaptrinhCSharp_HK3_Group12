@@ -2,16 +2,7 @@ import React from 'react';
 import PlaybackControls from '../ui/playbar/PlaybackControls';
 import PlaybarUtilities from '../ui/playbar/PlaybarUtilities';
 import TrackInfo from '../ui/playbar/TrackInfo';
-
-const currentTrack = {
-  artworkUrl: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=96&q=80',
-  title: 'Detective Conan Main Theme',
-  artist: 'Katsuo Ono',
-  currentTime: '1:21',
-  duration: '3:42',
-  progress: 37,
-  volume: 72,
-};
+import { currentTrack } from '../../data/currentTrack';
 
 const Playbar: React.FC = () => {
   return (

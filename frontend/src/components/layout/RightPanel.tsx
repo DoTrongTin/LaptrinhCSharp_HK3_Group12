@@ -1,22 +1,7 @@
-import React from 'react';
+import NowPlayingPanel from '../ui/rightpanel/NowPlayingPanel';
 
 const RightPanel: React.FC = () => {
-  return (
-    <aside style={styles.rightPanel}>
-      {/* Add right panel content here */}
-    </aside>
-  );
-};
-
-const styles = {
-  rightPanel: {
-    width: 250,
-    backgroundColor: '#9370db',
-    height: '100%',
-    minHeight: 0,
-    flexShrink: 0,
-    overflow: 'auto' as const,
-  },
+  return <NowPlayingPanel />;
 };
 
 export default RightPanel;
