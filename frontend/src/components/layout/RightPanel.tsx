@@ -147,6 +147,10 @@ const styles = {
     fontSize: 11,
     margin: 0,
   },
+import NowPlayingPanel from '../ui/rightpanel/NowPlayingPanel';
+
+const RightPanel: React.FC = () => {
+  return <NowPlayingPanel />;
 };
 
 export default RightPanel;
