@@ -4,8 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TuneVault.Application;
 using TuneVault.Infrastructure;
-//using TuneVault.Infrastructure.Hubs;
-//using TuneVault.API.Middleware;
+using TuneVault.Infrastructure.Hubs;
+using TuneVault.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,7 +72,7 @@ builder.Services.AddSignalR();
 var app = builder.Build();
 
 // ── Middleware Pipeline ──────────────────────────────────
-// app.UseMiddleware<ExceptionHandlingMiddleware>(); // TODO: Implement exception handling
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -85,6 +85,6 @@ app.UseCors("ReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-// app.MapHub<NotificationHub>("/hubs/notifications"); // TODO: Implement notification hub
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

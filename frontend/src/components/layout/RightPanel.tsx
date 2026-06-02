@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import NowPlayingPanel from '../ui/rightpanel/NowPlayingPanel';
 import { ChevronLeft } from 'lucide-react';
 
