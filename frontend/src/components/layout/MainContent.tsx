@@ -1,3 +1,14 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Home from '../../pages/Home';
+
+const MainContent: React.FC = () => {
+  return (
+    <main style={styles.mainContent}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        {/* Add more routes here */}
+      </Routes>
 import React, { useState } from 'react';
 // Do MainContent nằm trong thư mục layout, nên ta trỏ đường dẫn ra ngoài 1 cấp (../) rồi vào thư mục ui
 import FilterPill from '../ui/maincontent/FilterPill';
@@ -72,6 +83,14 @@ const MainContent: React.FC = () => {
 const styles = {
   // Cấu trúc khung chính của vùng màu xám mà ta đã làm trước đó
   mainContent: {
+    flex: 1,
+    backgroundColor: '#06100fea',
+    borderRadius: 8,
+    height: '100%',
+    minHeight: 0,
+    minWidth: 0,
+    margin: '0 10px', 
+    overflowY: 'auto' as const,
     flex: 1, 
     backgroundColor: '#121212', 
     borderRadius: 8, 
