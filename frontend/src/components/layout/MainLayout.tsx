@@ -34,6 +34,8 @@ const styles = {
     flex: 1,
     minHeight: 0,
     overflow: 'hidden',
+    gap: 8,             // ĐIỂM CỐT LÕI: Tạo rãnh đen 8px giữa 3 cột
+    padding: '0 8px',   // Đẩy 3 cột thụt vào so với mép màn hình trái/phải 8px
   },
 };
 

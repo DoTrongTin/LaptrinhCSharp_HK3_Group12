@@ -115,7 +115,7 @@ const Navbar: React.FC = () => {
 const styles = {
   navbar: {
     height: 56,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#000000',
     width: '100%',
     display: 'flex' as const,
     alignItems: 'center' as const,
