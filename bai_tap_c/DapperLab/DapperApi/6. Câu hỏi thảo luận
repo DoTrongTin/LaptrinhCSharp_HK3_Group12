@@ -1,0 +1,88 @@
+1. Query vs Execute: Sự khác nhau giữa db.Query<T>() và db.Execute()
+trong Dapper là gì? Khi nào dùng cái nào?
+GIAI:
+public class UserRepository
+{
+    private readonly string _connectionString = "Your_Connection_String_Here";
+
+    // 1. Dùng Query<T>() để LẤY dữ liệu (SELECT)
+    public IEnumerable<User> GetAllUsers()
+    {
+        using var db = new SqlConnection(_connectionString);
+        string sql = "SELECT Id, Name, Email FROM Users";
+        
+        // Trả về danh sách Object kiểu User
+        return db.Query<User>(sql); 
+    }
+
+    // 2. Dùng Execute() để THAY ĐỔI dữ liệu (INSERT, UPDATE, DELETE)
+    public bool UpdateUserEmail(int id, string newEmail)
+    {
+        using var db = new SqlConnection(_connectionString);
+        string sql = "UPDATE Users SET Email = @Email WHERE Id = @Id";
+        
+        // Trả về số dòng bị tác động (Ví dụ: 1 dòng thành công)
+        int rowsAffected = db.Execute(sql, new { Id = id, Email = newEmail });
+        
+        return rowsAffected > 0; 
+    }
+}
+
+Từ đây có thể thấy db.Query<T>() là lấy dữ liệu "SELECT" còn db.Execute() là thay đổi dữ liệu "INSERT, UPDATE, DELETE"
+
+
+
+
+
+
+
+2. Repository Pattern: Tại sao cần tách logic database ra khỏi Controller? Lợi
+ích là gì khi test?
+GIAI:
+Nếu bạn viết code gọi Database (như Dapper, SQL) ngay bên trong Controller, Controller của bạn sẽ biến thành một "bãi rác" khổng lồ vì vừa phải lo nhận request từ client, vừa phải lo kết nối database, viết SQL...
+
+Lợi ích lớn nhất khi Test (Unit Test):
+Khi bạn muốn test xem logic của Controller chạy đúng hay sai, bạn không muốn nó thực sự chạy xuống Database thật (vì sẽ làm bẩn data test, hoặc nếu mất mạng thì test bị fail).
+
+Nếu dùng Repository Pattern (thông qua Interface), trong file Test bạn có thể dễ dàng tạo ra một Repository giả lập (Mock). Cái Repo giả này không kết nối với SQL thật mà chỉ tự trả về một danh sách sinh viên "bằng mẹo" trong RAM. Nhờ vậy, bạn test Controller cực kỳ nhanh và độc lập.
+
+=> TÓM LẠI LÀ NẾU VIẾT Ở CONTROLLER THÌ HỖN LOẠN LẮM
+
+
+
+
+
+3. Dapper vs EF Core: So sánh ưu/nhược điểm của Dapper với Entity
+Framework Core. Khi nào nên chọn Dapper?
+GIẢI:
+Dapper và EF Core là hai công cụ kết nối database với hai thế mạnh trái ngược nhau. Dapper (Micro-ORM) tập trung vào tốc độ. Khi dùng Dapper, bạn phải tự viết tay 100% câu lệnh SQL thuần. Nhờ vậy, Dapper chạy cực kỳ nhanh và nhẹ vì máy không mất công biên dịch, nhưng nhược điểm là viết code tốn công và khó sửa khi database đổi cấu trúc.
+
+Ngược lại, EF Core (Full-ORM) tập trung vào sự tiện lợi. Bạn chỉ cần viết code bằng C# (LINQ), EF Core sẽ tự dịch ra câu SQL tương ứng. Nó cực kỳ tiện nhờ các tính năng tự động tạo bảng (Migration) và tự theo dõi thay đổi dữ liệu, nhưng đổi lại là tốc độ chạy sẽ chậm hơn Dapper một chút.
+
+Khi nào chọn Dapper? Hãy chọn Dapper khi dự án cần tối ưu tốc độ tối đa, gánh lượng người truy cập khổng lồ (High Traffic), làm báo cáo/đọc dữ liệu lớn, hoặc khi bạn muốn tự tay viết những câu lệnh SQL phức tạp để kiểm soát hiệu năng.
+
+
+
+
+
+
+4. Connection Management: Tại sao mỗi hàm lại mở Connection mới?
+GIAI:
+Tránh xung đột (Thread-safe): Một API Web có thể phục vụ cùng lúc hàng ngàn người dùng. Nếu dùng chung 1 connection, ông A đang chạy dở câu lệnh SELECT mà ông B nhảy vào COMMIT hoặc đóng kết nối thì ứng dụng sẽ bị crash ngay lập tức. Mỗi hàm tự mở kết nối riêng sẽ giúp các request chạy độc lập, không ông nào đụng chạm ông nào.
+
+Đã có Connection Pooling cứu cánh: Bạn đừng lo việc new SqlConnection() liên tục làm chậm app. Hệ điều hành và .NET có một cơ chế ngầm tên là Connection Pooling. Khi bạn đóng kết nối (using), nó không hủy kết nối đó đi mà chỉ đem cất vào một "cái hồ". Hàm tiếp theo gọi new, nó sẽ bốc từ cái hồ đó ra xài lại ngay lập tức, tốc độ cực kỳ nhanh!
+
+
+
+
+
+5. Dependency Injection: Giải thích sự khác nhau giữa AddScoped,
+AddTransient và AddSingleton. Cái nào phù hợp cho Repository?
+GIAI:
+Cả 3 cái này là cách cấu hình vòng đời (tuổi thọ) của một Object khi được tạo ra trong ứng dụng:
+
+Transient (Mì ăn liền): Mỗi lần có ai gọi (bất kể ở đâu), hệ thống đều tạo ra một Object hoàn toàn mới. Dùng xong là vứt.
+
+Scoped (Theo một Request): Khi có một người dùng gửi 1 request lên API, hệ thống tạo ra Object. Trong suốt quá trình xử lý cái request đó (từ Controller đi qua Service, qua Repo), Object này được dùng chung. Khi API trả kết quả về cho khách, Object này bị hủy.
+
+Singleton (Bất tử): Cả cái App chạy từ ngày này qua tháng nọ chỉ có đúng 1 Object duy nhất được tạo ra lần đầu. Tất cả mọi người dùng, mọi request đều xài chung đúng cái Object đó.
