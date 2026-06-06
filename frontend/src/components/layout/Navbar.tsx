@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useRef } from 'react';
 // Import toàn bộ icon cần thiết từ thư viện
 import { 
   MoreHorizontal, 
@@ -18,6 +18,7 @@ const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [isHomeHovered, setIsHomeHovered] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const menuItems = ['Tệp', 'Sửa', 'Xem', 'Phát lại', 'Trợ giúp'];
 
@@ -70,19 +71,33 @@ const Navbar: React.FC = () => {
           <Home size={24} strokeWidth={2.5} />
         </button>
 
-        <div style={styles.searchContainer}>
-          <span style={styles.searchIcon}>
+<div style={styles.searchContainer}>
+          {/* Bấm vào icon kính lúp cũng tự động focus vào input */}
+          <span 
+            style={{...styles.searchIcon, cursor: 'text'}} 
+            onClick={() => searchInputRef.current?.focus()}
+          >
             <Search size={22} strokeWidth={2.4} />
           </span>
+
+          {/* Gắn ref vào thẻ input */}
           <input 
+            ref={searchInputRef}
             type="text"
             placeholder="Bạn muốn phát nội dung gì?"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             style={styles.searchInput}
           />
+          
           <span style={styles.searchDivider} />
-          <button style={styles.searchActionButton} title="Duyệt tìm">
+          
+          {/* Bấm vào nút Duyệt tìm bên phải cũng focus vào input */}
+          <button 
+            style={styles.searchActionButton} 
+            title="Duyệt tìm"
+            onClick={() => searchInputRef.current?.focus()}
+          >
             <Disc3 size={22} strokeWidth={2.2} />
           </button>
         </div>
