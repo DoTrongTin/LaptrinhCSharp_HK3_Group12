@@ -54,3 +54,43 @@ html, body, #root {
 body {
   overflow: hidden;
 }
+
+/* =========================================
+   CUSTOM SCROLLBAR (Giao diện Spotify)
+   ========================================= */
+
+/* 1. Kích thước thanh cuộn (nhỏ gọn 8px) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px; /* Dành cho cuộn ngang nếu có */
+}
+
+/* 2. Rãnh trượt (Track) - Luôn trong suốt */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 3. Tay cầm (Thumb) - Mặc định trong suốt để ẩn đi */
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 8px;
+}
+
+/* 4. CHỈ HIỆN TAY CẦM KHI HOVER VÀO KHU VỰC CÓ THANH CUỘN */
+*:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 5. Sáng hơn một chút khi rê chuột trực tiếp lên chính thanh cuộn */
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Hỗ trợ thêm cho Firefox (Firefox dùng chuẩn riêng) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
