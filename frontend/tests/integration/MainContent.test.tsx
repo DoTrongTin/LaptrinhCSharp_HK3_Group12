@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import MainContent from './MainContent';
+import MainContent from '../../src/components/layout/MainContent';
 
 describe('MainContent integration', () => {
   it('renders filters, sections, and media cards together', () => {

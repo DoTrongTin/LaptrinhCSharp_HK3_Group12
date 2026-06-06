@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import FilterPill from './FilterPill';
+import FilterPill from '../../src/components/ui/maincontent/FilterPill';
 
 describe('FilterPill', () => {
   it('renders an active filter with selected styles', () => {

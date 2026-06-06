@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import MediaCard from './MediaCard';
+import MediaCard from '../../src/components/ui/maincontent/MediaCard';
 
 describe('MediaCard', () => {
   it('renders media title, subtitle, and image alt text', () => {
