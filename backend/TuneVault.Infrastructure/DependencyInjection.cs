@@ -21,7 +21,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(opt =>
             opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
-        services.AddIdentity<ApplicationUser, IdentityRole>(opt =>
+        services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(opt =>
         {
             opt.Password.RequireDigit = true;
             opt.Password.RequiredLength = 6;

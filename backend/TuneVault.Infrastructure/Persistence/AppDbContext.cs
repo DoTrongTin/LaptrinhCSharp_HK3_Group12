@@ -5,7 +5,7 @@ using TuneVault.Domain.Entities;
 namespace TuneVault.Infrastructure.Persistence;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options)
-    : IdentityDbContext<ApplicationUser>(options)
+    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<MediaItem> MediaItems => Set<MediaItem>();
     public DbSet<Playlist> Playlists => Set<Playlist>();
