@@ -1,54 +1,120 @@
-import React, { useState,useRef } from 'react';
-// Import toàn bộ icon cần thiết từ thư viện
-import { 
-  MoreHorizontal, 
-  ChevronLeft, 
-  ChevronRight, 
-  Home, 
-  Search, 
-  Disc3, 
-  Bell, 
-  Settings, 
-  Minus, 
-  Square, 
-  X 
+import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import {
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  Search,
+  Disc3,
+  Bell,
+  Settings,
+  Minus,
+  Square,
+  X,
 } from 'lucide-react';
 
+type PopupType = 'menu' | 'notifications' | 'settings' | 'profile' | null;
+
 const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const [activePopup, setActivePopup] = useState<PopupType>(null);
   const [searchValue, setSearchValue] = useState('');
   const [isHomeHovered, setIsHomeHovered] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const menuItems = ['Tệp', 'Sửa', 'Xem', 'Phát lại', 'Trợ giúp'];
 
+  const handleTogglePopup = (popup: PopupType) => {
+    setActivePopup((current) => (current === popup ? null : popup));
+  };
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const handleForward = () => {
+    navigate(1);
+  };
+
+  const handleHome = () => {
+    navigate('/');
+    setActivePopup(null);
+  };
+
+  const handleSearchSubmit = () => {
+    const keyword = searchValue.trim();
+
+    if (!keyword) {
+      searchInputRef.current?.focus();
+      return;
+    }
+
+    navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
+    setActivePopup(null);
+  };
+
+  const handleBrowse = () => {
+    navigate('/search');
+
+    window.setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 0);
+  };
+
+  const handleMinimize = () => {
+    alert('Trình duyệt không cho web tự thu nhỏ cửa sổ. Nút này hiện đang để mô phỏng UI.');
+  };
+
+  const handleMaximize = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      alert('Không thể bật/tắt fullscreen trên trình duyệt này.');
+    }
+  };
+
+  const handleClose = () => {
+    alert('Web app không thể tự đóng tab nếu tab không được mở bằng script. Đây là nút mô phỏng giao diện.');
+  };
+
   return (
     <header style={styles.navbar}>
       <div style={styles.leftContent}>
-        <button 
-          onClick={() => setIsOpen(!isOpen)}
+        <button
+          onClick={() => handleTogglePopup('menu')}
           style={styles.menuButton}
           title="Menu"
         >
           <MoreHorizontal size={24} />
         </button>
-        
+
         <div style={styles.arrowsContainer}>
-          <button style={styles.arrowButton} title="Back">
+          <button style={styles.arrowButton} title="Back" onClick={handleBack}>
             <ChevronLeft size={28} />
           </button>
-          <button style={styles.arrowButton} title="Forward">
+
+          <button style={styles.arrowButton} title="Forward" onClick={handleForward}>
             <ChevronRight size={28} />
           </button>
         </div>
 
-        {isOpen && (
+        {activePopup === 'menu' && (
           <div style={styles.dropdownMenu}>
             {menuItems.map((item) => (
-              <div 
-                key={item} 
+              <div
+                key={item}
                 style={styles.menuItem}
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  alert(`Bạn vừa chọn: ${item}`);
+                  setActivePopup(null);
+                }}
               >
                 {item}
               </div>
@@ -65,61 +131,107 @@ const Navbar: React.FC = () => {
             ...(isHomeHovered ? styles.homeButtonHover : {}),
           }}
           title="Home"
+          onClick={handleHome}
           onMouseEnter={() => setIsHomeHovered(true)}
           onMouseLeave={() => setIsHomeHovered(false)}
         >
           <Home size={24} strokeWidth={2.5} />
         </button>
 
-<div style={styles.searchContainer}>
-          {/* Bấm vào icon kính lúp cũng tự động focus vào input */}
-          <span 
-            style={{...styles.searchIcon, cursor: 'text'}} 
+        <div style={styles.searchContainer}>
+          <span
+            style={{ ...styles.searchIcon, cursor: 'text' }}
             onClick={() => searchInputRef.current?.focus()}
           >
             <Search size={22} strokeWidth={2.4} />
           </span>
 
-          {/* Gắn ref vào thẻ input */}
-          <input 
+          <input
             ref={searchInputRef}
             type="text"
             placeholder="Bạn muốn phát nội dung gì?"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearchSubmit();
+              }
+            }}
             style={styles.searchInput}
           />
-          
+
           <span style={styles.searchDivider} />
-          
-          {/* Bấm vào nút Duyệt tìm bên phải cũng focus vào input */}
-          <button 
-            style={styles.searchActionButton} 
-            title="Duyệt tìm"
-            onClick={() => searchInputRef.current?.focus()}
-          >
+
+          <button style={styles.searchActionButton} title="Duyệt tìm" onClick={handleBrowse}>
             <Disc3 size={22} strokeWidth={2.2} />
           </button>
         </div>
       </div>
 
       <div style={styles.rightContent}>
-        <button style={styles.iconButton} title="Notifications">
-          <Bell size={20} />
-        </button>
-        <button style={styles.iconButton} title="Settings">
-          <Settings size={20} />
-        </button>
-        <button style={styles.profileButton}>
-          T
-        </button>
-        <button style={styles.controlButton} title="Minimize">
+        <div style={styles.popupWrapper}>
+          <button
+            style={styles.iconButton}
+            title="Notifications"
+            onClick={() => handleTogglePopup('notifications')}
+          >
+            <Bell size={20} />
+          </button>
+
+          {activePopup === 'notifications' && (
+            <div style={styles.rightPopup}>
+              <h4 style={styles.popupTitle}>Thông báo</h4>
+              <p style={styles.popupText}>Chưa có thông báo mới.</p>
+            </div>
+          )}
+        </div>
+
+        <div style={styles.popupWrapper}>
+          <button
+            style={styles.iconButton}
+            title="Settings"
+            onClick={() => handleTogglePopup('settings')}
+          >
+            <Settings size={20} />
+          </button>
+
+          {activePopup === 'settings' && (
+            <div style={styles.rightPopup}>
+              <h4 style={styles.popupTitle}>Cài đặt</h4>
+              <button style={styles.popupButton}>Dark mode</button>
+              <button style={styles.popupButton}>Ngôn ngữ</button>
+              <button style={styles.popupButton}>Chất lượng phát</button>
+            </div>
+          )}
+        </div>
+
+        <div style={styles.popupWrapper}>
+          <button
+            style={styles.profileButton}
+            title="Profile"
+            onClick={() => handleTogglePopup('profile')}
+          >
+            T
+          </button>
+
+          {activePopup === 'profile' && (
+            <div style={styles.rightPopup}>
+              <h4 style={styles.popupTitle}>Tài khoản</h4>
+              <button style={styles.popupButton}>Hồ sơ</button>
+              <button style={styles.popupButton}>Đăng xuất</button>
+            </div>
+          )}
+        </div>
+
+        <button style={styles.controlButton} title="Minimize" onClick={handleMinimize}>
           <Minus size={18} />
         </button>
-        <button style={styles.controlButton} title="Maximize">
+
+        <button style={styles.controlButton} title="Maximize" onClick={handleMaximize}>
           <Square size={14} />
         </button>
-        <button style={styles.controlButton} title="Close">
+
+        <button style={styles.controlButton} title="Close" onClick={handleClose}>
           <X size={18} />
         </button>
       </div>
@@ -139,17 +251,20 @@ const styles = {
     position: 'relative' as const,
     gap: 16,
   },
+
   leftContent: {
-    display: 'flex',
+    display: 'flex' as const,
     alignItems: 'center' as const,
     gap: 24,
     position: 'relative' as const,
   },
+
   arrowsContainer: {
-    display: 'flex',
+    display: 'flex' as const,
     alignItems: 'center' as const,
     gap: 16,
   },
+
   centerContent: {
     flex: 1,
     display: 'flex' as const,
@@ -157,21 +272,25 @@ const styles = {
     gap: 12,
     justifyContent: 'center' as const,
   },
+
   rightContent: {
     display: 'flex' as const,
     alignItems: 'center' as const,
-    gap: 16, // Tăng nhẹ khoảng cách các nút bên phải cho thoáng
+    gap: 16,
+    position: 'relative' as const,
   },
+
   menuButton: {
     backgroundColor: 'transparent',
     border: 'none',
     color: '#ffffff',
     cursor: 'pointer' as const,
     padding: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
+
   arrowButton: {
     backgroundColor: 'transparent',
     border: 'none',
@@ -179,10 +298,11 @@ const styles = {
     opacity: 0.7,
     cursor: 'pointer' as const,
     padding: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
+
   searchContainer: {
     display: 'flex' as const,
     alignItems: 'center' as const,
@@ -196,13 +316,15 @@ const styles = {
     maxWidth: '48vw',
     boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.04)',
   },
+
   searchIcon: {
     marginRight: 12,
     color: '#b3b3b3',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
+
   searchInput: {
     flex: 1,
     border: 'none',
@@ -213,6 +335,7 @@ const styles = {
     outline: 'none',
     padding: 0,
   },
+
   searchDivider: {
     width: 1,
     height: 24,
@@ -220,6 +343,7 @@ const styles = {
     marginRight: 10,
     backgroundColor: '#5a5a5a',
   },
+
   searchActionButton: {
     width: 34,
     height: 34,
@@ -233,29 +357,33 @@ const styles = {
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
+
   iconButton: {
     backgroundColor: 'transparent',
     border: 'none',
     cursor: 'pointer' as const,
     padding: 0,
     color: '#ffffff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    opacity: 0.8, // Giảm độ sáng một chút để khi hover sáng lên sẽ đẹp hơn
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    opacity: 0.8,
   },
+
   homeButton: {
     width: 38,
     height: 38,
     borderRadius: '50%',
     transition: 'background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease',
   },
+
   homeButtonHover: {
     backgroundColor: '#333333',
     color: '#ffffff',
     opacity: 1,
     transform: 'scale(1.06)',
   },
+
   profileButton: {
     backgroundColor: '#d946ef',
     border: 'none',
@@ -266,38 +394,85 @@ const styles = {
     cursor: 'pointer' as const,
     color: '#ffffff',
     fontWeight: 'bold',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
+
   controlButton: {
     backgroundColor: 'transparent',
     border: 'none',
-    color: '#b3b3b3', // Đổi màu các nút control (X, -, phóng to) thành xám
+    color: '#b3b3b3',
     cursor: 'pointer' as const,
     padding: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
+
   dropdownMenu: {
     position: 'absolute' as const,
     top: 56,
     left: 0,
-    backgroundColor: '#ffffff',
-    border: '1px solid #ccc',
-    borderRadius: 4,
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+    backgroundColor: '#282828',
+    border: '1px solid #3a3a3a',
+    borderRadius: 6,
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
     minWidth: 150,
     zIndex: 1000,
+    overflow: 'hidden',
   },
+
   menuItem: {
     padding: '10px 16px',
-    color: '#000000',
+    color: '#ffffff',
     cursor: 'pointer' as const,
     fontSize: 13,
-    borderBottom: '1px solid #eee',
+    borderBottom: '1px solid #3a3a3a',
     transition: 'background-color 0.2s',
+  },
+
+  popupWrapper: {
+    position: 'relative' as const,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+  },
+
+  rightPopup: {
+    position: 'absolute' as const,
+    top: 38,
+    right: 0,
+    width: 220,
+    backgroundColor: '#282828',
+    border: '1px solid #3a3a3a',
+    borderRadius: 8,
+    padding: 12,
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+    zIndex: 1000,
+  },
+
+  popupTitle: {
+    color: '#ffffff',
+    fontSize: 15,
+    margin: '0 0 10px 0',
+  },
+
+  popupText: {
+    color: '#b3b3b3',
+    fontSize: 13,
+    margin: 0,
+  },
+
+  popupButton: {
+    width: '100%',
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: '#ffffff',
+    textAlign: 'left' as const,
+    cursor: 'pointer' as const,
+    padding: '8px 6px',
+    borderRadius: 4,
+    fontSize: 13,
   },
 };
 

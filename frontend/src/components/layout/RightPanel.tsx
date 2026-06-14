@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import NowPlayingPanel from '../ui/rightpanel/NowPlayingPanel';
 import { ChevronLeft } from 'lucide-react';
+import { useAppContext } from '../../context/AppContext'; // ĐÃ THÊM: Import context tổng để lắng nghe bài hát
 
 const RightPanel: React.FC = () => {
   // Trạng thái: Mặc định là mở (true)
   const [isExpanded, setIsExpanded] = useState(true);
+  
+  // ĐÃ THÊM: Lấy dữ liệu bài hát được chọn từ Context
+  const { rightPanelData } = useAppContext();
 
   return (
     <div style={{
@@ -13,8 +17,11 @@ const RightPanel: React.FC = () => {
       width: isExpanded ? 372 : 60,
     }}>
       {isExpanded ? (
-        // Truyền hàm đóng xuống NowPlayingPanel
-        <NowPlayingPanel onClose={() => setIsExpanded(false)} />
+        // ĐÃ CHỈNH SỬA: Truyền thêm prop trackData xuống cho component hiển thị giao diện
+        <NowPlayingPanel 
+          onClose={() => setIsExpanded(false)} 
+          trackData={rightPanelData} 
+        />
       ) : (
         // Khối hiển thị khi đã ẩn (thanh mỏng có mũi tên)
         <aside style={styles.collapsedPanel}>
