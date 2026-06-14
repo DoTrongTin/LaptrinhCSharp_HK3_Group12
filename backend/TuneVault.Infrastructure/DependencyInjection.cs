@@ -2,46 +2,61 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TuneVault.Application.Common.Interfaces;
 using TuneVault.Domain.Entities;
-using TuneVault.Domain.Interfaces;
-using TuneVault.Infrastructure.AI;
-using TuneVault.Infrastructure.Hubs;
-using TuneVault.Infrastructure.Persistence;
+// Import đúng các thư mục bạn vừa tạo
+using TuneVault.Infrastructure.Persistence; 
 using TuneVault.Infrastructure.Repositories;
-using TuneVault.Infrastructure.Services;
+using TuneVault.Application.Common.Interfaces  ; 
+// using TuneVault.Infrastructure.AI; (Sẽ dùng sau khi tích hợp AI)
+// using TuneVault.Infrastructure.Services; (Sẽ dùng sau)
 
-namespace TuneVault.Infrastructure;
-
-public static class DependencyInjection
+namespace TuneVault.Infrastructure
 {
-    public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services, IConfiguration config)
+    public static class DependencyInjection
     {
-        services.AddDbContext<AppDbContext>(opt =>
-            opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
-
-        services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(opt =>
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            opt.Password.RequireDigit = true;
-            opt.Password.RequiredLength = 6;
-        })
-        .AddEntityFrameworkStores<AppDbContext>()
-        .AddDefaultTokenProviders();
+            // ==========================================
+            // 1. ĐĂNG KÝ DBCONTEXT (KẾT NỐI DATABASE)
+            // Lấy từ thư mục Persistence
+            // ==========================================
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
-        services.AddScoped<IMediaRepository, MediaRepository>();
-        services.AddScoped<IPlaylistRepository, PlaylistRepository>();
-        services.AddScoped<IShareRepository, ShareRepository>();
-        services.AddScoped<INotificationRepository, NotificationRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
+            // ==========================================
+            // 2. ĐĂNG KÝ IDENTITY (QUẢN LÝ USER)
+            // ==========================================
+            services.AddIdentityCore<AppUser>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+            })
+            .AddRoles<IdentityRole<Guid>>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
-        services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IFileStorageService, FileStorageService>();
-        services.AddScoped<INotificationHub, NotificationHubService>();
+            // ==========================================
+            // 3. ĐĂNG KÝ REPOSITORIES
+            // Lấy từ thư mục Repositories
+            // ==========================================
+            // Ví dụ đăng ký PlaylistRepository (Bạn cần tạo IPlaylistRepository ở tầng Application trước)
+            // services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+            
+            // ==========================================
+            // 4. ĐĂNG KÝ EXTERNAL SERVICES & AI
+            // Lấy từ thư mục AI và Services (Tài liệu yêu cầu Anthropic AI)
+            // ==========================================
+            // services.AddScoped<IAnthropicService, AnthropicService>();
+            
+            // ==========================================
+            // 5. ĐĂNG KÝ SIGNALR (Nằm ở tầng API nhưng có thể config Hub ở đây nếu chia tách sâu)
+            // ==========================================
 
-        services.Configure<AnthropicOptions>(config.GetSection("Anthropic"));
-        services.AddHttpClient<IAnthropicService, AnthropicService>();
-
-        return services;
+            return services;
+        }
     }
 }

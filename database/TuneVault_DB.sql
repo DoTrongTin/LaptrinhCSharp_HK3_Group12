@@ -1,5 +1,5 @@
 Create database TuneVault_DB
-CREATE TABLE AppUsers (
+CREATE TABLE ApplicationUsers (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
     UserName NVARCHAR,
     Email NVARCHAR,
