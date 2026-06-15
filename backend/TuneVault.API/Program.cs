@@ -1,90 +1,106 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TuneVault.Application;
 using TuneVault.Infrastructure;
-using TuneVault.Infrastructure.Hubs;
 using TuneVault.API.Middleware;
+using TuneVault.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Layers ──────────────────────────────────────────────
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+// ==========================================
+// 1. KẾT NỐI CÁC TẦNG KIẾN TRÚC
+// ==========================================
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// ── Controllers ─────────────────────────────────────────
+// ==========================================
+// 2. CẤU HÌNH CORS (Bắt buộc cho React SPA)
+// ==========================================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // Đổi port tùy React của bạn
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()); // Rất quan trọng nếu sau này dùng SignalR
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// ── Swagger với JWT support ──────────────────────────────
+// ==========================================
+// 3. CẤU HÌNH SWAGGER ĐỂ TEST ĐƯỢC JWT TOKEN
+// ==========================================
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TuneVault API", Version = "v1" });
+    
+    // Nút nhập Token trên Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization", Type = SecuritySchemeType.Http,
-        Scheme = "Bearer", BearerFormat = "JWT", In = ParameterLocation.Header,
+        Description = "Nhập 'Bearer [khoảng trắng] [Token của bạn]'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {{
-        new OpenApiSecurityScheme { Reference = new OpenApiReference
-            { Type = ReferenceType.SecurityScheme, Id = "Bearer" }},
-        Array.Empty<string>()
-    }});
-});
-
-// ── JWT Authentication ───────────────────────────────────
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(opt =>
     {
-        opt.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ClockSkew = TimeSpan.Zero
-        };
-        // SignalR: lấy token từ query string
-        opt.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = ctx =>
+            new OpenApiSecurityScheme
             {
-                var token = ctx.Request.Query["access_token"];
-                if (!string.IsNullOrEmpty(token) &&
-                    ctx.HttpContext.Request.Path.StartsWithSegments("/hubs"))
-                    ctx.Token = token;
-                return Task.CompletedTask;
-            }
-        };
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            new string[] {}
+        }
     });
-
-// ── CORS cho React frontend ──────────────────────────────
-builder.Services.AddCors(opt => opt.AddPolicy("ReactApp", p =>
-    p.WithOrigins("http://localhost:5173")
-     .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
-
-// ── SignalR ──────────────────────────────────────────────
-builder.Services.AddSignalR();
+});
 
 var app = builder.Build();
 
-// ── Middleware Pipeline ──────────────────────────────────
+// ==========================================
+// 4. KÍCH HOẠT MIDDLEWARE
+// ==========================================
+// Cài đặt Middleware bẫy lỗi toàn cục lên đầu tiên
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TuneVault v1"));
+    app.UseSwaggerUI();
 }
 
-app.UseStaticFiles();
-app.UseCors("ReactApp");
+app.UseHttpsRedirection();
+
+// Kích hoạt CORS trước khi Auth
+app.UseCors("AllowReactApp");
+
+// THỨ TỰ CỰC KỲ QUAN TRỌNG: Authentication -> Authorization
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
-app.MapHub<NotificationHub>("/hubs/notifications");
+
+// ĐOẠN CODE KÍCH HOẠT DATA SEEDER
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+// 1. DÒNG NÀY SẼ TỰ ĐỘNG TẠO DATABASE VÀ CÁC BẢNG NẾU CHƯA CÓ
+        await context.Database.MigrateAsync(); 
+        
+        // 2. SAU KHI BẢNG ĐÃ TẠO XONG THÌ MỚI ĐỔ DỮ LIỆU VÀO
+        await TuneVaultDbContextSeed.SeedAsync(context);
+        Console.WriteLine("Đã đổ dữ liệu thành công vào TuneVault_DB!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Đã xảy ra lỗi khi đổ dữ liệu: {ex.Message}");
+    }
+}
+
 
 app.Run();

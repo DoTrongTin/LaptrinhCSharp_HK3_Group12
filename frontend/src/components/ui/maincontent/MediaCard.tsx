@@ -4,12 +4,13 @@ interface MediaCardProps {
   imageUrl: string;
   title: string;
   subtitle: string;
-  isCircleImage?: boolean; // Dùng để bo tròn ảnh nếu là Nghệ sĩ
+  isCircleImage?: boolean;
+  onClick?: () => void;
 }
 
-const MediaCard: React.FC<MediaCardProps> = ({ imageUrl, title, subtitle, isCircleImage = false }) => {
+const MediaCard: React.FC<MediaCardProps> = ({ imageUrl, title, subtitle, isCircleImage = false, onClick }) => {
   return (
-    <div style={styles.card}>
+    <div style={styles.card} onClick={onClick}>
       <div style={styles.imageContainer}>
         <img 
           src={imageUrl} 
@@ -62,7 +63,7 @@ const styles = {
     color: '#b3b3b3',
     fontSize: 14,
     display: '-webkit-box',
-    WebkitLineClamp: 2, // Hiển thị tối đa 2 dòng, sau đó thêm ...
+    WebkitLineClamp: 2,
     WebkitBoxOrient: 'vertical' as const,
     overflow: 'hidden',
   }

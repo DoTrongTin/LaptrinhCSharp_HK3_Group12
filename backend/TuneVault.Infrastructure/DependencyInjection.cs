@@ -1,14 +1,15 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using TuneVault.Domain.Entities;
-// Import đúng các thư mục bạn vừa tạo
 using TuneVault.Infrastructure.Persistence; 
-using TuneVault.Infrastructure.Repositories;
-using TuneVault.Application.Common.Interfaces  ; 
-// using TuneVault.Infrastructure.AI; (Sẽ dùng sau khi tích hợp AI)
-// using TuneVault.Infrastructure.Services; (Sẽ dùng sau)
+// using TuneVault.Infrastructure.Repositories;
+using TuneVault.Application.Common.Interfaces; 
+using TuneVault.Infrastructure.Services; // Mở comment để dùng TokenService
 
 namespace TuneVault.Infrastructure
 {
@@ -18,17 +19,18 @@ namespace TuneVault.Infrastructure
         {
             // ==========================================
             // 1. ĐĂNG KÝ DBCONTEXT (KẾT NỐI DATABASE)
-            // Lấy từ thư mục Persistence
+            // Đã sửa thành AppDbContext để khớp với thư mục Persistence
             // ==========================================
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+                    b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
             // ==========================================
             // 2. ĐĂNG KÝ IDENTITY (QUẢN LÝ USER)
+            // Đã sửa thành ApplicationUser để khớp với thư mục Entities
             // ==========================================
-            services.AddIdentityCore<AppUser>(options =>
+            services.AddIdentityCore<ApplicationUser>(options =>
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 6;
@@ -36,25 +38,44 @@ namespace TuneVault.Infrastructure
                 options.Password.RequireUppercase = false;
             })
             .AddRoles<IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
             // ==========================================
             // 3. ĐĂNG KÝ REPOSITORIES
-            // Lấy từ thư mục Repositories
             // ==========================================
-            // Ví dụ đăng ký PlaylistRepository (Bạn cần tạo IPlaylistRepository ở tầng Application trước)
+            // Ví dụ đăng ký PlaylistRepository (Sẽ mở ra khi bạn code class PlaylistRepository)
             // services.AddScoped<IPlaylistRepository, PlaylistRepository>();
             
             // ==========================================
-            // 4. ĐĂNG KÝ EXTERNAL SERVICES & AI
-            // Lấy từ thư mục AI và Services (Tài liệu yêu cầu Anthropic AI)
+            // 4. ĐĂNG KÝ EXTERNAL SERVICES
             // ==========================================
-            // services.AddScoped<IAnthropicService, AnthropicService>();
+            services.AddScoped<ITokenService, TokenService>();
+            
+            // services.AddScoped<IAnthropicService, AnthropicService>(); // Dùng cho AI sau này
             
             // ==========================================
-            // 5. ĐĂNG KÝ SIGNALR (Nằm ở tầng API nhưng có thể config Hub ở đây nếu chia tách sâu)
+            // 5. CẤU HÌNH XÁC THỰC (AUTHENTICATION) BẰNG JWT
             // ==========================================
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Secret"]!)),
+                    ValidateIssuer = true,
+                    ValidIssuer = configuration["JwtSettings:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = configuration["JwtSettings:Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero // Bỏ qua 5 phút trễ mặc định của token
+                };
+            });
 
             return services;
         }

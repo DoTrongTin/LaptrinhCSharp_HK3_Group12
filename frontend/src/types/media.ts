@@ -1,12 +1,11 @@
 export interface MediaItem {
   id: string;
   title: string;
-  description?: string;
-  mediaType: "audio" | "video";
   duration: number;
-  thumbnailPath?: string;
-  isPublic: boolean;
-  ownerId: string;
+  thumbnailPath: string | null;
   ownerName: string;
-  createdAt: string;
+  filePath?: string;
+  description?: string;
+  mediaType?: number;
+  createdAt?: string;
 }

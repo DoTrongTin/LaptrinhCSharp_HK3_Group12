@@ -1,0 +1,9 @@
+- [ ] Explore existing frontend structure (components, services, types)
+- [ ] Explore backend API endpoints (MediaController)
+- [ ] Set up API service layer to fetch songs from backend
+- [ ] Update MainContent to display songs from backend
+- [ ] Update PlayBar to play songs from backend
+- [ ] Update RightPanel to show current track details
+- [ ] Update Sidebar to display Playlist, Podcasts, Nghệ sĩ
+- [ ] Ensure state management works correctly
+- [ ] Test the application

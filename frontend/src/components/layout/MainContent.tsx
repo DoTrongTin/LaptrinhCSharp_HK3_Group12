@@ -1,92 +1,162 @@
-import React, { useState } from 'react';
-// Do MainContent nằm trong thư mục layout, nên ta trỏ đường dẫn ra ngoài 1 cấp (../) rồi vào thư mục ui
+import React, { useState, useEffect } from 'react';
 import FilterPill from '../ui/maincontent/FilterPill';
 import SectionHeader from '../ui/maincontent/SectionHeader';
 import MediaCard from '../ui/maincontent/MediaCard';
+import { mediaService } from '../../services/mediaService';
+import { useAppContext } from '../../context/AppContext';
+import { usePlayerStore } from '../../store/playerStore';
+import type { MediaItem } from '../../types/media';
 
 const MainContent: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('Tất cả');
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const { setRightPanelData } = useAppContext();
+  const play = usePlayerStore((s) => s.play);
 
-  // Dữ liệu giả lập khớp với ảnh
-  const recommendedData = [
-    { id: 1, title: 'Chịu Cách Mình Nói Thua', subtitle: 'RHYDER, CoolKid, BAN', img: 'https://via.placeholder.com/150/1a1a1a/ffffff?text=RHYDER' },
-    { id: 2, title: '2AM', subtitle: 'JustaTee, BigDaddy', img: 'https://via.placeholder.com/150/1a1a1a/ffffff?text=2AM' },
-    { id: 3, title: 'Bảo Tàng Của Nuối Tiếc', subtitle: 'Vũ.', img: 'https://via.placeholder.com/150/1a1a1a/ffffff?text=VU' },
-    { id: 4, title: 'Yêu 5', subtitle: 'Rhymastic', img: 'https://via.placeholder.com/150/1a1a1a/ffffff?text=YEU5' },
-    { id: 5, title: 'Hẹn Gặp Em Dưới Ánh Trăng', subtitle: 'MANBO, HIEUTHUHAI', img: 'https://via.placeholder.com/150/1a1a1a/ffffff?text=MANBO' },
-  ];
+  useEffect(() => {
+    const fetchMedia = async () => {
+      try {
+        setLoading(true);
+        const data = await mediaService.getTrendingMedia();
+        setMediaItems(data);
+        setError('');
+      } catch (err) {
+        console.error('Failed to fetch media:', err);
+        setError('Không thể tải danh sách nhạc. Vui lòng kiểm tra kết nối đến server.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMedia();
+  }, []);
 
-  const chilliesData = [
-    { id: 1, title: 'Một Đêm Say (X)', subtitle: 'Thịnh Suy', img: 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Say' },
-    { id: 2, title: 'Với Da LAB, Vũ., GREY D', subtitle: 'Danh sách phát', img: 'https://via.placeholder.com/150/ff6b6b/ffffff?text=Chillies' },
-    { id: 3, title: 'Mai Mình Xa', subtitle: 'Thịnh Suy', img: 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Mai' },
-    { id: 4, title: 'Sinh Ra Đã Là Thứ Đối Lập', subtitle: 'Emcee L (Da LAB)', img: 'https://via.placeholder.com/150/1a1a1a/ffffff?text=DaLab' },
-    { id: 5, title: 'Tinh hoa hội tụ', subtitle: 'đầy cảm xúc...', img: 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Indie' },
-  ];
+  const handleMediaClick = (item: MediaItem) => {
+    // Set right panel data
+    setRightPanelData({
+      title: item.title,
+      artist: item.ownerName,
+      cover: item.thumbnailPath || 'https://via.placeholder.com/300/1a1a1a/ffffff?text=Music',
+      type: 'song',
+    });
+
+    // Play the track via player store
+    play(item);
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // Filter items based on active filter
+  const filteredItems = mediaItems.filter((item) => {
+    if (activeFilter === 'Tất cả') return true;
+    if (activeFilter === 'Nhạc') return item.mediaType === undefined || item.mediaType === 0;
+    if (activeFilter === 'Podcasts') return item.mediaType === 1;
+    return true;
+  });
+
+  // Split into two groups for display
+  const firstHalf = filteredItems.slice(0, 10);
+  const secondHalf = filteredItems.slice(10, 20);
+
+  if (loading) {
+    return (
+      <main style={{ ...styles.mainContent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: '#b3b3b3', fontSize: 18 }}>Đang tải dữ liệu...</p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main style={{ ...styles.mainContent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: '#f44336', fontSize: 16, textAlign: 'center', maxWidth: 400 }}>{error}</p>
+      </main>
+    );
+  }
 
   return (
     <main style={styles.mainContent}>
       <div style={styles.innerContainer}>
-        
+
         {/* Thanh Filters */}
         <div style={styles.filtersRow}>
-          {['Tất cả', 'Nhạc', 'Podcasts'].map(filter => (
-            <FilterPill 
-              key={filter} 
-              label={filter} 
-              isActive={activeFilter === filter} 
-              onClick={() => setActiveFilter(filter)} 
+          {['Tất cả', 'Nhạc', 'Podcasts'].map((filter) => (
+            <FilterPill
+              key={filter}
+              label={filter}
+              isActive={activeFilter === filter}
+              onClick={() => setActiveFilter(filter)}
             />
           ))}
         </div>
 
-        {/* Section 1: Được đề xuất */}
-        <section style={styles.section}>
-          <SectionHeader title="Được đề xuất cho hôm nay" />
-          <div style={styles.gridContainer}>
-            {recommendedData.map(item => (
-              <MediaCard key={item.id} title={item.title} subtitle={item.subtitle} imageUrl={item.img} />
-            ))}
-          </div>
-        </section>
+        {/* Section 1: Mới nhất */}
+        {firstHalf.length > 0 && (
+          <section style={styles.section}>
+            <SectionHeader title="Mới nhất" />
+            <div style={styles.gridContainer}>
+              {firstHalf.map((item) => (
+                <MediaCard
+                  key={item.id}
+                  title={item.title}
+                  subtitle={`${item.ownerName} • ${formatDuration(item.duration)}`}
+                  imageUrl={item.thumbnailPath || 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Music'}
+                  onClick={() => handleMediaClick(item)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* Section 2: Gợi ý nghệ sĩ */}
-        <section style={styles.section}>
-          <SectionHeader 
-            title="Chillies" 
-            subtitle="Nội dung khác giống" 
-            avatarUrl="https://via.placeholder.com/48/333/fff?text=C" 
-          />
-          <div style={styles.gridContainer}>
-            {chilliesData.map(item => (
-              <MediaCard key={item.id} title={item.title} subtitle={item.subtitle} imageUrl={item.img} />
-            ))}
+        {/* Section 2: Gợi ý thêm */}
+        {secondHalf.length > 0 && (
+          <section style={styles.section}>
+            <SectionHeader title="Gợi ý cho bạn" subtitle="Từ cộng đồng" />
+            <div style={styles.gridContainer}>
+              {secondHalf.map((item) => (
+                <MediaCard
+                  key={item.id}
+                  title={item.title}
+                  subtitle={`${item.ownerName} • ${formatDuration(item.duration)}`}
+                  imageUrl={item.thumbnailPath || 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Music'}
+                  onClick={() => handleMediaClick(item)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {filteredItems.length === 0 && !loading && !error && (
+          <div style={{ textAlign: 'center', padding: 40 }}>
+            <p style={{ color: '#b3b3b3', fontSize: 16 }}>Không có nội dung phù hợp với bộ lọc.</p>
           </div>
-        </section>
-        
+        )}
       </div>
     </main>
   );
 };
 
 const styles = {
-  // Cấu trúc khung chính của vùng màu xám mà ta đã làm trước đó
   mainContent: {
-    flex: 1, 
-    backgroundColor: '#121212', 
-    borderRadius: 8, 
-    height: '100%', 
-    overflowY: 'auto' as const, // Kích hoạt thanh cuộn dọc cho vùng này
+    flex: 1,
+    backgroundColor: '#121212',
+    borderRadius: 8,
+    height: '100%',
+    overflowY: 'auto' as const,
     display: 'flex' as const,
     flexDirection: 'column' as const,
     position: 'relative' as const,
   },
-  // Khoảng cách bên trong của trang web
   innerContainer: {
-    padding: '24px 24px 40px 24px', 
+    padding: '24px 24px 40px 24px',
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: 40, // Khoảng cách giữa cụm filter và các phần Section
+    gap: 40,
   },
   filtersRow: {
     display: 'flex',
@@ -100,7 +170,7 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
     gap: 24,
-  }
+  },
 };
 
 export default MainContent;

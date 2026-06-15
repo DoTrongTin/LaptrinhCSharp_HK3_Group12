@@ -3,37 +3,59 @@ import PlaybackControls from '../ui/playbar/PlaybackControls';
 import PlaybarUtilities from '../ui/playbar/PlaybarUtilities';
 import TrackInfo from '../ui/playbar/TrackInfo';
 import { currentTrack } from '../../data/currentTrack';
-import { useAppContext } from '../../context/AppContext'; // ĐÃ THÊM: Import context tổng của ứng dụng
+import { usePlayerStore } from '../../store/playerStore';
+
+const formatTime = (seconds: number): string => {
+  if (!seconds || isNaN(seconds)) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
 
 const Playbar: React.FC = () => {
-  const { rightPanelData } = useAppContext(); // ĐÃ THÊM: Lấy thông tin bài hát được chọn từ Context
+  const currentTrackStore = usePlayerStore((s) => s.currentTrack);
+  const volume = usePlayerStore((s) => s.volume);
+  const currentTime = usePlayerStore((s) => s.currentTime);
+  const duration = usePlayerStore((s) => s.duration);
 
-  // Kiểm tra: Nếu có bài hát được click từ vùng trung tâm thì lấy thông tin bài đó, ngược lại dùng bài mặc định (currentTrack)
-  const activeTrack = rightPanelData ? {
-    artworkUrl: rightPanelData.cover,
-    title: rightPanelData.title,
-    artist: rightPanelData.artist
-  } : {
-    artworkUrl: currentTrack.artworkUrl,
-    title: currentTrack.title,
-    artist: currentTrack.artist
-  };
+  // Calculate progress percentage
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  // If a track is selected from the store, use it; otherwise fallback to default
+  const activeTrack = currentTrackStore
+    ? {
+        artworkUrl: currentTrackStore.thumbnailPath || 'https://via.placeholder.com/64/1a1a1a/ffffff?text=Music',
+        title: currentTrackStore.title,
+        artist: currentTrackStore.ownerName || 'Unknown Artist',
+        currentTime: formatTime(currentTime),
+        duration: formatTime(duration || currentTrackStore.duration),
+        progress: progressPercent,
+        volume: volume,
+      }
+    : {
+        artworkUrl: currentTrack.artworkUrl,
+        title: currentTrack.title,
+        artist: currentTrack.artist,
+        currentTime: currentTrack.currentTime,
+        duration: currentTrack.duration,
+        progress: currentTrack.progress,
+        volume: currentTrack.volume,
+      };
 
   return (
     <footer style={styles.playbar}>
-      {/* ĐÃ CHỈNH SỬA: Truyền dữ liệu động activeTrack thay vì currentTrack cố định */}
-      <TrackInfo 
-        artworkUrl={activeTrack.artworkUrl} 
-        title={activeTrack.title} 
-        artist={activeTrack.artist} 
+      <TrackInfo
+        artworkUrl={activeTrack.artworkUrl}
+        title={activeTrack.title}
+        artist={activeTrack.artist}
       />
-      
+
       <PlaybackControls
-        currentTime={currentTrack.currentTime}
-        duration={currentTrack.duration}
-        progress={currentTrack.progress}
+        currentTime={activeTrack.currentTime}
+        duration={activeTrack.duration}
+        progress={activeTrack.progress}
       />
-      <PlaybarUtilities volume={currentTrack.volume} />
+      <PlaybarUtilities volume={activeTrack.volume} />
     </footer>
   );
 };

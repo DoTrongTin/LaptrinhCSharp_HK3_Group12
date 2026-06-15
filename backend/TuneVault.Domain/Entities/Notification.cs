@@ -2,8 +2,8 @@ namespace TuneVault.Domain.Entities;
 
 public class Notification
 {
-    public Guid Id { get; set; }
-    public string UserId { get; set; } = "";
+    public Guid Id { get; set; } 
+    public Guid UserId { get; set; }
     public string Type { get; set; } = ""; // share | follow | like
     public string Payload { get; set; } = "{}";
     public bool IsRead { get; set; } = false;
