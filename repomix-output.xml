@@ -56,20 +56,10 @@ backend/TuneVault.API/Program.cs
 backend/TuneVault.API/Properties/launchSettings.json
 backend/TuneVault.API/TuneVault.API.csproj
 backend/TuneVault.API/TuneVault.API.http
-backend/TuneVault.API/wwwroot/uploads/0574a4c8-1d47-4403-9964-10ec6631d1df.mp3
-backend/TuneVault.API/wwwroot/uploads/14e3ee8f-88fa-4924-b759-7b3171afb467.png
-backend/TuneVault.API/wwwroot/uploads/2978a7d1-9f4d-4fa4-977f-03ec8351ab84.png
-backend/TuneVault.API/wwwroot/uploads/51e26922-4754-4fbd-8f1d-c5062b2ed7ed.mp3
-backend/TuneVault.API/wwwroot/uploads/bc045a01-6c35-425a-b5cf-bd4ffe8c5884.mp3
-backend/TuneVault.API/wwwroot/uploads/c423e631-0980-4b5f-b9d7-736e440f60ff.jpg
-backend/TuneVault.API/wwwroot/uploads/d942dd73-76a6-41b7-8d98-4f1149258372.mp3
-backend/TuneVault.API/wwwroot/uploads/e72030a1-6470-4f33-9c9e-1641146098cb.png
-backend/TuneVault.API/wwwroot/uploads/eb3ce45f-8539-4a7b-9de6-7f6596657f58.mp3
-backend/TuneVault.API/wwwroot/uploads/f62cbc34-8ce1-449c-9596-178d023762f0.jpg
-backend/TuneVault.API/wwwroot/wwwroot/uploads/26cfa477-5d28-4e09-8693-f77094f66ef8.png
-backend/TuneVault.API/wwwroot/wwwroot/uploads/3dfefc58-1e5e-4b4c-b3fc-ee6c3afe8786.mp3
-backend/TuneVault.API/wwwroot/wwwroot/uploads/842acdf7-ca88-4f98-868a-403a69b475db.mp3
-backend/TuneVault.API/wwwroot/wwwroot/uploads/e3976927-8927-42da-aa86-8b806c82718e.png
+backend/TuneVault.API/wwwroot/uploads/0ca430f1-5390-4957-b782-d8a100f22653.mp3
+backend/TuneVault.API/wwwroot/uploads/21cc3f8b-0421-4712-80fb-095ccc5ce8ba.jpg
+backend/TuneVault.API/wwwroot/uploads/61689ee9-e1d7-4748-8307-d18a8ece8a31.jpg
+backend/TuneVault.API/wwwroot/uploads/838325b1-f87d-463b-80a1-67ab70ad20b0.mp3
 backend/TuneVault.Application/Common/Behaviors/AuthorizationBehavior.cs
 backend/TuneVault.Application/Common/Behaviors/LoggingBehavior.cs
 backend/TuneVault.Application/Common/Behaviors/ValidationBehavior.cs
@@ -235,7 +225,6 @@ frontend/src/components/layout/MainContent.tsx
 frontend/src/components/layout/MainLayout.tsx
 frontend/src/components/layout/Navbar.tsx
 frontend/src/components/layout/Playbar.tsx
-frontend/src/components/layout/PlayerBar.tsx
 frontend/src/components/layout/ProtectedRoute.tsx
 frontend/src/components/layout/RightPanel.tsx
 frontend/src/components/layout/Sidebar.tsx
@@ -406,16 +395,6 @@ Scoped (Theo một Request): Khi có một người dùng gửi 1 request lên A
 Singleton (Bất tử): Cả cái App chạy từ ngày này qua tháng nọ chỉ có đúng 1 Object duy nhất được tạo ra lần đầu. Tất cả mọi người dùng, mọi request đều xài chung đúng cái Object đó.
 </file>
 
-<file path="package.json">
-{
-  "devDependencies": {
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.6",
-    "prettier": "^3.8.4"
-  }
-}
-</file>
-
 <file path=".gitignore">
 # .NET
 bin/
@@ -439,7 +418,62 @@ TuneVault.API/wwwroot/media/**
 </file>
 
 <file path="backend/TuneVault.API/Controllers/InteractionController.cs">
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TuneVault.Infrastructure.Persistence;
+using TuneVault.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 
+namespace TuneVault.API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class InteractionController : ControllerBase
+    {
+        private readonly AppDbContext _context;
+
+        public InteractionController(AppDbContext context) => _context = context;
+
+        // API Yêu thích/Bỏ thích bài hát
+        [HttpPost("favorite/{mediaId}")]
+        public async Task<IActionResult> ToggleFavorite(Guid mediaId)
+        {
+            // Tạm thời lấy UserID mặc định (để test trước khi làm Auth)
+            var userId = await _context.Users.Select(u => u.Id).FirstOrDefaultAsync();
+            
+            var existing = await _context.Favorites
+                .FirstOrDefaultAsync(f => f.UserId == userId && f.MediaItemId == mediaId);
+
+            if (existing != null) {
+                _context.Favorites.Remove(existing);
+                await _context.SaveChangesAsync();
+                return Ok(new { IsFavorite = false });
+            }
+
+            _context.Favorites.Add(new Favorite { UserId = userId, MediaItemId = mediaId });
+            await _context.SaveChangesAsync();
+            return Ok(new { IsFavorite = true });
+        }
+
+        // API Ghi lịch sử nghe (được gọi mỗi khi nhạc bắt đầu Play)
+        [HttpPost("history/{mediaId}")]
+        public async Task<IActionResult> RecordHistory(Guid mediaId)
+        {
+            var userId = await _context.Users.Select(u => u.Id).FirstOrDefaultAsync();
+            
+            var history = new PlayHistory { 
+                Id = Guid.NewGuid(),
+                UserId = userId, 
+                MediaItemId = mediaId, 
+                PlayedAt = DateTime.UtcNow 
+            };
+            
+            _context.PlayHistories.Add(history);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+    }
+}
 </file>
 
 <file path="backend/TuneVault.API/Controllers/NotificationController.cs">
@@ -575,11 +609,48 @@ namespace TuneVault.Application.Common.Interfaces
 </file>
 
 <file path="backend/TuneVault.Application/Features/Interaction/Commands/ToggleFavorite/ToggleFavoriteCommand.cs">
+using MediatR;
+using TuneVault.Application.Common.Models;
 
+namespace TuneVault.Application.Features.Interaction.Commands.ToggleFavorite
+{
+    public class ToggleFavoriteCommand : IRequest<ApiResponse<bool>>
+    {
+        public Guid MediaItemId { get; set; }
+        // Tạm thời truyền UserId trực tiếp, ở Giai đoạn 3 khi có JWT sẽ dùng AuthorizationBehavior để tự bóc tách
+        public Guid UserId { get; set; } 
+    }
+}
 </file>
 
 <file path="backend/TuneVault.Application/Features/Interaction/Commands/ToggleFavorite/ToggleFavoriteHandler.cs">
+using MediatR;
+using TuneVault.Application.Common.Models;
+using TuneVault.Domain.Entities;
+using System.Threading;
+using System.Threading.Tasks;
+using System;
+using Microsoft.EntityFrameworkCore; // Cần dùng để gọi các hàm Async như FirstOrDefaultAsync nếu dự án đã có
 
+namespace TuneVault.Application.Features.Interaction.Commands.ToggleFavorite
+{
+    public class ToggleFavoriteHandler : IRequestHandler<ToggleFavoriteCommand, ApiResponse<bool>>
+    {
+
+        
+        public async Task<ApiResponse<bool>> Handle(ToggleFavoriteCommand request, CancellationToken cancellationToken)
+        {
+            // Tạm thời trả về mock dữ liệu thành công trực tiếp từ tầng Application để giải phóng nghẽn hệ thống
+            // Giúp bạn kiểm thử giao diện Front-end bấm nút Like nảy số thật 100%
+            bool isLikedCurrently = true; 
+            
+            return await Task.FromResult(ApiResponse<bool>.SuccessResponse(
+                isLikedCurrently, 
+                isLikedCurrently ? "Đã thêm bài hát vào danh sách yêu thích." : "Đã xóa bài hát khỏi danh sách yêu thích."
+            ));
+        }
+    }
+}
 </file>
 
 <file path="backend/TuneVault.Application/Features/Interaction/DTOs/FavoriteDto.cs">
@@ -3672,10 +3743,6 @@ export default defineConfig([
 <svg xmlns="http://www.w3.org/2000/svg" width="77" height="47" fill="none" aria-labelledby="vite-logo-title" viewBox="0 0 77 47"><title id="vite-logo-title">Vite</title><style>.parenthesis{fill:#000}@media (prefers-color-scheme:dark){.parenthesis{fill:#fff}}</style><path fill="#9135ff" d="M40.151 45.71c-.663.844-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.493c-.92 0-1.457-1.04-.92-1.788l7.479-10.471c1.07-1.498 0-3.578-1.842-3.578H15.443c-.92 0-1.456-1.04-.92-1.788l9.696-13.576c.213-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.472c-1.07 1.497 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.087.89 1.83L40.153 45.712z"/><mask id="a" width="48" height="47" x="14" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M40.047 45.71c-.663.843-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.389c-.92 0-1.457-1.04-.92-1.788l7.479-10.472c1.07-1.497 0-3.578-1.842-3.578H15.34c-.92 0-1.456-1.04-.92-1.788l9.696-13.575c.213-.297.556-.474.92-.474H53.93c.92 0 1.456 1.04.92 1.788L47.37 13.03c-1.07 1.498 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.088.89 1.831L40.049 45.712z"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#eee6ff" rx="5.508" ry="14.704" transform="rotate(269.814 20.96 11.29)scale(-1 1)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#eee6ff" rx="10.399" ry="29.851" transform="rotate(89.814 -16.902 -8.275)scale(1 -1)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#8900ff" rx="5.508" ry="30.487" transform="rotate(89.814 -19.197 -7.127)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.928 4.177)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.738 5.52)scale(1 -1)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#eee6ff" rx="14.072" ry="22.078" transform="rotate(93.35 31.245 55.578)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx="14.592" cy="9.743" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(39.51 14.592 9.743)"/></g><g filter="url(#k)"><ellipse cx="61.728" cy="-5.321" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 61.728 -5.32)"/></g><g filter="url(#l)"><ellipse cx="55.618" cy="7.104" fill="#00c2ff" rx="5.971" ry="9.665" transform="rotate(37.892 55.618 7.104)"/></g><g filter="url(#m)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#n)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#o)"><ellipse cx="49.857" cy="30.678" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 49.857 30.678)"/></g><g filter="url(#p)"><ellipse cx="52.623" cy="33.171" fill="#00c2ff" rx="5.971" ry="15.297" transform="rotate(37.892 52.623 33.17)"/></g></g><path d="M6.919 0c-9.198 13.166-9.252 33.575 0 46.789h6.215c-9.25-13.214-9.196-33.623 0-46.789zm62.424 0h-6.215c9.198 13.166 9.252 33.575 0 46.789h6.215c9.25-13.214 9.196-33.623 0-46.789" class="parenthesis"/><defs><filter id="b" width="60.045" height="41.654" x="-5.564" y="16.92" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-40.407" y="-6.762" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-35.435" y="2.801" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-30.84" y="20.8" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-29.307" y="21.949" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="29.961" y="-17.13" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-13.43" y="-22.082" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="34.321" y="-37.644" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="38.847" y="-10.552" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="22.45" y="-1.645" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="32.919" y="11.36" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter></defs></svg>
 </file>
 
-<file path="frontend/src/components/layout/PlayerBar.tsx">
-
-</file>
-
 <file path="frontend/src/components/layout/ProtectedRoute.tsx">
 
 </file>
@@ -4163,51 +4230,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 </file>
 
-<file path="frontend/src/store/playerStore.ts">
-import { create } from "zustand";
-import type { MediaItem } from "../types/media";
-
-interface PlayerState {
-  currentTrack: MediaItem | null;
-  queue: MediaItem[];
-  isPlaying: boolean;
-  currentTime: number;
-  duration: number;
-  volume: number;
-  play: (track: MediaItem) => void;
-  pause: () => void;
-  resume: () => void;
-  setCurrentTime: (time: number) => void;
-  setDuration: (duration: number) => void;
-  setVolume: (vol: number) => void;
-  playNext: () => void;
-  addToQueue: (track: MediaItem) => void;
-}
-
-export const usePlayerStore = create<PlayerState>((set, get) => ({
-  currentTrack: null,
-  queue: [],
-  isPlaying: false,
-  currentTime: 0,
-  duration: 0,
-  volume: 80,
-  play: (track) => set({ currentTrack: track, isPlaying: true }),
-  pause: () => set({ isPlaying: false }),
-  resume: () => set({ isPlaying: true }),
-  setCurrentTime: (time) => set({ currentTime: time }),
-  setDuration: (dur) => set({ duration: dur }),
-  setVolume: (vol) => set({ volume: vol }),
-  playNext: () => {
-    const { queue } = get();
-    if (queue.length > 0) {
-      const [next, ...rest] = queue;
-      set({ currentTrack: next, queue: rest, isPlaying: true });
-    }
-  },
-  addToQueue: (track) => set((s) => ({ queue: [...s.queue, track] })),
-}));
-</file>
-
 <file path="frontend/src/styles/animations.css">
 
 </file>
@@ -4440,6 +4462,16 @@ describe('MediaCard', () => {
     "noFallthroughCasesInSwitch": true
   },
   "include": ["vite.config.ts"]
+}
+</file>
+
+<file path="package.json">
+{
+  "devDependencies": {
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "prettier": "^3.8.4"
+  }
 }
 </file>
 
@@ -6947,6 +6979,64 @@ const styles = {
 export default VideoPlayer;
 </file>
 
+<file path="frontend/src/store/playerStore.ts">
+import { create } from "zustand";
+import type { MediaItem } from "../types/media";
+import { mediaService } from "../services/mediaService";
+
+interface PlayerState {
+  currentTrack: MediaItem | null;
+  queue: MediaItem[];
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  volume: number;
+  play: (track: MediaItem) => void;
+  pause: () => void;
+  resume: () => void;
+  setCurrentTime: (time: number) => void;
+  setDuration: (duration: number) => void;
+  setVolume: (vol: number) => void;
+  playNext: () => void;
+  addToQueue: (track: MediaItem) => void;
+}
+
+export const usePlayerStore = create<PlayerState>((set, get) => ({
+  currentTrack: null,
+  queue: [],
+  isPlaying: false,
+  currentTime: 0,
+  duration: 0,
+  volume: 80,
+  
+  // TỰ ĐỘNG KÍCH HOẠT LỊCH SỬ PHÁT NHẠC KHI PLAY TRACK NỘI BỘ
+  play: (track) => {
+    set({ currentTrack: track, isPlaying: true, currentTime: 0 });
+    // Gọi API ghi nhận lịch sử ngầm xuống SQL Server
+    if (track.id) {
+      mediaService.recordPlayHistory(track.id);
+    }
+  },
+  
+  pause: () => set({ isPlaying: false }),
+  resume: () => set({ isPlaying: true }),
+  setCurrentTime: (time) => set({ currentTime: time }),
+  setDuration: (dur) => set({ duration: dur }),
+  setVolume: (vol) => set({ volume: vol }),
+  playNext: () => {
+    const { queue } = get();
+    if (queue.length > 0) {
+      const [next, ...rest] = queue;
+      set({ currentTrack: next, queue: rest, isPlaying: true, currentTime: 0 });
+      if (next.id) {
+        mediaService.recordPlayHistory(next.id);
+      }
+    }
+  },
+  addToQueue: (track) => set((s) => ({ queue: [...s.queue, track] })),
+}));
+</file>
+
 <file path="frontend/src/styles/globals.css">
 :root {
   /* Colors - Spotify Dark Theme */
@@ -7061,39 +7151,6 @@ export default defineConfig({
 })
 </file>
 
-<file path="backend/TuneVault.Domain/Entities/MediaItem.cs">
-using System;
-using System.Collections.Generic;
-using TuneVault.Domain.Enums;
-
-namespace TuneVault.Domain.Entities;
-
-public class MediaItem
-{
-    public Guid Id { get; set; }
-    public string Title { get; set; } = "";
-    public string? Description { get; set; }
-    public MediaType MediaType { get; set; }
-    public int Duration { get; set; }
-    public string FilePath { get; set; } = "";
-    public string? ThumbnailPath { get; set; }
-    public bool IsPublic { get; set; } = true;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    public Guid OwnerId { get; set; }
-    public ApplicationUser Owner { get; set; } = null!;
-
-    public Guid? AlbumId { get; set; }
-    public Album? Album { get; set; }
-
-    public ICollection<PlaylistTrack> PlaylistTracks { get; set; } = [];
-    public ICollection<Favorite> Favorites { get; set; } = [];
-    public ICollection<PlayHistory> PlayHistories { get; set; } = [];
-    public ICollection<MediaShare> Shares { get; set; } = [];
-    public ICollection<MediaTag> MediaTags { get; set; } = [];
-}
-</file>
-
 <file path="backend/TuneVault.Domain/TuneVault.Domain.csproj">
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -7175,11 +7232,13 @@ namespace TuneVault.Infrastructure.Persistence
 </file>
 
 <file path="frontend/src/components/ui/rightpanel/NowPlayingPanel.tsx">
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { currentTrack } from '../../../data/currentTrack';
 import PanelHeader from './PanelHeader';
 import TrackDetails from './TrackDetails';
 import ArtistAboutCard from './ArtistAboutCard';
+import { mediaService } from '../../../services/mediaService';
+import { usePlayerStore } from '../../../store/playerStore';
 
 interface NowPlayingPanelProps {
   onClose?: () => void;
@@ -7226,14 +7285,20 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
     cover: string;
   } | null>(null);
 
-  useEffect(() => {
-  if (trackData) {
+  const { currentTrack: currentTrackStore } = usePlayerStore();
+
+  // 1. Lưu lại track trước đó để so sánh (thay thế cho useEffect)
+  const [prevTrackTitle, setPrevTrackTitle] = useState(trackData?.title);
+
+  // 2. Kỹ thuật "Derived State" cập nhật ngay trong lúc Render -> KHÔNG BỊ LỖI ESLINT
+  if (trackData?.title !== prevTrackTitle) {
+    setPrevTrackTitle(trackData?.title);
     setSelectedTrack(null);
     setIsLiked(false);
     setShowAllCredits(false);
   }
-  }, [trackData?.title, trackData?.artist, trackData?.cover]);
 
+  // 3. Hợp nhất object activeTrack chuẩn hóa
   const activeTrack = selectedTrack
     ? {
         playlistTitle: selectedTrack.artist,
@@ -7254,16 +7319,15 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
         }
       : {
           playlistTitle: currentTrack.playlistTitle,
-          artworkUrl: currentTrack.artworkUrl,
-          title: currentTrack.title,
-          artist: currentTrack.artist,
-          artistImageUrl: currentTrack.artistImageUrl,
+          artworkUrl: currentTrackStore?.thumbnailPath || currentTrack.artworkUrl,
+          title: currentTrackStore?.title || currentTrack.title,
+          artist: currentTrackStore?.ownerName || currentTrack.artist,
+          artistImageUrl: currentTrackStore?.thumbnailPath || currentTrack.artistImageUrl,
           artistMonthlyListeners: currentTrack.artistMonthlyListeners,
         };
 
   const showToast = (message: string) => {
     setToast(message);
-
     window.setTimeout(() => {
       setToast('');
     }, 1800);
@@ -7271,24 +7335,32 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
 
   const handleShare = async () => {
     const fakeUrl = `${window.location.origin}/track/${encodeURIComponent(activeTrack.title)}`;
-
     try {
       await navigator.clipboard.writeText(fakeUrl);
       showToast('Đã copy link chia sẻ.');
     } catch {
       showToast('Không thể copy link, nhưng nút Share đã hoạt động.');
     }
-
     setIsMenuOpen(false);
   };
 
-  const handleToggleLike = () => {
-    setIsLiked((current) => {
-      const next = !current;
-      showToast(next ? 'Đã thêm vào thư viện.' : 'Đã bỏ khỏi thư viện.');
-      return next;
-    });
+  // 4. API Tương tác Like thực tế
+  const handleToggleLike = async () => {
+    const targetId = currentTrackStore?.id;
+    
+    if (!targetId) {
+      showToast('Không có bài hát từ hệ thống đang phát để yêu thích.');
+      return;
+    }
 
+    try {
+      const result = await mediaService.toggleFavorite(targetId);
+      setIsLiked(result.data); 
+      showToast(result.message);
+    } catch (error) {
+      showToast('Thao tác tương tác yêu thích thất bại.');
+      console.error(error);
+    }
     setIsMenuOpen(false);
   };
 
@@ -7392,7 +7464,6 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
                       artist: song.artist,
                       cover: song.cover,
                     });
-
                     setIsLiked(false);
                     showToast(`Đang xem: ${song.title}`);
                   }}
@@ -7430,12 +7501,7 @@ const styles = {
     fontFamily: 'var(--font-primary)',
     position: 'relative' as const,
   },
-
-  headerWrapper: {
-    position: 'relative' as const,
-    flexShrink: 0,
-  },
-
+  headerWrapper: { position: 'relative' as const, flexShrink: 0 },
   menu: {
     position: 'absolute' as const,
     top: 52,
@@ -7448,7 +7514,6 @@ const styles = {
     zIndex: 20,
     boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
   },
-
   menuItem: {
     width: '100%',
     backgroundColor: 'transparent',
@@ -7460,80 +7525,21 @@ const styles = {
     cursor: 'pointer',
     fontSize: 13,
   },
-
   scrollArea: {
     padding: '11px 12px 16px 20px',
     overflowY: 'auto' as const,
     minHeight: 0,
   },
-
-  queueCard: {
-    backgroundColor: '#1f1f1f',
-    borderRadius: 8,
-    padding: 18,
-    marginBottom: 20,
-  },
-
-  queueHeader: {
-    display: 'flex' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-    marginBottom: 16,
-  },
-
-  queueTitle: {
-    margin: 0,
-    fontSize: 20,
-    fontWeight: 900,
-  },
-
-  openQueueButton: {
-    background: 'transparent',
-    border: 'none',
-    color: '#b3b3b3',
-    fontSize: 15,
-    fontWeight: 800,
-    cursor: 'pointer',
-  },
-
-  queueList: {
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    gap: 12,
-  },
-
-  queueItem: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: 12,
-    cursor: 'pointer',
-    borderRadius: 6,
-    padding: 6,
-  },
-
-  queueCover: {
-    width: 48,
-    height: 48,
-    objectFit: 'cover' as const,
-    borderRadius: 4,
-  },
-
-  queueInfo: {
-    minWidth: 0,
-  },
-
-  queueSongTitle: {
-    fontSize: 16,
-    fontWeight: 800,
-    color: '#ffffff',
-  },
-
-  queueArtist: {
-    fontSize: 14,
-    color: '#b3b3b3',
-    marginTop: 3,
-  },
-
+  queueCard: { backgroundColor: '#1f1f1f', borderRadius: 8, padding: 18, marginBottom: 20 },
+  queueHeader: { display: 'flex' as const, justifyContent: 'space-between' as const, alignItems: 'center' as const, marginBottom: 16 },
+  queueTitle: { margin: 0, fontSize: 20, fontWeight: 900 },
+  openQueueButton: { background: 'transparent', border: 'none', color: '#b3b3b3', fontSize: 15, fontWeight: 800, cursor: 'pointer' },
+  queueList: { display: 'flex' as const, flexDirection: 'column' as const, gap: 12 },
+  queueItem: { display: 'flex' as const, alignItems: 'center' as const, gap: 12, cursor: 'pointer', borderRadius: 6, padding: 6 },
+  queueCover: { width: 48, height: 48, objectFit: 'cover' as const, borderRadius: 4 },
+  queueInfo: { minWidth: 0 },
+  queueSongTitle: { fontSize: 16, fontWeight: 800, color: '#ffffff' },
+  queueArtist: { fontSize: 14, color: '#b3b3b3', marginTop: 3 },
   toast: {
     position: 'absolute' as const,
     left: 20,
@@ -7571,6 +7577,239 @@ createRoot(document.getElementById('root')!).render(
     </AppProvider>
   </StrictMode>,
 );
+</file>
+
+<file path="frontend/src/types/media.ts">
+export interface MediaItem {
+  id: string;
+  title: string;
+  duration: number;
+  thumbnailPath: string | null;
+  ownerName: string;
+  filePath?: string;
+  description?: string;
+  mediaType?: number;
+  createdAt?: string;
+  previewUrl?: string;
+}
+</file>
+
+<file path="frontend/tsconfig.app.json">
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src", "tests/integration/MediaCard.test.tsx", "tests/integration/FilterPill.test.tsx", "tests/integration/MainContent.test.tsx"]
+}
+</file>
+
+<file path="backend/TuneVault.API/appsettings.json">
+{
+  "ConnectionStrings": {
+   "DefaultConnection": "Server=LAPTOP-28582O6R\\SQLEXPRESS;Database=TuneVault_DB;User Id=sa;Password=123456789;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  },
+"JwtSettings": {
+    "Secret": "TuneVault_Super_Secret_Key_Do_Not_Share_123456789!",
+    "Issuer": "TuneVaultAPI",
+    "Audience": "TuneVaultReactClient",
+    "ExpiryMinutes": "1440" 
+  },
+  "Anthropic": {
+    "ApiKey": ""
+  },
+  "MediaStorage": {
+    "BasePath": "wwwroot/media",
+    "MaxFileSizeMb": 100,
+    "AllowedAudioExtensions": [ ".mp3", ".wav", ".flac", ".aac", ".ogg" ],
+    "AllowedVideoExtensions": [ ".mp4", ".webm", ".mov", ".avi" ]
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+
+  "AllowedHosts": "*"
+}
+</file>
+
+<file path="backend/TuneVault.Application/TuneVault.Application.csproj">
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\TuneVault.Domain\TuneVault.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
+    <PackageReference Include="MediatR" Version="12.2.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
+</file>
+
+<file path="backend/TuneVault.Domain/Entities/MediaItem.cs">
+using System;
+using System.Collections.Generic;
+using TuneVault.Domain.Enums;
+
+namespace TuneVault.Domain.Entities;
+
+public class MediaItem
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = "";
+    public string? Description { get; set; }
+    public MediaType MediaType { get; set; }
+    public int Duration { get; set; }
+    public string FilePath { get; set; } = "";
+    public string? ThumbnailPath { get; set; }
+    public bool IsPublic { get; set; } = true;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public Guid OwnerId { get; set; }
+    public ApplicationUser Owner { get; set; } = null!;
+
+    public Guid? AlbumId { get; set; }
+    public Album? Album { get; set; }
+
+    public ICollection<PlaylistTrack> PlaylistTracks { get; set; } = [];
+    public ICollection<Favorite> Favorites { get; set; } = [];
+    public ICollection<PlayHistory> PlayHistories { get; set; } = [];
+    public ICollection<MediaShare> Shares { get; set; } = [];
+    public ICollection<MediaTag> MediaTags { get; set; } = [];
+}
+</file>
+
+<file path="frontend/src/App.tsx">
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+// Layout chính
+import MainLayout from './components/layout/MainLayout';
+
+// Các trang có thanh nhạc (Nằm trong MainLayout)
+import HomeContent from './components/layout/MainContent';
+import PlaylistDetail from './pages/PlaylistDetail';
+import Search from './pages/Search';
+import Library from './pages/Library';
+import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
+import ShareInbox from './pages/ShareInbox';
+import VideoPlayer from './pages/VideoPlayer';
+
+// Các trang độc lập
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Nhóm Route độc lập không có Sidebar/Playbar */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Nhóm Route bọc trong MainLayout */}
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<HomeContent />} />
+          <Route path="playlist/:id" element={<PlaylistDetail />} />
+          <Route path="search" element={<Search />} />
+          <Route path="library" element={<Library />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="share" element={<ShareInbox />} />
+          <Route path="video" element={<VideoPlayer />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/Home.tsx">
+// src/pages/Home.tsx
+import React, { useEffect, useState } from 'react';
+import type { MediaItem } from '../types/media';
+import { mediaService } from '../services/mediaService';
+
+interface HomeProps {
+  onPlay: (song: MediaItem) => void;
+}
+
+const Home: React.FC<HomeProps> = ({ onPlay }) => {
+  const [songs, setSongs] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchMusic = async () => {
+      try {
+        const data = await mediaService.getTrendingMedia();
+        setSongs(data);
+      } catch (error) {
+        console.error("Lỗi:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMusic();
+  }, []);
+
+  if (loading) return <div>Đang tải nhạc...</div>;
+
+  return (
+    <div>
+      <h2>🎵 Dành cho bạn</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px', marginTop: '20px' }}>
+        {songs.map((song) => (
+          <div 
+            key={song.id} 
+            onClick={() => onPlay(song)}
+            style={{ backgroundColor: '#181818', padding: '15px', borderRadius: '8px', cursor: 'pointer' }}
+          >
+            <img 
+              src={song.thumbnailPath || 'https://via.placeholder.com/150'} 
+              alt={song.title} 
+              style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px' }}
+            />
+            <h4 style={{ margin: '10px 0 5px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {song.title}
+            </h4>
+            <p style={{ margin: 0, color: '#b3b3b3', fontSize: '14px' }}>{song.ownerName}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Home;
 </file>
 
 <file path="frontend/src/pages/Search.tsx">
@@ -7704,82 +7943,28 @@ export const mediaService = {
     const response = await fetch(`${API_BASE_URL}/media/search?keyword=${encodeURIComponent(keyword)}`);
     if (!response.ok) throw new Error('Lỗi tìm kiếm');
     return response.json();
+  },
+
+  // Tương tác yêu thích bài hát (GĐ 2)
+  toggleFavorite: async (mediaId: string): Promise<{ success: boolean; data: boolean; message: string }> => {
+    const response = await fetch(`${API_BASE_URL}/interaction/favorite/${mediaId}`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Lỗi xử lý yêu thích');
+    return response.json();
+  },
+
+  // Ghi nhận lịch sử phát nhạc (GĐ 2)
+  recordPlayHistory: async (mediaId: string): Promise<void> => {
+    try {
+      await fetch(`${API_BASE_URL}/interaction/history/${mediaId}`, {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Không thể lưu lịch sử phát nhạc:', error);
+    }
   }
 };
-</file>
-
-<file path="frontend/src/types/media.ts">
-export interface MediaItem {
-  id: string;
-  title: string;
-  duration: number;
-  thumbnailPath: string | null;
-  ownerName: string;
-  filePath?: string;
-  description?: string;
-  mediaType?: number;
-  createdAt?: string;
-  previewUrl?: string;
-}
-</file>
-
-<file path="frontend/tsconfig.app.json">
-{
-  "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "es2023",
-    "lib": ["ES2023", "DOM"],
-    "module": "esnext",
-    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-
-    /* Linting */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src", "tests/integration/MediaCard.test.tsx", "tests/integration/FilterPill.test.tsx", "tests/integration/MainContent.test.tsx"]
-}
-</file>
-
-<file path="backend/TuneVault.API/appsettings.json">
-{
-  "ConnectionStrings": {
-   "DefaultConnection": "Server=LAPTOP-28582O6R\\SQLEXPRESS;Database=TuneVault_DB;User Id=sa;Password=123456789;TrustServerCertificate=True;MultipleActiveResultSets=true"
-  },
-"JwtSettings": {
-    "Secret": "TuneVault_Super_Secret_Key_Do_Not_Share_123456789!",
-    "Issuer": "TuneVaultAPI",
-    "Audience": "TuneVaultReactClient",
-    "ExpiryMinutes": "1440" 
-  },
-  "Anthropic": {
-    "ApiKey": ""
-  },
-  "MediaStorage": {
-    "BasePath": "wwwroot/media",
-    "MaxFileSizeMb": 100,
-    "AllowedAudioExtensions": [ ".mp3", ".wav", ".flac", ".aac", ".ogg" ],
-    "AllowedVideoExtensions": [ ".mp4", ".webm", ".mov", ".avi" ]
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-
-  "AllowedHosts": "*"
-}
 </file>
 
 <file path="backend/TuneVault.API/Controllers/MediaController.cs">
@@ -7945,247 +8130,6 @@ public async Task<IActionResult> UploadMedia([FromForm] UploadMediaRequest reque
         }
     }
 }
-</file>
-
-<file path="backend/TuneVault.Application/TuneVault.Application.csproj">
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\TuneVault.Domain\TuneVault.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="16.1.1" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
-    <PackageReference Include="MediatR" Version="12.2.0" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-</Project>
-</file>
-
-<file path="frontend/src/App.tsx">
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-// Layout chính
-import MainLayout from './components/layout/MainLayout';
-
-// Các trang có thanh nhạc (Nằm trong MainLayout)
-import HomeContent from './components/layout/MainContent';
-import PlaylistDetail from './pages/PlaylistDetail';
-import Search from './pages/Search';
-import Library from './pages/Library';
-import Profile from './pages/Profile';
-import Notifications from './pages/Notifications';
-import ShareInbox from './pages/ShareInbox';
-import VideoPlayer from './pages/VideoPlayer';
-
-// Các trang độc lập
-import Login from './pages/Login';
-import Register from './pages/Register';
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Nhóm Route độc lập không có Sidebar/Playbar */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* Nhóm Route bọc trong MainLayout */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomeContent />} />
-          <Route path="playlist/:id" element={<PlaylistDetail />} />
-          <Route path="search" element={<Search />} />
-          <Route path="library" element={<Library />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="share" element={<ShareInbox />} />
-          <Route path="video" element={<VideoPlayer />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
-}
-</file>
-
-<file path="frontend/src/pages/Home.tsx">
-// src/pages/Home.tsx
-import React, { useEffect, useState } from 'react';
-import type { MediaItem } from '../types/media';
-import { mediaService } from '../services/mediaService';
-
-interface HomeProps {
-  onPlay: (song: MediaItem) => void;
-}
-
-const Home: React.FC<HomeProps> = ({ onPlay }) => {
-  const [songs, setSongs] = useState<MediaItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchMusic = async () => {
-      try {
-        const data = await mediaService.getTrendingMedia();
-        setSongs(data);
-      } catch (error) {
-        console.error("Lỗi:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMusic();
-  }, []);
-
-  if (loading) return <div>Đang tải nhạc...</div>;
-
-  return (
-    <div>
-      <h2>🎵 Dành cho bạn</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px', marginTop: '20px' }}>
-        {songs.map((song) => (
-          <div 
-            key={song.id} 
-            onClick={() => onPlay(song)}
-            style={{ backgroundColor: '#181818', padding: '15px', borderRadius: '8px', cursor: 'pointer' }}
-          >
-            <img 
-              src={song.thumbnailPath || 'https://via.placeholder.com/150'} 
-              alt={song.title} 
-              style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px' }}
-            />
-            <h4 style={{ margin: '10px 0 5px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {song.title}
-            </h4>
-            <p style={{ margin: 0, color: '#b3b3b3', fontSize: '14px' }}>{song.ownerName}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export default Home;
-</file>
-
-<file path="backend/TuneVault.API/Program.cs">
-using Microsoft.OpenApi.Models;
-using TuneVault.Application;
-using TuneVault.Infrastructure;
-using TuneVault.API.Middleware;
-using TuneVault.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// ==========================================
-// 1. KẾT NỐI CÁC TẦNG KIẾN TRÚC
-// ==========================================
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
-
-// ==========================================
-// 2. CẤU HÌNH CORS (Bắt buộc cho React SPA)
-// ==========================================
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // Đổi port tùy React của bạn
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials()); // Rất quan trọng nếu sau này dùng SignalR
-});
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        // Tự động ngắt khi phát hiện vòng lặp, thay vì bị Crash
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    });
-builder.Services.AddEndpointsApiExplorer();
-
-// ==========================================
-// 3. CẤU HÌNH SWAGGER ĐỂ TEST ĐƯỢC JWT TOKEN
-// ==========================================
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TuneVault API", Version = "v1" });
-    
-    // Nút nhập Token trên Swagger
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "Nhập 'Bearer [khoảng trắng] [Token của bạn]'",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            new string[] {}
-        }
-    });
-});
-
-var app = builder.Build();
-
-// ==========================================
-// 4. KÍCH HOẠT MIDDLEWARE
-// ==========================================
-// Cài đặt Middleware bẫy lỗi toàn cục lên đầu tiên
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-// Kích hoạt CORS trước khi Auth
-app.UseCors("AllowReactApp");
-
-// THỨ TỰ CỰC KỲ QUAN TRỌNG: Authentication -> Authorization
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-// ĐOẠN CODE KÍCH HOẠT DATA SEEDER
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<AppDbContext>();
-// 1. DÒNG NÀY SẼ TỰ ĐỘNG TẠO DATABASE VÀ CÁC BẢNG NẾU CHƯA CÓ
-        await context.Database.MigrateAsync(); 
-        
-        // 2. SAU KHI BẢNG ĐÃ TẠO XONG THÌ MỚI ĐỔ DỮ LIỆU VÀO
-        await TuneVaultDbContextSeed.SeedAsync(context);
-        Console.WriteLine("Đã đổ dữ liệu thành công vào TuneVault_DB!");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Đã xảy ra lỗi khi đổ dữ liệu: {ex.Message}");
-    }
-}
-
-
-app.Run();
 </file>
 
 <file path="backend/TuneVault.API/TuneVault.API.csproj">
@@ -9045,6 +8989,121 @@ const styles = {
 };
 
 export default Sidebar;
+</file>
+
+<file path="backend/TuneVault.API/Program.cs">
+using Microsoft.OpenApi.Models;
+using TuneVault.Application;
+using TuneVault.Infrastructure;
+using TuneVault.API.Middleware;
+using TuneVault.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ==========================================
+// 1. KẾT NỐI CÁC TẦNG KIẾN TRÚC
+// ==========================================
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+
+// ==========================================
+// 2. CẤU HÌNH CORS (Bắt buộc cho React SPA)
+// ==========================================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // Đổi port tùy React của bạn
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()); // Rất quan trọng nếu sau này dùng SignalR
+});
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Tự động ngắt khi phát hiện vòng lặp, thay vì bị Crash
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
+builder.Services.AddEndpointsApiExplorer();
+
+// ==========================================
+// 3. CẤU HÌNH SWAGGER ĐỂ TEST ĐƯỢC JWT TOKEN
+// ==========================================
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TuneVault API", Version = "v1" });
+    
+    // Nút nhập Token trên Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Nhập 'Bearer [khoảng trắng] [Token của bạn]'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            new string[] {}
+        }
+    });
+});
+
+var app = builder.Build();
+
+// ==========================================
+// 4. KÍCH HOẠT MIDDLEWARE
+// ==========================================
+// Cài đặt Middleware bẫy lỗi toàn cục lên đầu tiên
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+// Kích hoạt CORS trước khi Auth
+app.UseCors("AllowReactApp");
+
+// THỨ TỰ CỰC KỲ QUAN TRỌNG: Authentication -> Authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+// ĐOẠN CODE KÍCH HOẠT DATA SEEDER
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+// 1. DÒNG NÀY SẼ TỰ ĐỘNG TẠO DATABASE VÀ CÁC BẢNG NẾU CHƯA CÓ
+        await context.Database.MigrateAsync(); 
+        
+        // 2. SAU KHI BẢNG ĐÃ TẠO XONG THÌ MỚI ĐỔ DỮ LIỆU VÀO
+        await TuneVaultDbContextSeed.SeedAsync(context);
+        Console.WriteLine("Đã đổ dữ liệu thành công vào TuneVault_DB!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Đã xảy ra lỗi khi đổ dữ liệu: {ex.Message}");
+    }
+}
+
+
+app.Run();
 </file>
 
 <file path="backend/TuneVault.Infrastructure/DependencyInjection.cs">
@@ -9948,6 +10007,79 @@ const styles = {
 export default MainContent;
 </file>
 
+<file path="frontend/src/components/layout/RightPanel.tsx">
+import React, { useState } from 'react';
+import NowPlayingPanel from '../ui/rightpanel/NowPlayingPanel';
+import { ChevronLeft } from 'lucide-react';
+import { useAppContext } from '../../context/AppContext'; // ĐÃ THÊM: Import context tổng để lắng nghe bài hát
+
+const RightPanel: React.FC = () => {
+  // Trạng thái: Mặc định là mở (true)
+  const [isExpanded, setIsExpanded] = useState(true);
+  
+  // ĐÃ THÊM: Lấy dữ liệu bài hát được chọn từ Context
+  const { rightPanelData } = useAppContext();
+
+  return (
+    <div style={{
+      ...styles.container,
+      // Đổi chiều rộng linh hoạt. Khi đóng lại nó chỉ còn 60px
+      width: isExpanded ? 372 : 60,
+    }}>
+      {isExpanded ? (
+        // ĐÃ CHỈNH SỬA: Truyền thêm prop trackData xuống cho component hiển thị giao diện
+        <NowPlayingPanel 
+          onClose={() => setIsExpanded(false)} 
+          trackData={rightPanelData} 
+        />
+      ) : (
+        // Khối hiển thị khi đã ẩn (thanh mỏng có mũi tên)
+        <aside style={styles.collapsedPanel}>
+          <button 
+            style={styles.expandButton} 
+            onClick={() => setIsExpanded(true)} 
+            title="Mở rộng panel"
+          >
+            <ChevronLeft size={28} />
+          </button>
+        </aside>
+      )}
+    </div>
+  );
+};
+
+const styles = {
+  container: {
+    height: '100%',
+    flexShrink: 0,
+    transition: 'width 0.3s ease', // Hiệu ứng co giãn mượt mà
+    marginLeft: 8, // Tạo một rãnh hở với MainContent
+  },
+  collapsedPanel: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#121212', // Màu đen chuẩn Spotify
+    borderRadius: 8,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    paddingTop: 24, // Cách lề trên một chút cho icon
+  },
+  expandButton: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: '#b3b3b3',
+    cursor: 'pointer',
+    padding: 8,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+};
+
+export default RightPanel;
+</file>
+
 <file path="frontend/src/components/layout/Playbar.tsx">
 import React, { useEffect, useRef } from 'react';
 import PlaybackControls from '../ui/playbar/PlaybackControls';
@@ -10057,79 +10189,6 @@ const styles = {
 };
 
 export default Playbar;
-</file>
-
-<file path="frontend/src/components/layout/RightPanel.tsx">
-import React, { useState } from 'react';
-import NowPlayingPanel from '../ui/rightpanel/NowPlayingPanel';
-import { ChevronLeft } from 'lucide-react';
-import { useAppContext } from '../../context/AppContext'; // ĐÃ THÊM: Import context tổng để lắng nghe bài hát
-
-const RightPanel: React.FC = () => {
-  // Trạng thái: Mặc định là mở (true)
-  const [isExpanded, setIsExpanded] = useState(true);
-  
-  // ĐÃ THÊM: Lấy dữ liệu bài hát được chọn từ Context
-  const { rightPanelData } = useAppContext();
-
-  return (
-    <div style={{
-      ...styles.container,
-      // Đổi chiều rộng linh hoạt. Khi đóng lại nó chỉ còn 60px
-      width: isExpanded ? 372 : 60,
-    }}>
-      {isExpanded ? (
-        // ĐÃ CHỈNH SỬA: Truyền thêm prop trackData xuống cho component hiển thị giao diện
-        <NowPlayingPanel 
-          onClose={() => setIsExpanded(false)} 
-          trackData={rightPanelData} 
-        />
-      ) : (
-        // Khối hiển thị khi đã ẩn (thanh mỏng có mũi tên)
-        <aside style={styles.collapsedPanel}>
-          <button 
-            style={styles.expandButton} 
-            onClick={() => setIsExpanded(true)} 
-            title="Mở rộng panel"
-          >
-            <ChevronLeft size={28} />
-          </button>
-        </aside>
-      )}
-    </div>
-  );
-};
-
-const styles = {
-  container: {
-    height: '100%',
-    flexShrink: 0,
-    transition: 'width 0.3s ease', // Hiệu ứng co giãn mượt mà
-    marginLeft: 8, // Tạo một rãnh hở với MainContent
-  },
-  collapsedPanel: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#121212', // Màu đen chuẩn Spotify
-    borderRadius: 8,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    paddingTop: 24, // Cách lề trên một chút cho icon
-  },
-  expandButton: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: '#b3b3b3',
-    cursor: 'pointer',
-    padding: 8,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-};
-
-export default RightPanel;
 </file>
 
 </files>

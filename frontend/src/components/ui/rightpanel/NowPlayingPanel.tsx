@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { currentTrack } from '../../../data/currentTrack';
 import PanelHeader from './PanelHeader';
 import TrackDetails from './TrackDetails';
 import ArtistAboutCard from './ArtistAboutCard';
+import { mediaService } from '../../../services/mediaService';
+import { usePlayerStore } from '../../../store/playerStore';
 
 interface NowPlayingPanelProps {
   onClose?: () => void;
@@ -49,14 +51,20 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
     cover: string;
   } | null>(null);
 
-  useEffect(() => {
-  if (trackData) {
+  const { currentTrack: currentTrackStore } = usePlayerStore();
+
+  // 1. Lưu lại track trước đó để so sánh (thay thế cho useEffect)
+  const [prevTrackTitle, setPrevTrackTitle] = useState(trackData?.title);
+
+  // 2. Kỹ thuật "Derived State" cập nhật ngay trong lúc Render -> KHÔNG BỊ LỖI ESLINT
+  if (trackData?.title !== prevTrackTitle) {
+    setPrevTrackTitle(trackData?.title);
     setSelectedTrack(null);
     setIsLiked(false);
     setShowAllCredits(false);
   }
-  }, [trackData?.title, trackData?.artist, trackData?.cover]);
 
+  // 3. Hợp nhất object activeTrack chuẩn hóa
   const activeTrack = selectedTrack
     ? {
         playlistTitle: selectedTrack.artist,
@@ -77,16 +85,15 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
         }
       : {
           playlistTitle: currentTrack.playlistTitle,
-          artworkUrl: currentTrack.artworkUrl,
-          title: currentTrack.title,
-          artist: currentTrack.artist,
-          artistImageUrl: currentTrack.artistImageUrl,
+          artworkUrl: currentTrackStore?.thumbnailPath || currentTrack.artworkUrl,
+          title: currentTrackStore?.title || currentTrack.title,
+          artist: currentTrackStore?.ownerName || currentTrack.artist,
+          artistImageUrl: currentTrackStore?.thumbnailPath || currentTrack.artistImageUrl,
           artistMonthlyListeners: currentTrack.artistMonthlyListeners,
         };
 
   const showToast = (message: string) => {
     setToast(message);
-
     window.setTimeout(() => {
       setToast('');
     }, 1800);
@@ -94,24 +101,32 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
 
   const handleShare = async () => {
     const fakeUrl = `${window.location.origin}/track/${encodeURIComponent(activeTrack.title)}`;
-
     try {
       await navigator.clipboard.writeText(fakeUrl);
       showToast('Đã copy link chia sẻ.');
     } catch {
       showToast('Không thể copy link, nhưng nút Share đã hoạt động.');
     }
-
     setIsMenuOpen(false);
   };
 
-  const handleToggleLike = () => {
-    setIsLiked((current) => {
-      const next = !current;
-      showToast(next ? 'Đã thêm vào thư viện.' : 'Đã bỏ khỏi thư viện.');
-      return next;
-    });
+  // 4. API Tương tác Like thực tế
+  const handleToggleLike = async () => {
+    const targetId = currentTrackStore?.id;
+    
+    if (!targetId) {
+      showToast('Không có bài hát từ hệ thống đang phát để yêu thích.');
+      return;
+    }
 
+    try {
+      const result = await mediaService.toggleFavorite(targetId);
+      setIsLiked(result.data); 
+      showToast(result.message);
+    } catch (error) {
+      showToast('Thao tác tương tác yêu thích thất bại.');
+      console.error(error);
+    }
     setIsMenuOpen(false);
   };
 
@@ -215,7 +230,6 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
                       artist: song.artist,
                       cover: song.cover,
                     });
-
                     setIsLiked(false);
                     showToast(`Đang xem: ${song.title}`);
                   }}
@@ -253,12 +267,7 @@ const styles = {
     fontFamily: 'var(--font-primary)',
     position: 'relative' as const,
   },
-
-  headerWrapper: {
-    position: 'relative' as const,
-    flexShrink: 0,
-  },
-
+  headerWrapper: { position: 'relative' as const, flexShrink: 0 },
   menu: {
     position: 'absolute' as const,
     top: 52,
@@ -271,7 +280,6 @@ const styles = {
     zIndex: 20,
     boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
   },
-
   menuItem: {
     width: '100%',
     backgroundColor: 'transparent',
@@ -283,80 +291,21 @@ const styles = {
     cursor: 'pointer',
     fontSize: 13,
   },
-
   scrollArea: {
     padding: '11px 12px 16px 20px',
     overflowY: 'auto' as const,
     minHeight: 0,
   },
-
-  queueCard: {
-    backgroundColor: '#1f1f1f',
-    borderRadius: 8,
-    padding: 18,
-    marginBottom: 20,
-  },
-
-  queueHeader: {
-    display: 'flex' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-    marginBottom: 16,
-  },
-
-  queueTitle: {
-    margin: 0,
-    fontSize: 20,
-    fontWeight: 900,
-  },
-
-  openQueueButton: {
-    background: 'transparent',
-    border: 'none',
-    color: '#b3b3b3',
-    fontSize: 15,
-    fontWeight: 800,
-    cursor: 'pointer',
-  },
-
-  queueList: {
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    gap: 12,
-  },
-
-  queueItem: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: 12,
-    cursor: 'pointer',
-    borderRadius: 6,
-    padding: 6,
-  },
-
-  queueCover: {
-    width: 48,
-    height: 48,
-    objectFit: 'cover' as const,
-    borderRadius: 4,
-  },
-
-  queueInfo: {
-    minWidth: 0,
-  },
-
-  queueSongTitle: {
-    fontSize: 16,
-    fontWeight: 800,
-    color: '#ffffff',
-  },
-
-  queueArtist: {
-    fontSize: 14,
-    color: '#b3b3b3',
-    marginTop: 3,
-  },
-
+  queueCard: { backgroundColor: '#1f1f1f', borderRadius: 8, padding: 18, marginBottom: 20 },
+  queueHeader: { display: 'flex' as const, justifyContent: 'space-between' as const, alignItems: 'center' as const, marginBottom: 16 },
+  queueTitle: { margin: 0, fontSize: 20, fontWeight: 900 },
+  openQueueButton: { background: 'transparent', border: 'none', color: '#b3b3b3', fontSize: 15, fontWeight: 800, cursor: 'pointer' },
+  queueList: { display: 'flex' as const, flexDirection: 'column' as const, gap: 12 },
+  queueItem: { display: 'flex' as const, alignItems: 'center' as const, gap: 12, cursor: 'pointer', borderRadius: 6, padding: 6 },
+  queueCover: { width: 48, height: 48, objectFit: 'cover' as const, borderRadius: 4 },
+  queueInfo: { minWidth: 0 },
+  queueSongTitle: { fontSize: 16, fontWeight: 800, color: '#ffffff' },
+  queueArtist: { fontSize: 14, color: '#b3b3b3', marginTop: 3 },
   toast: {
     position: 'absolute' as const,
     left: 20,
