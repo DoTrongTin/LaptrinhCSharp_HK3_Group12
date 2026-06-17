@@ -173,7 +173,7 @@ const Navbar: React.FC = () => {
           <button
             style={styles.iconButton}
             title="Notifications"
-            onClick={() => handleTogglePopup('notifications')}
+            onClick={() => navigate('/notifications')}
           >
             <Bell size={20} />
           </button>
@@ -209,7 +209,10 @@ const Navbar: React.FC = () => {
           <button
             style={styles.profileButton}
             title="Profile"
-            onClick={() => handleTogglePopup('profile')}
+          onClick={() => {
+        navigate('/profile'); // <--- Chuyển tới trang Hồ sơ
+        setActivePopup(null);
+      }}
           >
             T
           </button>

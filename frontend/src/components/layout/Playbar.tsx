@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import PlaybackControls from '../ui/playbar/PlaybackControls';
 import PlaybarUtilities from '../ui/playbar/PlaybarUtilities';
 import TrackInfo from '../ui/playbar/TrackInfo';
@@ -13,43 +13,60 @@ const formatTime = (seconds: number): string => {
 };
 
 const Playbar: React.FC = () => {
-  const currentTrackStore = usePlayerStore((s) => s.currentTrack);
-  const volume = usePlayerStore((s) => s.volume);
-  const currentTime = usePlayerStore((s) => s.currentTime);
-  const duration = usePlayerStore((s) => s.duration);
+  const audioRef = useRef<HTMLAudioElement>(null); // Trình phát nhạc ẩn
+  
+  // Lấy toàn bộ state từ Store
+  const { 
+    currentTrack: currentTrackStore, 
+    volume, currentTime, duration, 
+    isPlaying, setCurrentTime, playNext 
+  } = usePlayerStore();
 
-  // Calculate progress percentage
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  // If a track is selected from the store, use it; otherwise fallback to default
+  // Lấy thông tin bài hát (Dùng từ Store hoặc Mock mặc định)
   const activeTrack = currentTrackStore
     ? {
         artworkUrl: currentTrackStore.thumbnailPath || 'https://via.placeholder.com/64/1a1a1a/ffffff?text=Music',
         title: currentTrackStore.title,
         artist: currentTrackStore.ownerName || 'Unknown Artist',
+        previewUrl: currentTrackStore.previewUrl, // <--- Cần thiết để phát nhạc
         currentTime: formatTime(currentTime),
         duration: formatTime(duration || currentTrackStore.duration),
         progress: progressPercent,
         volume: volume,
       }
-    : {
-        artworkUrl: currentTrack.artworkUrl,
-        title: currentTrack.title,
-        artist: currentTrack.artist,
-        currentTime: currentTrack.currentTime,
-        duration: currentTrack.duration,
-        progress: currentTrack.progress,
-        volume: currentTrack.volume,
-      };
+    : { ...currentTrack, previewUrl: null };
+
+  // ĐỒNG BỘ PLAY/PAUSE & ÂM LƯỢNG
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = activeTrack.volume / 100;
+      if (isPlaying) {
+        audioRef.current.play().catch(e => console.log("Lỗi tự động phát:", e));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying, activeTrack.previewUrl, activeTrack.volume]);
 
   return (
     <footer style={styles.playbar}>
+      {/* THẺ AUDIO ẨN: Cỗ máy phát nhạc thực sự */}
+      {activeTrack.previewUrl && (
+        <audio
+          ref={audioRef}
+          src={activeTrack.previewUrl}
+          onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
+          onEnded={playNext} // Hết bài tự chuyển bài tiếp
+        />
+      )}
+
       <TrackInfo
         artworkUrl={activeTrack.artworkUrl}
         title={activeTrack.title}
         artist={activeTrack.artist}
       />
-
       <PlaybackControls
         currentTime={activeTrack.currentTime}
         duration={activeTrack.duration}

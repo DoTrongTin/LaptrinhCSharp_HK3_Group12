@@ -24,7 +24,6 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader()
                         .AllowCredentials()); // Rất quan trọng nếu sau này dùng SignalR
 });
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 

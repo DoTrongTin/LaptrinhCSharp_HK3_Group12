@@ -7,6 +7,7 @@ interface PlaybarIconButtonProps {
   size?: number;
   variant?: 'subtle' | 'control' | 'play';
   filled?: boolean;
+  onClick?: () => void;
 }
 
 const PlaybarIconButton: React.FC<PlaybarIconButtonProps> = ({
@@ -15,9 +16,10 @@ const PlaybarIconButton: React.FC<PlaybarIconButtonProps> = ({
   size = 18,
   variant = 'subtle',
   filled = false,
+  onClick,
 }) => {
   return (
-    <button style={{ ...styles.baseButton, ...styles[variant] }} title={title}>
+    <button style={{ ...styles.baseButton, ...styles[variant] }} title={title} onClick={onClick}>
       <Icon size={size} fill={filled ? 'currentColor' : 'none'} />
     </button>
   );

@@ -8,4 +8,5 @@ export interface MediaItem {
   description?: string;
   mediaType?: number;
   createdAt?: string;
+  previewUrl?: string;
 }

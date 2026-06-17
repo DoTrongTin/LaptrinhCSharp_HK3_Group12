@@ -1,7 +1,8 @@
 import React from 'react';
-import { Pause, Repeat2, Shuffle, SkipBack, SkipForward } from 'lucide-react';
+import { Pause, Play, Repeat2, Shuffle, SkipBack, SkipForward } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 import PlaybarIconButton from './PlaybarIconButton';
+import { usePlayerStore } from '../../../store/playerStore';
 
 interface PlaybackControlsProps {
   currentTime: string;
@@ -10,12 +11,24 @@ interface PlaybackControlsProps {
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({ currentTime, duration, progress }) => {
+  // Lấy trạng thái từ Store
+  const { isPlaying, resume, pause } = usePlayerStore();
   return (
     <section style={styles.playerSection}>
-      <div style={styles.controlsRow}>
+<div style={styles.controlsRow}>
         <PlaybarIconButton icon={Shuffle} title="Trộn bài" variant="control" />
         <PlaybarIconButton icon={SkipBack} title="Bài trước" variant="control" size={20} filled />
-        <PlaybarIconButton icon={Pause} title="Tạm dừng" variant="play" size={20} filled />
+        
+        {/* NÚT PLAY/PAUSE ĐỘNG */}
+        <PlaybarIconButton 
+          icon={isPlaying ? Pause : Play} 
+          title={isPlaying ? "Tạm dừng" : "Phát"} 
+          variant="play" 
+          size={20} 
+          filled 
+          onClick={isPlaying ? pause : resume} 
+        />
+        
         <PlaybarIconButton icon={SkipForward} title="Bài tiếp theo" variant="control" size={20} filled />
         <PlaybarIconButton icon={Repeat2} title="Lặp lại" variant="control" />
       </div>
