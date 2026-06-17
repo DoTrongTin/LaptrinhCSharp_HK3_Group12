@@ -12,6 +12,7 @@ interface PlayerState {
   pause: () => void;
   resume: () => void;
   setCurrentTime: (time: number) => void;
+  setDuration: (duration: number) => void;
   setVolume: (vol: number) => void;
   playNext: () => void;
   addToQueue: (track: MediaItem) => void;
@@ -28,6 +29,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   pause: () => set({ isPlaying: false }),
   resume: () => set({ isPlaying: true }),
   setCurrentTime: (time) => set({ currentTime: time }),
+  setDuration: (dur) => set({ duration: dur }),
   setVolume: (vol) => set({ volume: vol }),
   playNext: () => {
     const { queue } = get();

@@ -56,6 +56,20 @@ backend/TuneVault.API/Program.cs
 backend/TuneVault.API/Properties/launchSettings.json
 backend/TuneVault.API/TuneVault.API.csproj
 backend/TuneVault.API/TuneVault.API.http
+backend/TuneVault.API/wwwroot/uploads/0574a4c8-1d47-4403-9964-10ec6631d1df.mp3
+backend/TuneVault.API/wwwroot/uploads/14e3ee8f-88fa-4924-b759-7b3171afb467.png
+backend/TuneVault.API/wwwroot/uploads/2978a7d1-9f4d-4fa4-977f-03ec8351ab84.png
+backend/TuneVault.API/wwwroot/uploads/51e26922-4754-4fbd-8f1d-c5062b2ed7ed.mp3
+backend/TuneVault.API/wwwroot/uploads/bc045a01-6c35-425a-b5cf-bd4ffe8c5884.mp3
+backend/TuneVault.API/wwwroot/uploads/c423e631-0980-4b5f-b9d7-736e440f60ff.jpg
+backend/TuneVault.API/wwwroot/uploads/d942dd73-76a6-41b7-8d98-4f1149258372.mp3
+backend/TuneVault.API/wwwroot/uploads/e72030a1-6470-4f33-9c9e-1641146098cb.png
+backend/TuneVault.API/wwwroot/uploads/eb3ce45f-8539-4a7b-9de6-7f6596657f58.mp3
+backend/TuneVault.API/wwwroot/uploads/f62cbc34-8ce1-449c-9596-178d023762f0.jpg
+backend/TuneVault.API/wwwroot/wwwroot/uploads/26cfa477-5d28-4e09-8693-f77094f66ef8.png
+backend/TuneVault.API/wwwroot/wwwroot/uploads/3dfefc58-1e5e-4b4c-b3fc-ee6c3afe8786.mp3
+backend/TuneVault.API/wwwroot/wwwroot/uploads/842acdf7-ca88-4f98-868a-403a69b475db.mp3
+backend/TuneVault.API/wwwroot/wwwroot/uploads/e3976927-8927-42da-aa86-8b806c82718e.png
 backend/TuneVault.Application/Common/Behaviors/AuthorizationBehavior.cs
 backend/TuneVault.Application/Common/Behaviors/LoggingBehavior.cs
 backend/TuneVault.Application/Common/Behaviors/ValidationBehavior.cs
@@ -186,7 +200,6 @@ backend/TuneVault.Infrastructure/Repositories/ShareRepository.cs
 backend/TuneVault.Infrastructure/Repositories/UnitOfWork.cs
 backend/TuneVault.Infrastructure/Repositories/UserRepository.cs
 backend/TuneVault.Infrastructure/Services/FileStorageService.cs
-backend/TuneVault.Infrastructure/Services/SpotifyService.cs
 backend/TuneVault.Infrastructure/Services/TokenService.cs
 backend/TuneVault.Infrastructure/TuneVault.Infrastructure.csproj
 backend/TuneVault.sln
@@ -294,6 +307,7 @@ frontend/tsconfig.app.json
 frontend/tsconfig.json
 frontend/tsconfig.node.json
 frontend/vite.config.ts
+package.json
 README.md
 task_progress_checkpoint.md
 </directory_structure>
@@ -390,6 +404,16 @@ Transient (Mì ăn liền): Mỗi lần có ai gọi (bất kể ở đâu), h�
 Scoped (Theo một Request): Khi có một người dùng gửi 1 request lên API, hệ thống tạo ra Object. Trong suốt quá trình xử lý cái request đó (từ Controller đi qua Service, qua Repo), Object này được dùng chung. Khi API trả kết quả về cho khách, Object này bị hủy.
 
 Singleton (Bất tử): Cả cái App chạy từ ngày này qua tháng nọ chỉ có đúng 1 Object duy nhất được tạo ra lần đầu. Tất cả mọi người dùng, mọi request đều xài chung đúng cái Object đó.
+</file>
+
+<file path="package.json">
+{
+  "devDependencies": {
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "prettier": "^3.8.4"
+  }
+}
 </file>
 
 <file path=".gitignore">
@@ -3078,113 +3102,6 @@ namespace TuneVault.Infrastructure.Persistence.Configurations
 
 </file>
 
-<file path="backend/TuneVault.Infrastructure/Services/SpotifyService.cs">
-using System.Net.Http.Headers;
-using System.Text.Json;
-using Microsoft.Extensions.Configuration;
-
-namespace TuneVault.Infrastructure.Services
-{
-    public class SpotifyService
-    {
-        private readonly HttpClient _httpClient;
-        private readonly string _clientId;
-        private readonly string _clientSecret;
-        
-        // Biến lưu trữ Token trong bộ nhớ tạm (In-memory cache)
-        private string? _accessToken;
-        private DateTime _tokenExpiration;
-
-        public SpotifyService(HttpClient httpClient, IConfiguration configuration)
-        {
-            _httpClient = httpClient;
-            _clientId = configuration["Spotify:ClientId"] ?? throw new ArgumentNullException("Spotify ClientId đang bị thiếu trong appsettings.json");
-            _clientSecret = configuration["Spotify:ClientSecret"] ?? throw new ArgumentNullException("Spotify ClientSecret đang bị thiếu trong appsettings.json");
-        }
-
-        /// <summary>
-        /// Hàm nội bộ tự động kiểm tra và lấy Access Token theo cơ chế Client Credentials Flow
-        /// </summary>
-        private async Task<string> GetAccessTokenAsync()
-        {
-            // Nếu token vẫn còn hạn (trừ hao 5 phút chống lệch giây giữa các server), sử dụng lại luôn
-            if (!string.IsNullOrEmpty(_accessToken) && DateTime.UtcNow < _tokenExpiration)
-            {
-                return _accessToken;
-            }
-
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token");
-            
-            // Đóng gói Client ID & Secret thành biểu mẫu FormUrlEncoded theo yêu cầu của Spotify
-            var collection = new List<KeyValuePair<string, string>>
-            {
-                new("grant_type", "client_credentials"),
-                new("client_id", _clientId),
-                new("client_secret", _clientSecret)
-            };
-            
-            request.Content = new FormUrlEncodedContent(collection);
-
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            var jsonString = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(jsonString);
-            var root = doc.RootElement;
-
-            _accessToken = root.GetProperty("access_token").GetString();
-            int expiresIn = root.GetProperty("expires_in").GetInt32();
-            
-            // Tính thời gian hết hạn thực tế (Trừ bớt 300 giây ~ 5 phút cho an toàn)
-            _tokenExpiration = DateTime.UtcNow.AddSeconds(expiresIn - 300); 
-
-            return _accessToken!;
-        }
-
-        /// <summary>
-        /// Lấy danh sách các bài hát/Album mới phát hành trên Spotify (Trending)
-        /// </summary>
-        public async Task<JsonElement> GetNewReleasesAsync()
-        {
-            var token = await GetAccessTokenAsync();
-            
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://api.spotify.com/v1/browse/new-releases?limit=20");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            var jsonString = await response.Content.ReadAsStringAsync();
-            var doc = JsonDocument.Parse(jsonString);
-            
-            // Trả về nhánh chứa mảng danh sách các item
-            return doc.RootElement.GetProperty("albums").GetProperty("items").Clone();
-        }
-
-        /// <summary>
-        /// Tìm kiếm bài hát theo từ khóa bất kỳ
-        /// </summary>
-        public async Task<JsonElement> SearchTracksAsync(string keyword)
-        {
-            var token = await GetAccessTokenAsync();
-            
-            var url = $"https://api.spotify.com/v1/search?q={Uri.EscapeDataString(keyword)}&type=track&limit=20";
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            var jsonString = await response.Content.ReadAsStringAsync();
-            var doc = JsonDocument.Parse(jsonString);
-            
-            // Trả về nhánh chứa mảng danh sách bài hát tìm được
-            return doc.RootElement.GetProperty("tracks").GetProperty("items").Clone();
-        }
-    }
-}
-</file>
-
 <file path="backend/TuneVault.sln">
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
@@ -3900,131 +3817,6 @@ export default SectionHeader;
 
 </file>
 
-<file path="frontend/src/components/ui/playbar/PlaybackControls.tsx">
-import React from 'react';
-import { Pause, Repeat2, Shuffle, SkipBack, SkipForward } from 'lucide-react';
-import ProgressBar from './ProgressBar';
-import PlaybarIconButton from './PlaybarIconButton';
-
-interface PlaybackControlsProps {
-  currentTime: string;
-  duration: string;
-  progress: number;
-}
-
-const PlaybackControls: React.FC<PlaybackControlsProps> = ({ currentTime, duration, progress }) => {
-  return (
-    <section style={styles.playerSection}>
-      <div style={styles.controlsRow}>
-        <PlaybarIconButton icon={Shuffle} title="Trộn bài" variant="control" />
-        <PlaybarIconButton icon={SkipBack} title="Bài trước" variant="control" size={20} filled />
-        <PlaybarIconButton icon={Pause} title="Tạm dừng" variant="play" size={20} filled />
-        <PlaybarIconButton icon={SkipForward} title="Bài tiếp theo" variant="control" size={20} filled />
-        <PlaybarIconButton icon={Repeat2} title="Lặp lại" variant="control" />
-      </div>
-
-      <div style={styles.progressRow}>
-        <span style={styles.timeText}>{currentTime}</span>
-        <ProgressBar value={progress} />
-        <span style={styles.timeText}>{duration}</span>
-      </div>
-    </section>
-  );
-};
-
-const styles = {
-  playerSection: {
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    gap: 8,
-    minWidth: 0,
-  },
-  controlsRow: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    gap: 18,
-  },
-  progressRow: {
-    width: '100%',
-    maxWidth: 620,
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: 8,
-  },
-  timeText: {
-    color: '#a7a7a7',
-    fontSize: 12,
-    minWidth: 36,
-    textAlign: 'center' as const,
-  },
-};
-
-export default PlaybackControls;
-</file>
-
-<file path="frontend/src/components/ui/playbar/PlaybarIconButton.tsx">
-import React from 'react';
-import type { LucideIcon } from 'lucide-react';
-
-interface PlaybarIconButtonProps {
-  icon: LucideIcon;
-  title: string;
-  size?: number;
-  variant?: 'subtle' | 'control' | 'play';
-  filled?: boolean;
-}
-
-const PlaybarIconButton: React.FC<PlaybarIconButtonProps> = ({
-  icon: Icon,
-  title,
-  size = 18,
-  variant = 'subtle',
-  filled = false,
-}) => {
-  return (
-    <button style={{ ...styles.baseButton, ...styles[variant] }} title={title}>
-      <Icon size={size} fill={filled ? 'currentColor' : 'none'} />
-    </button>
-  );
-};
-
-const styles = {
-  baseButton: {
-    border: 'none',
-    borderRadius: '50%',
-    cursor: 'pointer' as const,
-    padding: 0,
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    flexShrink: 0,
-  },
-  subtle: {
-    width: 22,
-    height: 22,
-    backgroundColor: 'transparent',
-    color: '#b3b3b3',
-  },
-  control: {
-    width: 28,
-    height: 28,
-    backgroundColor: 'transparent',
-    color: '#b3b3b3',
-  },
-  play: {
-    width: 34,
-    height: 34,
-    backgroundColor: '#ffffff',
-    color: '#000000',
-  },
-};
-
-export default PlaybarIconButton;
-</file>
-
 <file path="frontend/src/components/ui/playbar/PlaybarUtilities.tsx">
 import React from 'react';
 import { ListMusic, Maximize2, Mic2, MonitorSpeaker, PictureInPicture2, Volume2 } from 'lucide-react';
@@ -4289,30 +4081,6 @@ export function useNotifications() {
 
 </file>
 
-<file path="frontend/src/pages/Login.tsx">
-
-</file>
-
-<file path="frontend/src/pages/Notifications.tsx">
-
-</file>
-
-<file path="frontend/src/pages/Profile.tsx">
-
-</file>
-
-<file path="frontend/src/pages/Register.tsx">
-
-</file>
-
-<file path="frontend/src/pages/ShareInbox.tsx">
-
-</file>
-
-<file path="frontend/src/pages/VideoPlayer.tsx">
-
-</file>
-
 <file path="frontend/src/services/aiService.ts">
 
 </file>
@@ -4410,6 +4178,7 @@ interface PlayerState {
   pause: () => void;
   resume: () => void;
   setCurrentTime: (time: number) => void;
+  setDuration: (duration: number) => void;
   setVolume: (vol: number) => void;
   playNext: () => void;
   addToQueue: (track: MediaItem) => void;
@@ -4426,6 +4195,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   pause: () => set({ isPlaying: false }),
   resume: () => set({ isPlaying: true }),
   setCurrentTime: (time) => set({ currentTime: time }),
+  setDuration: (dur) => set({ duration: dur }),
   setVolume: (vol) => set({ volume: vol }),
   playNext: () => {
     const { queue } = get();
@@ -5325,39 +5095,6 @@ public class Follow
 }
 </file>
 
-<file path="backend/TuneVault.Domain/Entities/MediaItem.cs">
-using System;
-using System.Collections.Generic;
-using TuneVault.Domain.Enums;
-
-namespace TuneVault.Domain.Entities;
-
-public class MediaItem
-{
-    public Guid Id { get; set; }
-    public string Title { get; set; } = "";
-    public string? Description { get; set; }
-    public MediaType MediaType { get; set; }
-    public int Duration { get; set; }
-    public string FilePath { get; set; } = "";
-    public string? ThumbnailPath { get; set; }
-    public bool IsPublic { get; set; } = true;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    public Guid OwnerId { get; set; }
-    public ApplicationUser Owner { get; set; } = null!;
-
-    public Guid? AlbumId { get; set; }
-    public Album? Album { get; set; }
-
-    public ICollection<PlaylistTrack> PlaylistTracks { get; set; } = [];
-    public ICollection<Favorite> Favorites { get; set; } = [];
-    public ICollection<PlayHistory> PlayHistories { get; set; } = [];
-    public ICollection<MediaShare> Shares { get; set; } = [];
-    public ICollection<MediaTag> MediaTags { get; set; } = [];
-}
-</file>
-
 <file path="backend/TuneVault.Domain/Entities/MediaShare.cs">
 using System;
 
@@ -6079,6 +5816,146 @@ const styles = {
 export default MediaCard;
 </file>
 
+<file path="frontend/src/components/ui/playbar/PlaybackControls.tsx">
+import React from 'react';
+import { Pause, Play, Repeat2, Shuffle, SkipBack, SkipForward } from 'lucide-react';
+import ProgressBar from './ProgressBar';
+import PlaybarIconButton from './PlaybarIconButton';
+import { usePlayerStore } from '../../../store/playerStore';
+
+interface PlaybackControlsProps {
+  currentTime: string;
+  duration: string;
+  progress: number;
+}
+
+const PlaybackControls: React.FC<PlaybackControlsProps> = ({ currentTime, duration, progress }) => {
+  // Lấy trạng thái từ Store
+  const { isPlaying, resume, pause } = usePlayerStore();
+  return (
+    <section style={styles.playerSection}>
+<div style={styles.controlsRow}>
+        <PlaybarIconButton icon={Shuffle} title="Trộn bài" variant="control" />
+        <PlaybarIconButton icon={SkipBack} title="Bài trước" variant="control" size={20} filled />
+        
+        {/* NÚT PLAY/PAUSE ĐỘNG */}
+        <PlaybarIconButton 
+          icon={isPlaying ? Pause : Play} 
+          title={isPlaying ? "Tạm dừng" : "Phát"} 
+          variant="play" 
+          size={20} 
+          filled 
+          onClick={isPlaying ? pause : resume} 
+        />
+        
+        <PlaybarIconButton icon={SkipForward} title="Bài tiếp theo" variant="control" size={20} filled />
+        <PlaybarIconButton icon={Repeat2} title="Lặp lại" variant="control" />
+      </div>
+
+      <div style={styles.progressRow}>
+        <span style={styles.timeText}>{currentTime}</span>
+        <ProgressBar value={progress} />
+        <span style={styles.timeText}>{duration}</span>
+      </div>
+    </section>
+  );
+};
+
+const styles = {
+  playerSection: {
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+    minWidth: 0,
+  },
+  controlsRow: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 18,
+  },
+  progressRow: {
+    width: '100%',
+    maxWidth: 620,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    gap: 8,
+  },
+  timeText: {
+    color: '#a7a7a7',
+    fontSize: 12,
+    minWidth: 36,
+    textAlign: 'center' as const,
+  },
+};
+
+export default PlaybackControls;
+</file>
+
+<file path="frontend/src/components/ui/playbar/PlaybarIconButton.tsx">
+import React from 'react';
+import type { LucideIcon } from 'lucide-react';
+
+interface PlaybarIconButtonProps {
+  icon: LucideIcon;
+  title: string;
+  size?: number;
+  variant?: 'subtle' | 'control' | 'play';
+  filled?: boolean;
+  onClick?: () => void;
+}
+
+const PlaybarIconButton: React.FC<PlaybarIconButtonProps> = ({
+  icon: Icon,
+  title,
+  size = 18,
+  variant = 'subtle',
+  filled = false,
+  onClick,
+}) => {
+  return (
+    <button style={{ ...styles.baseButton, ...styles[variant] }} title={title} onClick={onClick}>
+      <Icon size={size} fill={filled ? 'currentColor' : 'none'} />
+    </button>
+  );
+};
+
+const styles = {
+  baseButton: {
+    border: 'none',
+    borderRadius: '50%',
+    cursor: 'pointer' as const,
+    padding: 0,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    flexShrink: 0,
+  },
+  subtle: {
+    width: 22,
+    height: 22,
+    backgroundColor: 'transparent',
+    color: '#b3b3b3',
+  },
+  control: {
+    width: 28,
+    height: 28,
+    backgroundColor: 'transparent',
+    color: '#b3b3b3',
+  },
+  play: {
+    width: 34,
+    height: 34,
+    backgroundColor: '#ffffff',
+    color: '#000000',
+  },
+};
+
+export default PlaybarIconButton;
+</file>
+
 <file path="frontend/src/components/ui/rightpanel/ArtistAboutCard.tsx">
 import React from 'react';
 
@@ -6690,6 +6567,96 @@ const styles = {
 export default Library;
 </file>
 
+<file path="frontend/src/pages/Login.tsx">
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+
+const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Tạm thời mock đăng nhập thành công
+    console.log('Đăng nhập với:', email, password);
+    navigate('/');
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.formBox}>
+        <h1 style={styles.title}>Đăng nhập vào TuneVault</h1>
+        
+        <form onSubmit={handleLogin} style={styles.form}>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Email hoặc tên người dùng</label>
+            <input 
+              type="text" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email hoặc tên người dùng"
+              style={styles.input}
+              required
+            />
+          </div>
+          
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Mật khẩu</label>
+            <input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Mật khẩu"
+              style={styles.input}
+              required
+            />
+          </div>
+
+          <button type="submit" style={styles.submitBtn}>Đăng nhập</button>
+        </form>
+
+        <p style={styles.footerText}>
+          Chưa có tài khoản? <Link to="/register" style={styles.link}>Đăng ký TuneVault</Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+const styles = {
+  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#000000', color: '#ffffff' },
+  formBox: { backgroundColor: '#121212', padding: '60px', borderRadius: '8px', width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column' as const, alignItems: 'center' },
+  title: { fontSize: '32px', fontWeight: 800, marginBottom: '40px', textAlign: 'center' as const },
+  form: { width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '20px' },
+  inputGroup: { display: 'flex', flexDirection: 'column' as const, gap: '8px' },
+  label: { fontSize: '14px', fontWeight: 700 },
+  input: { padding: '14px', borderRadius: '4px', border: '1px solid #727272', backgroundColor: '#121212', color: 'white', fontSize: '16px', outline: 'none' },
+  submitBtn: { marginTop: '20px', padding: '14px', borderRadius: '500px', border: 'none', backgroundColor: '#1db954', color: '#000000', fontSize: '16px', fontWeight: 700, cursor: 'pointer' },
+  footerText: { marginTop: '40px', color: '#a7a7a7', fontSize: '14px' },
+  link: { color: '#ffffff', textDecoration: 'underline', fontWeight: 700 }
+};
+
+export default Login;
+</file>
+
+<file path="frontend/src/pages/Notifications.tsx">
+import React from 'react';
+
+const Notifications: React.FC = () => {
+  return (
+    <div style={{ padding: 24, color: '#ffffff', minHeight: '100%', backgroundColor: '#121212' }}>
+      <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 24 }}>Thông báo mới</h1>
+      <div style={{ backgroundColor: '#181818', padding: 20, borderRadius: 8 }}>
+        <p style={{ color: '#b3b3b3', margin: 0 }}>Bạn hiện không có thông báo nào.</p>
+      </div>
+    </div>
+  );
+};
+
+export default Notifications;
+</file>
+
 <file path="frontend/src/pages/PlaylistDetail.tsx">
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -6757,222 +6724,227 @@ const PlaylistDetail: React.FC = () => {
 export default PlaylistDetail;
 </file>
 
-<file path="frontend/src/pages/Search.tsx">
+<file path="frontend/src/pages/Profile.tsx">
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
 
-// Dữ liệu giả lập (Mock Data) giữ nguyên
-const mockSearchData = [
-  {
-    id: 1,
-    type: 'song',
-    title: 'Chịu Cách Mình Nói Thua',
-    artist: 'RHYDER, CoolKid, BAN',
-    cover: 'https://via.placeholder.com/150/1DB954/ffffff?text=RHYDER',
-  },
-  {
-    id: 2,
-    type: 'song',
-    title: '2AM',
-    artist: 'JustaTee, BigDaddy',
-    cover: 'https://via.placeholder.com/150/6366f1/ffffff?text=2AM',
-  },
-  {
-    id: 3,
-    type: 'song',
-    title: 'Bảo Tàng Của Nuối Tiếc',
-    artist: 'Vũ.',
-    cover: 'https://via.placeholder.com/150/ff6b6b/ffffff?text=VU',
-  },
-  {
-    id: 4,
-    type: 'artist',
-    title: 'Vũ Phụng Tiên',
-    artist: 'Nghệ sĩ',
-    cover: 'https://via.placeholder.com/150/333333/ffffff?text=VPT',
-  },
-  {
-    id: 5,
-    type: 'playlist',
-    title: 'Danh sách phát của tôi #7',
-    artist: 'Danh sách phát • Đỗ Trọng Tín',
-    cover: 'https://via.placeholder.com/150/1DB954/ffffff?text=P',
-  },
-  {
-    id: 6,
-    type: 'podcast',
-    title: 'IELTS Speaking for Success',
-    artist: 'Podcourses',
-    cover: 'https://via.placeholder.com/150/5555bb/ffffff?text=IELTS',
-  },
-];
+const Profile: React.FC = () => {
+  return (
+    <div style={styles.page}>
+      <div style={styles.header}>
+        <div style={styles.avatar}>T</div>
+        <div>
+          <p style={styles.type}>Hồ sơ</p>
+          <h1 style={styles.name}>Tên Người Dùng</h1>
+          <p style={styles.stats}>0 Danh sách phát công khai • 10 Đang theo dõi</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-const Search: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const keyword = searchParams.get('keyword') || '';
-  const { setRightPanelData } = useAppContext();
+const styles = {
+  page: { padding: 24, color: '#ffffff', minHeight: '100%', backgroundColor: '#121212' },
+  header: { display: 'flex', alignItems: 'flex-end', gap: '24px', marginBottom: '32px' },
+  avatar: { width: '192px', height: '192px', borderRadius: '50%', backgroundColor: '#282828', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '64px', fontWeight: 'bold', boxShadow: '0 4px 60px rgba(0,0,0,.5)' },
+  type: { margin: 0, fontSize: '14px', fontWeight: 700 },
+  name: { margin: '8px 0', fontSize: '72px', fontWeight: 900, letterSpacing: '-0.04em' },
+  stats: { margin: 0, color: '#b3b3b3', fontSize: '14px' }
+};
 
-  // Logic lọc dữ liệu dựa trên từ khóa
-  const results = keyword
-    ? mockSearchData.filter((item) => {
-        const lowerKeyword = keyword.toLowerCase();
-        return (
-          item.title.toLowerCase().includes(lowerKeyword) ||
-          item.artist.toLowerCase().includes(lowerKeyword) ||
-          item.type.toLowerCase().includes(lowerKeyword)
-        );
-      })
-    : mockSearchData;
+export default Profile;
+</file>
+
+<file path="frontend/src/pages/Register.tsx">
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+
+const Register: React.FC = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Đăng ký:', { email, username, password });
+    navigate('/login');
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.formBox}>
+        <h1 style={styles.title}>Đăng ký TuneVault</h1>
+        
+        <form onSubmit={handleRegister} style={styles.form}>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Email của bạn</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Nhập email" style={styles.input} required />
+          </div>
+
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Tên hồ sơ</label>
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Nhập tên người dùng" style={styles.input} required />
+          </div>
+          
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Tạo mật khẩu</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Tạo mật khẩu" style={styles.input} required />
+          </div>
+
+          <button type="submit" style={styles.submitBtn}>Đăng ký</button>
+        </form>
+
+        <p style={styles.footerText}>
+          Đã có tài khoản? <Link to="/login" style={styles.link}>Đăng nhập</Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Copy lại toàn bộ const styles = { ... } từ file Login.tsx ở trên xuống đây.
+const styles = {
+  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#000000', color: '#ffffff' },
+  formBox: { backgroundColor: '#121212', padding: '60px', borderRadius: '8px', width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column' as const, alignItems: 'center' },
+  title: { fontSize: '32px', fontWeight: 800, marginBottom: '40px', textAlign: 'center' as const },
+  form: { width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '20px' },
+  inputGroup: { display: 'flex', flexDirection: 'column' as const, gap: '8px' },
+  label: { fontSize: '14px', fontWeight: 700 },
+  input: { padding: '14px', borderRadius: '4px', border: '1px solid #727272', backgroundColor: '#121212', color: 'white', fontSize: '16px', outline: 'none' },
+  submitBtn: { marginTop: '20px', padding: '14px', borderRadius: '500px', border: 'none', backgroundColor: '#1db954', color: '#000000', fontSize: '16px', fontWeight: 700, cursor: 'pointer' },
+  footerText: { marginTop: '40px', color: '#a7a7a7', fontSize: '14px' },
+  link: { color: '#ffffff', textDecoration: 'underline', fontWeight: 700 }
+};
+
+export default Register;
+</file>
+
+<file path="frontend/src/pages/ShareInbox.tsx">
+import React from 'react';
+
+const ShareInbox: React.FC = () => {
+  return (
+    <div style={{ padding: 24, color: '#ffffff', minHeight: '100%', backgroundColor: '#121212' }}>
+      <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 24 }}>Hộp thư chia sẻ</h1>
+      <div style={{ backgroundColor: '#181818', padding: 20, borderRadius: 8 }}>
+        <p style={{ color: '#b3b3b3', margin: 0 }}>Chưa có ai gửi nhạc cho bạn. Hãy mời bạn bè cùng sử dụng TuneVault!</p>
+      </div>
+    </div>
+  );
+};
+
+export default ShareInbox;
+</file>
+
+<file path="frontend/src/pages/VideoPlayer.tsx">
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+
+const VideoPlayer: React.FC = () => {
+  const { id } = useParams<{ id: string }>(); // Lấy ID video từ URL nếu có
+  const navigate = useNavigate();
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.title}>Tìm kiếm</h1>
-
-      {keyword ? (
-        <p style={styles.subtitle}>
-          Kết quả cho: <span style={styles.keyword}>{keyword}</span>
-        </p>
-      ) : (
-        <p style={styles.subtitle}>
-          Nhập từ khóa trên thanh tìm kiếm để tìm bài hát, nghệ sĩ hoặc playlist.
-        </p>
-      )}
-
-      {results.length === 0 ? (
-        <div style={styles.emptyBox}>Không tìm thấy nội dung phù hợp.</div>
-      ) : (
-        <div style={styles.resultList}>
-          {results.map((item) => (
-            <div
-              key={item.id}
-              style={styles.resultItem}
-              onClick={() =>
-                setRightPanelData({
-                  title: item.title,
-                  artist: item.artist,
-                  cover: item.cover,
-                  type: item.type === 'artist' ? 'artist' : 'song',
-                })
-              }
-            >
-              <img src={item.cover} alt={item.title} style={styles.cover} />
-
-              <div style={styles.info}>
-                <div style={styles.itemTitle}>{item.title}</div>
-
-                <div style={styles.itemSubtitle}>
-                  {item.type === 'song'
-                    ? 'Bài hát'
-                    : item.type === 'artist'
-                    ? 'Nghệ sĩ'
-                    : item.type === 'playlist'
-                    ? 'Playlist'
-                    : 'Podcast'}{' '}
-                  • {item.artist}
-                </div>
-              </div>
-            </div>
-          ))}
+      <button style={styles.backButton} onClick={() => navigate(-1)}>
+        &larr; Quay lại
+      </button>
+      
+      <div style={styles.videoContainer}>
+        {/* Placeholder cho thẻ <video> thực tế sau này */}
+        <div style={styles.videoPlaceholder}>
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#b3b3b3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '16px' }}>
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <p style={{ margin: 0 }}>Trình phát Video</p>
+          <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#b3b3b3', fontWeight: 'normal' }}>
+            {id ? `Đang tải nội dung cho ID: ${id}` : 'Chưa có nội dung video'}
+          </p>
         </div>
-      )}
+      </div>
+
+      <div style={styles.infoContainer}>
+        <h1 style={styles.title}>Tính năng Video đang được phát triển</h1>
+        <p style={styles.artist}>TuneVault Studio</p>
+        <p style={styles.description}>
+          Đây là không gian dành riêng cho các MV ca nhạc hoặc Podcast định dạng Video. 
+          Trong các bản cập nhật sắp tới, hệ thống sẽ tích hợp một trình phát video tùy chỉnh, 
+          hỗ trợ thu nhỏ khung hình (Picture-in-Picture) để bạn vừa xem video vừa lướt web.
+        </p>
+      </div>
     </div>
   );
 };
 
 const styles = {
   page: {
-    padding: 24,
+    padding: '24px',
     color: '#ffffff',
     minHeight: '100%',
     backgroundColor: '#121212',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '24px',
+  },
+  backButton: {
+    background: 'none',
+    border: 'none',
+    color: '#b3b3b3',
+    fontSize: '15px',
+    cursor: 'pointer',
+    alignSelf: 'flex-start',
+    padding: '8px 16px',
+    fontWeight: 'bold',
+    borderRadius: '20px',
+    backgroundColor: '#282828',
+    transition: 'background-color 0.2s',
+  },
+  videoContainer: {
+    width: '100%',
+    maxWidth: '1000px',
+    aspectRatio: '16 / 9', // Tỉ lệ chuẩn của video
+    backgroundColor: '#000000',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+  },
+  videoPlaceholder: {
+    textAlign: 'center' as const,
+    color: '#ffffff',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+  },
+  infoContainer: {
+    maxWidth: '1000px',
+    padding: '10px 0',
   },
   title: {
-    fontSize: 32,
-    fontWeight: 800,
     margin: '0 0 8px 0',
+    fontSize: '28px',
+    fontWeight: 800,
   },
-  subtitle: {
+  artist: {
+    margin: '0 0 16px 0',
+    fontSize: '16px',
     color: '#b3b3b3',
-    fontSize: 14,
-    marginBottom: 24,
+    fontWeight: 'bold',
   },
-  keyword: {
-    color: '#ffffff',
-    fontWeight: 700,
-  },
-  emptyBox: {
-    color: '#b3b3b3',
-    backgroundColor: '#181818',
-    padding: 20,
-    borderRadius: 8,
-  },
-  resultList: {
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    gap: 8,
-  },
-  resultItem: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: 16,
-    padding: '12px 14px',
-    backgroundColor: '#181818',
-    borderRadius: 8,
-    cursor: 'pointer',
-  },
-  cover: {
-    width: 56,
-    height: 56,
-    borderRadius: 6,
-    objectFit: 'cover' as const,
-    flexShrink: 0,
-  },
-  info: {
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    gap: 4,
-  },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: 700,
-    color: '#ffffff',
-  },
-  itemSubtitle: {
-    fontSize: 13,
-    color: '#b3b3b3',
+  description: {
+    margin: 0,
+    fontSize: '14px',
+    color: '#a7a7a7',
+    lineHeight: '1.6',
   },
 };
 
-export default Search;
-</file>
-
-<file path="frontend/src/services/mediaService.ts">
-import type { MediaItem } from '../types/media';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
-
-export const mediaService = {
-  getTrendingMedia: async (): Promise<MediaItem[]> => {
-    const response = await fetch(`${API_BASE_URL}/media/trending`);
-
-    if (!response.ok) {
-      throw new Error('Không thể tải danh sách nhạc từ hệ thống');
-    }
-
-    return response.json();
-  },
-
-  getMediaById: async (id: string): Promise<MediaItem> => {
-    const response = await fetch(`${API_BASE_URL}/media/${id}`);
-
-    if (!response.ok) {
-      throw new Error('Không thể tải thông tin bài hát');
-    }
-
-    return response.json();
-  },
-};
+export default VideoPlayer;
 </file>
 
 <file path="frontend/src/styles/globals.css">
@@ -7074,20 +7046,6 @@ body {
 }
 </file>
 
-<file path="frontend/src/types/media.ts">
-export interface MediaItem {
-  id: string;
-  title: string;
-  duration: number;
-  thumbnailPath: string | null;
-  ownerName: string;
-  filePath?: string;
-  description?: string;
-  mediaType?: number;
-  createdAt?: string;
-}
-</file>
-
 <file path="frontend/vite.config.ts">
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
@@ -7103,103 +7061,36 @@ export default defineConfig({
 })
 </file>
 
-<file path="backend/TuneVault.API/appsettings.json">
+<file path="backend/TuneVault.Domain/Entities/MediaItem.cs">
+using System;
+using System.Collections.Generic;
+using TuneVault.Domain.Enums;
+
+namespace TuneVault.Domain.Entities;
+
+public class MediaItem
 {
-  "ConnectionStrings": {
-   "DefaultConnection": "Server=LAPTOP-28582O6R\\SQLEXPRESS;Database=TuneVault_DB;User Id=sa;Password=123456789;TrustServerCertificate=True;MultipleActiveResultSets=true"
-  },
-"JwtSettings": {
-    "Secret": "TuneVault_Super_Secret_Key_Do_Not_Share_123456789!",
-    "Issuer": "TuneVaultAPI",
-    "Audience": "TuneVaultReactClient",
-    "ExpiryMinutes": "1440" 
-  },
-  "Anthropic": {
-    "ApiKey": ""
-  },
-  "MediaStorage": {
-    "BasePath": "wwwroot/media",
-    "MaxFileSizeMb": 100,
-    "AllowedAudioExtensions": [ ".mp3", ".wav", ".flac", ".aac", ".ogg" ],
-    "AllowedVideoExtensions": [ ".mp4", ".webm", ".mov", ".avi" ]
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
+    public Guid Id { get; set; }
+    public string Title { get; set; } = "";
+    public string? Description { get; set; }
+    public MediaType MediaType { get; set; }
+    public int Duration { get; set; }
+    public string FilePath { get; set; } = "";
+    public string? ThumbnailPath { get; set; }
+    public bool IsPublic { get; set; } = true;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-  "Spotify": {
-    "ClientId": "99af564e7f9844978410689a40f7694b",
-    "ClientSecret": "35240f36adc94ade92aa293c4a5c7caf"
-  },
-  "AllowedHosts": "*"
-}
-</file>
+    public Guid OwnerId { get; set; }
+    public ApplicationUser Owner { get; set; } = null!;
 
-<file path="backend/TuneVault.API/Controllers/MediaController.cs">
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using TuneVault.Infrastructure.Persistence;
-using TuneVault.Infrastructure.Services;
+    public Guid? AlbumId { get; set; }
+    public Album? Album { get; set; }
 
-namespace TuneVault.API.Controllers
-{
-    [Route("api/[controller]")]
-    [ApiController]
-    public class MediaController : ControllerBase
-    {
-        private readonly AppDbContext _context;
-        private readonly SpotifyService _spotifyService;
-
-        public MediaController(AppDbContext context)
-        {
-            _context = context;
-            // SpotifyService should be injected via DI
-            _spotifyService = null!;
-        }
-
-        // API lấy danh sách bài hát mới nhất (Hiển thị ở trang chủ)
-        [HttpGet("trending")]
-        public async Task<IActionResult> GetTrendingMedia()
-        {
-            var media = await _context.MediaItems
-                .Include(m => m.Owner) // Kéo theo thông tin người đăng (User)
-                .OrderByDescending(m => m.CreatedAt)
-                .Take(20) // Lấy 20 bài mới nhất cho nhẹ máy
-                .Select(m => new {
-                    m.Id,
-                    m.Title,
-                    m.Duration,
-                    m.ThumbnailPath,
-                    OwnerName = m.Owner.UserName // Chỉ lấy tên để bảo mật
-                })
-                .ToListAsync();
-
-            return Ok(media);
-        }
-
-        [HttpGet("spotify-trending")]
-        public async Task<IActionResult> GetSpotifyTrending()
-        {
-            // Gọi SpotifyService lấy dữ liệu gốc của Spotify
-            var spotifyData = await _spotifyService.GetNewReleasesAsync();
-        
-            // Ánh xạ (Map) dữ liệu của Spotify về đúng chuẩn MediaItem của TuneVault
-            var formattedData = spotifyData.Select(track => new {
-                Id = track.Id, // Lưu ID của Spotify thay vì Guid của bạn
-                Title = track.Name,
-                Duration = track.DurationMs / 1000,
-                ThumbnailPath = track.Album.Images.FirstOrDefault()?.Url,
-                OwnerName = track.Artists.FirstOrDefault()?.Name,
-                PreviewUrl = track.PreviewUrl // Link nhạc demo 30s
-            }).ToList();
-
-            return Ok(formattedData);
-        }
-    }
+    public ICollection<PlaylistTrack> PlaylistTracks { get; set; } = [];
+    public ICollection<Favorite> Favorites { get; set; } = [];
+    public ICollection<PlayHistory> PlayHistories { get; set; } = [];
+    public ICollection<MediaShare> Shares { get; set; } = [];
+    public ICollection<MediaTag> MediaTags { get; set; } = [];
 }
 </file>
 
@@ -7273,32 +7164,6 @@ namespace TuneVault.Infrastructure.Persistence
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-</file>
-
-<file path="frontend/src/App.tsx">
-// App.tsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import MainLayout from './components/layout/MainLayout';
-
-import HomeContent from './components/layout/MainContent';
-import PlaylistDetail from './pages/PlaylistDetail';
-import Search from './pages/Search';
-import Library from './pages/Library';
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomeContent />} />
-          <Route path="playlist/:id" element={<PlaylistDetail />} />
-          <Route path="search" element={<Search />} />
-          <Route path="library" element={<Library />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
-}
 </file>
 
 <file path="frontend/src/components/ui/ArtistCard.tsx">
@@ -7708,6 +7573,447 @@ createRoot(document.getElementById('root')!).render(
 );
 </file>
 
+<file path="frontend/src/pages/Search.tsx">
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
+import { usePlayerStore } from '../store/playerStore';
+import { mediaService } from '../services/mediaService';
+import type { MediaItem } from '../types/media';
+
+const Search: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const keyword = searchParams.get('keyword') || '';
+  const { setRightPanelData } = useAppContext();
+  const play = usePlayerStore((s) => s.play);
+
+  // State quản lý kết quả từ LocalDB và trạng thái chờ
+  const [results, setResults] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      if (!keyword.trim()) {
+        setResults([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        // Gọi API tìm kiếm nội bộ từ Backend của bạn
+        const data = await mediaService.searchMedia(keyword);
+        setResults(data);
+      } catch (error) {
+        console.error("Lỗi khi tìm kiếm bài hát nội bộ:", error);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Áp dụng Debounce (trì hoãn 500ms) để không gửi request liên tục khi đang gõ nhanh
+    const timeoutId = setTimeout(() => {
+      fetchSearchResults();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [keyword]);
+
+  const handleItemClick = (item: MediaItem) => {
+    // 1. Cập nhật Panel bên phải
+    setRightPanelData({
+      title: item.title,
+      artist: item.ownerName || 'Unknown User',
+      cover: item.thumbnailPath || 'https://via.placeholder.com/150',
+      type: 'song',
+    });
+    
+    // 2. Chuyển bài hát vào Trình phát nhạc toàn cục
+    play(item);
+  };
+
+  return (
+    <div style={styles.page}>
+      <h1 style={styles.title}>Tìm kiếm</h1>
+
+      {keyword ? (
+        <p style={styles.subtitle}>Kết quả cho: <span style={styles.keyword}>{keyword}</span></p>
+      ) : (
+        <p style={styles.subtitle}>Nhập từ khóa trên thanh tìm kiếm để tìm các bài hát đã tải lên hệ thống.</p>
+      )}
+
+      {loading ? (
+        <div style={styles.emptyBox}>Đang tìm kiếm trong cơ sở dữ liệu...</div>
+      ) : results.length === 0 && keyword ? (
+        <div style={styles.emptyBox}>Không tìm thấy bài hát nào phù hợp. Bạn hãy thử tải lên một bài hát mới nhé!</div>
+      ) : (
+        <div style={styles.resultList}>
+          {results.map((item) => (
+            <div key={item.id} style={styles.resultItem} onClick={() => handleItemClick(item)}>
+              <img 
+                src={`http://localhost:5078${item.thumbnailPath}`}
+                alt={item.title} 
+                style={styles.cover} 
+              />
+              <div style={styles.info}>
+                <div style={styles.itemTitle}>{item.title}</div>
+                <div style={styles.itemSubtitle}>
+                  Bài hát • {item.ownerName}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const styles = {
+  page: { padding: 24, color: '#ffffff', minHeight: '100%', backgroundColor: '#121212' },
+  title: { fontSize: 32, fontWeight: 800, margin: '0 0 8px 0' },
+  subtitle: { color: '#b3b3b3', fontSize: 14, marginBottom: 24 },
+  keyword: { color: '#ffffff', fontWeight: 700 },
+  emptyBox: { color: '#b3b3b3', backgroundColor: '#181818', padding: 20, borderRadius: 8 },
+  resultList: { display: 'flex' as const, flexDirection: 'column' as const, gap: 8 },
+  resultItem: { display: 'flex' as const, alignItems: 'center' as const, gap: 16, padding: '12px 14px', backgroundColor: '#181818', borderRadius: 8, cursor: 'pointer', transition: 'background-color 0.2s' },
+  cover: { width: 56, height: 56, borderRadius: 6, objectFit: 'cover' as const, flexShrink: 0 },
+  info: { display: 'flex' as const, flexDirection: 'column' as const, gap: 4 },
+  itemTitle: { fontSize: 16, fontWeight: 700, color: '#ffffff' },
+  itemSubtitle: { fontSize: 13, color: '#b3b3b3' },
+};
+
+export default Search;
+</file>
+
+<file path="frontend/src/services/mediaService.ts">
+import type { MediaItem } from '../types/media';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5078/api';
+
+export const mediaService = {
+  // Lấy nhạc trang chủ
+  getTrendingMedia: async (): Promise<MediaItem[]> => {
+    const response = await fetch(`${API_BASE_URL}/media/trending`);
+    if (!response.ok) throw new Error('Lỗi tải nhạc');
+    return response.json();
+  },
+
+  // Tìm kiếm nhạc
+  searchMedia: async (keyword: string): Promise<MediaItem[]> => {
+    const response = await fetch(`${API_BASE_URL}/media/search?keyword=${encodeURIComponent(keyword)}`);
+    if (!response.ok) throw new Error('Lỗi tìm kiếm');
+    return response.json();
+  }
+};
+</file>
+
+<file path="frontend/src/types/media.ts">
+export interface MediaItem {
+  id: string;
+  title: string;
+  duration: number;
+  thumbnailPath: string | null;
+  ownerName: string;
+  filePath?: string;
+  description?: string;
+  mediaType?: number;
+  createdAt?: string;
+  previewUrl?: string;
+}
+</file>
+
+<file path="frontend/tsconfig.app.json">
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src", "tests/integration/MediaCard.test.tsx", "tests/integration/FilterPill.test.tsx", "tests/integration/MainContent.test.tsx"]
+}
+</file>
+
+<file path="backend/TuneVault.API/appsettings.json">
+{
+  "ConnectionStrings": {
+   "DefaultConnection": "Server=LAPTOP-28582O6R\\SQLEXPRESS;Database=TuneVault_DB;User Id=sa;Password=123456789;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  },
+"JwtSettings": {
+    "Secret": "TuneVault_Super_Secret_Key_Do_Not_Share_123456789!",
+    "Issuer": "TuneVaultAPI",
+    "Audience": "TuneVaultReactClient",
+    "ExpiryMinutes": "1440" 
+  },
+  "Anthropic": {
+    "ApiKey": ""
+  },
+  "MediaStorage": {
+    "BasePath": "wwwroot/media",
+    "MaxFileSizeMb": 100,
+    "AllowedAudioExtensions": [ ".mp3", ".wav", ".flac", ".aac", ".ogg" ],
+    "AllowedVideoExtensions": [ ".mp4", ".webm", ".mov", ".avi" ]
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+
+  "AllowedHosts": "*"
+}
+</file>
+
+<file path="backend/TuneVault.API/Controllers/MediaController.cs">
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TuneVault.Infrastructure.Persistence;
+using TuneVault.Domain.Entities;
+
+namespace TuneVault.API.Controllers
+{
+    // 1. TẠO CLASS WRAPPER: Gói các trường lại giúp Swagger dễ dàng đọc định dạng form-data
+    public class UploadMediaRequest
+    {
+        public IFormFile AudioFile { get; set; } = null!;
+        public IFormFile? ImageFile { get; set; } // Dấu ? vì ảnh là tùy chọn
+        public string Title { get; set; } = string.Empty;
+    }
+
+    [Route("api/[controller]")]
+    [ApiController]
+    public class MediaController : ControllerBase
+    {
+        private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _env;
+
+        public MediaController(AppDbContext context, IWebHostEnvironment env)
+        {
+            _context = context;
+            _env = env;
+        }
+
+        // CHỨC NĂNG 1: UPLOAD NHẠC
+[HttpPost("upload")]
+public async Task<IActionResult> UploadMedia([FromForm] UploadMediaRequest request)
+{
+    // 1. Chống lỗi Null Reference khi người dùng không truyền data hoặc form rỗng
+    if (request == null || request.AudioFile == null || request.AudioFile.Length == 0) 
+        return BadRequest("Vui lòng chọn file nhạc (AudioFile là bắt buộc).");
+
+    try
+    {
+        // 2. Sửa lỗi đường dẫn lưu file (Đảm bảo không bị lặp wwwroot/wwwroot)
+        var webRoot = string.IsNullOrEmpty(_env.WebRootPath) ? Path.Combine(_env.ContentRootPath, "wwwroot") : _env.WebRootPath;
+        var uploadPath = Path.Combine(webRoot, "uploads");
+        if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
+
+        // Lưu file Audio
+        var audioFileName = Guid.NewGuid().ToString() + Path.GetExtension(request.AudioFile.FileName);
+        var audioFilePath = Path.Combine(uploadPath, audioFileName);
+        using (var stream = new FileStream(audioFilePath, FileMode.Create))
+        {
+            await request.AudioFile.CopyToAsync(stream);
+        }
+
+        // Lưu file Image (Nếu có)
+        string? imageFileName = null;
+        if (request.ImageFile != null && request.ImageFile.Length > 0)
+        {
+            imageFileName = Guid.NewGuid().ToString() + Path.GetExtension(request.ImageFile.FileName);
+            var imageFilePath = Path.Combine(uploadPath, imageFileName);
+            using (var stream = new FileStream(imageFilePath, FileMode.Create))
+            {
+                await request.ImageFile.CopyToAsync(stream);
+            }
+        }
+
+        // 3. SỬA LỖI KHÓA NGOẠI (Foreign Key) - Đảm bảo luôn có User hợp lệ
+        var owner = await _context.Users.FirstOrDefaultAsync();
+        if (owner == null)
+        {
+            // Nếu Database trống trơn, tự động tạo 1 user "System" để chứa nhạc
+            owner = new ApplicationUser 
+            { 
+                Id = Guid.NewGuid(), 
+                UserName = "System", 
+                Email = "system@tunevault.local",
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Users.Add(owner);
+            await _context.SaveChangesAsync();
+        }
+
+        // 4. Lưu bài hát vào Database
+        // Thay đổi đoạn tạo newMedia:
+        var hostUrl = $"{Request.Scheme}://{Request.Host}"; // Lấy địa chỉ Backend (http://localhost:5078)
+        var newMedia = new MediaItem
+        {
+            Title = string.IsNullOrWhiteSpace(request.Title) ? "Bài hát chưa đặt tên" : request.Title,
+            FilePath = $"/uploads/{audioFileName}",
+            // Cộng hostUrl vào đây luôn
+            ThumbnailPath = imageFileName != null ? $"{hostUrl}/uploads/{imageFileName}" : "https://via.placeholder.com/150",
+            OwnerId = owner.Id,
+            CreatedAt = DateTime.UtcNow,
+            MediaType = TuneVault.Domain.Enums.MediaType.Audio
+        };
+
+        _context.MediaItems.Add(newMedia);
+        await _context.SaveChangesAsync();
+
+        // THAY THẾ DÒNG RETURN CŨ BẰNG ĐOẠN NÀY
+        return Ok(new 
+        { 
+            Message = "Upload thành công!", 
+            Media = new 
+            {
+                Id = newMedia.Id,
+                Title = newMedia.Title,
+                FilePath = newMedia.FilePath,
+                ThumbnailPath = newMedia.ThumbnailPath,
+                OwnerName = owner.UserName // Tránh ném toàn bộ Object owner vào đây
+            } 
+        });
+    }
+    catch (Exception ex)
+    {
+        // 5. Bẫy lỗi tại chỗ: Nếu vẫn có lỗi, nó sẽ in thẳng ra Swagger để ta biết cần sửa gì
+        return StatusCode(500, $"Lỗi chi tiết: {ex.Message} --- Inner: {ex.InnerException?.Message}");
+    }
+}
+        // CHỨC NĂNG 2: LẤY NHẠC TRANG CHỦ
+        [HttpGet("trending")]
+        public async Task<IActionResult> GetTrendingMedia()
+        {
+            var media = await _context.MediaItems
+                .OrderByDescending(m => m.CreatedAt)
+// Sửa trong cả 2 hàm GetTrendingMedia và SearchLocal:
+.Select(m => new {
+    m.Id,
+    m.Title,
+    m.Duration,
+    // Sửa dòng ThumbnailPath thành như sau:
+    ThumbnailPath = m.ThumbnailPath!.StartsWith("http") 
+                    ? m.ThumbnailPath 
+                    : "http://localhost:5078" + m.ThumbnailPath,
+    OwnerName = "TuneVault User",
+    PreviewUrl = "http://localhost:5078" + m.FilePath
+})
+                .ToListAsync();
+
+            return Ok(media);
+        }
+
+        // CHỨC NĂNG 3: TÌM KIẾM NỘI BỘ
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchLocal([FromQuery] string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword)) return Ok(new List<object>());
+
+            var keywordLower = keyword.ToLower();
+            var results = await _context.MediaItems
+                .Where(m => m.Title.ToLower().Contains(keywordLower))
+                .Select(m => new {
+                    m.Id,
+                    m.Title,
+                    m.Duration,
+                    m.ThumbnailPath,
+                    OwnerName = "TuneVault User",
+                    PreviewUrl = "http://localhost:5078" + m.FilePath
+                })
+                .ToListAsync();
+
+            return Ok(results);
+        }
+    }
+}
+</file>
+
+<file path="backend/TuneVault.Application/TuneVault.Application.csproj">
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\TuneVault.Domain\TuneVault.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
+    <PackageReference Include="MediatR" Version="12.2.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
+</file>
+
+<file path="frontend/src/App.tsx">
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+// Layout chính
+import MainLayout from './components/layout/MainLayout';
+
+// Các trang có thanh nhạc (Nằm trong MainLayout)
+import HomeContent from './components/layout/MainContent';
+import PlaylistDetail from './pages/PlaylistDetail';
+import Search from './pages/Search';
+import Library from './pages/Library';
+import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
+import ShareInbox from './pages/ShareInbox';
+import VideoPlayer from './pages/VideoPlayer';
+
+// Các trang độc lập
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Nhóm Route độc lập không có Sidebar/Playbar */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Nhóm Route bọc trong MainLayout */}
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<HomeContent />} />
+          <Route path="playlist/:id" element={<PlaylistDetail />} />
+          <Route path="search" element={<Search />} />
+          <Route path="library" element={<Library />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="share" element={<ShareInbox />} />
+          <Route path="video" element={<VideoPlayer />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+</file>
+
 <file path="frontend/src/pages/Home.tsx">
 // src/pages/Home.tsx
 import React, { useEffect, useState } from 'react';
@@ -7767,34 +8073,6 @@ const Home: React.FC<HomeProps> = ({ onPlay }) => {
 export default Home;
 </file>
 
-<file path="frontend/tsconfig.app.json">
-{
-  "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "es2023",
-    "lib": ["ES2023", "DOM"],
-    "module": "esnext",
-    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-
-    /* Linting */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src", "tests/integration/MediaCard.test.tsx", "tests/integration/FilterPill.test.tsx", "tests/integration/MainContent.test.tsx"]
-}
-</file>
-
 <file path="backend/TuneVault.API/Program.cs">
 using Microsoft.OpenApi.Models;
 using TuneVault.Application;
@@ -7802,6 +8080,7 @@ using TuneVault.Infrastructure;
 using TuneVault.API.Middleware;
 using TuneVault.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7822,8 +8101,12 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader()
                         .AllowCredentials()); // Rất quan trọng nếu sau này dùng SignalR
 });
-
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Tự động ngắt khi phát hiện vòng lặp, thay vì bị Crash
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 builder.Services.AddEndpointsApiExplorer();
 
 // ==========================================
@@ -7870,6 +8153,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 // Kích hoạt CORS trước khi Auth
 app.UseCors("AllowReactApp");
@@ -7902,28 +8186,6 @@ using (var scope = app.Services.CreateScope())
 
 
 app.Run();
-</file>
-
-<file path="backend/TuneVault.Application/TuneVault.Application.csproj">
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\TuneVault.Domain\TuneVault.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="16.1.1" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
-    <PackageReference Include="MediatR" Version="12.2.0" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-</Project>
 </file>
 
 <file path="backend/TuneVault.API/TuneVault.API.csproj">
@@ -7999,488 +8261,6 @@ namespace TuneVault.Application.Common.Behaviors
         }
     }
 }
-</file>
-
-<file path="frontend/src/components/layout/Navbar.tsx">
-import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-import {
-  MoreHorizontal,
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  Search,
-  Disc3,
-  Bell,
-  Settings,
-  Minus,
-  Square,
-  X,
-} from 'lucide-react';
-
-type PopupType = 'menu' | 'notifications' | 'settings' | 'profile' | null;
-
-const Navbar: React.FC = () => {
-  const navigate = useNavigate();
-
-  const [activePopup, setActivePopup] = useState<PopupType>(null);
-  const [searchValue, setSearchValue] = useState('');
-  const [isHomeHovered, setIsHomeHovered] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const menuItems = ['Tệp', 'Sửa', 'Xem', 'Phát lại', 'Trợ giúp'];
-
-  const handleTogglePopup = (popup: PopupType) => {
-    setActivePopup((current) => (current === popup ? null : popup));
-  };
-
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  const handleForward = () => {
-    navigate(1);
-  };
-
-  const handleHome = () => {
-    navigate('/');
-    setActivePopup(null);
-  };
-
-  const handleSearchSubmit = () => {
-    const keyword = searchValue.trim();
-
-    if (!keyword) {
-      searchInputRef.current?.focus();
-      return;
-    }
-
-    navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
-    setActivePopup(null);
-  };
-
-  const handleBrowse = () => {
-    navigate('/search');
-
-    window.setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, 0);
-  };
-
-  const handleMinimize = () => {
-    alert('Trình duyệt không cho web tự thu nhỏ cửa sổ. Nút này hiện đang để mô phỏng UI.');
-  };
-
-  const handleMaximize = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
-      }
-    } catch {
-      alert('Không thể bật/tắt fullscreen trên trình duyệt này.');
-    }
-  };
-
-  const handleClose = () => {
-    alert('Web app không thể tự đóng tab nếu tab không được mở bằng script. Đây là nút mô phỏng giao diện.');
-  };
-
-  return (
-    <header style={styles.navbar}>
-      <div style={styles.leftContent}>
-        <button
-          onClick={() => handleTogglePopup('menu')}
-          style={styles.menuButton}
-          title="Menu"
-        >
-          <MoreHorizontal size={24} />
-        </button>
-
-        <div style={styles.arrowsContainer}>
-          <button style={styles.arrowButton} title="Back" onClick={handleBack}>
-            <ChevronLeft size={28} />
-          </button>
-
-          <button style={styles.arrowButton} title="Forward" onClick={handleForward}>
-            <ChevronRight size={28} />
-          </button>
-        </div>
-
-        {activePopup === 'menu' && (
-          <div style={styles.dropdownMenu}>
-            {menuItems.map((item) => (
-              <div
-                key={item}
-                style={styles.menuItem}
-                onClick={() => {
-                  alert(`Bạn vừa chọn: ${item}`);
-                  setActivePopup(null);
-                }}
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div style={styles.centerContent}>
-        <button
-          style={{
-            ...styles.iconButton,
-            ...styles.homeButton,
-            ...(isHomeHovered ? styles.homeButtonHover : {}),
-          }}
-          title="Home"
-          onClick={handleHome}
-          onMouseEnter={() => setIsHomeHovered(true)}
-          onMouseLeave={() => setIsHomeHovered(false)}
-        >
-          <Home size={24} strokeWidth={2.5} />
-        </button>
-
-        <div style={styles.searchContainer}>
-          <span
-            style={{ ...styles.searchIcon, cursor: 'text' }}
-            onClick={() => searchInputRef.current?.focus()}
-          >
-            <Search size={22} strokeWidth={2.4} />
-          </span>
-
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Bạn muốn phát nội dung gì?"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleSearchSubmit();
-              }
-            }}
-            style={styles.searchInput}
-          />
-
-          <span style={styles.searchDivider} />
-
-          <button style={styles.searchActionButton} title="Duyệt tìm" onClick={handleBrowse}>
-            <Disc3 size={22} strokeWidth={2.2} />
-          </button>
-        </div>
-      </div>
-
-      <div style={styles.rightContent}>
-        <div style={styles.popupWrapper}>
-          <button
-            style={styles.iconButton}
-            title="Notifications"
-            onClick={() => handleTogglePopup('notifications')}
-          >
-            <Bell size={20} />
-          </button>
-
-          {activePopup === 'notifications' && (
-            <div style={styles.rightPopup}>
-              <h4 style={styles.popupTitle}>Thông báo</h4>
-              <p style={styles.popupText}>Chưa có thông báo mới.</p>
-            </div>
-          )}
-        </div>
-
-        <div style={styles.popupWrapper}>
-          <button
-            style={styles.iconButton}
-            title="Settings"
-            onClick={() => handleTogglePopup('settings')}
-          >
-            <Settings size={20} />
-          </button>
-
-          {activePopup === 'settings' && (
-            <div style={styles.rightPopup}>
-              <h4 style={styles.popupTitle}>Cài đặt</h4>
-              <button style={styles.popupButton}>Dark mode</button>
-              <button style={styles.popupButton}>Ngôn ngữ</button>
-              <button style={styles.popupButton}>Chất lượng phát</button>
-            </div>
-          )}
-        </div>
-
-        <div style={styles.popupWrapper}>
-          <button
-            style={styles.profileButton}
-            title="Profile"
-            onClick={() => handleTogglePopup('profile')}
-          >
-            T
-          </button>
-
-          {activePopup === 'profile' && (
-            <div style={styles.rightPopup}>
-              <h4 style={styles.popupTitle}>Tài khoản</h4>
-              <button style={styles.popupButton}>Hồ sơ</button>
-              <button style={styles.popupButton}>Đăng xuất</button>
-            </div>
-          )}
-        </div>
-
-        <button style={styles.controlButton} title="Minimize" onClick={handleMinimize}>
-          <Minus size={18} />
-        </button>
-
-        <button style={styles.controlButton} title="Maximize" onClick={handleMaximize}>
-          <Square size={14} />
-        </button>
-
-        <button style={styles.controlButton} title="Close" onClick={handleClose}>
-          <X size={18} />
-        </button>
-      </div>
-    </header>
-  );
-};
-
-const styles = {
-  navbar: {
-    height: 56,
-    backgroundColor: '#000000',
-    width: '100%',
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    paddingLeft: 16,
-    paddingRight: 16,
-    position: 'relative' as const,
-    gap: 16,
-  },
-
-  leftContent: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: 24,
-    position: 'relative' as const,
-  },
-
-  arrowsContainer: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: 16,
-  },
-
-  centerContent: {
-    flex: 1,
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: 12,
-    justifyContent: 'center' as const,
-  },
-
-  rightContent: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    gap: 16,
-    position: 'relative' as const,
-  },
-
-  menuButton: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: '#ffffff',
-    cursor: 'pointer' as const,
-    padding: 0,
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-
-  arrowButton: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: '#ffffff',
-    opacity: 0.7,
-    cursor: 'pointer' as const,
-    padding: 0,
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-
-  searchContainer: {
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    backgroundColor: '#2a2a2a',
-    border: '1px solid transparent',
-    borderRadius: 999,
-    paddingLeft: 16,
-    paddingRight: 10,
-    height: 48,
-    width: 520,
-    maxWidth: '48vw',
-    boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.04)',
-  },
-
-  searchIcon: {
-    marginRight: 12,
-    color: '#b3b3b3',
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-
-  searchInput: {
-    flex: 1,
-    border: 'none',
-    backgroundColor: 'transparent',
-    color: '#f5f5f5',
-    fontSize: 15,
-    fontWeight: 500,
-    outline: 'none',
-    padding: 0,
-  },
-
-  searchDivider: {
-    width: 1,
-    height: 24,
-    marginLeft: 14,
-    marginRight: 10,
-    backgroundColor: '#5a5a5a',
-  },
-
-  searchActionButton: {
-    width: 34,
-    height: 34,
-    border: 'none',
-    borderRadius: '50%',
-    backgroundColor: 'transparent',
-    color: '#b3b3b3',
-    cursor: 'pointer' as const,
-    padding: 0,
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-
-  iconButton: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    cursor: 'pointer' as const,
-    padding: 0,
-    color: '#ffffff',
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    opacity: 0.8,
-  },
-
-  homeButton: {
-    width: 38,
-    height: 38,
-    borderRadius: '50%',
-    transition: 'background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease',
-  },
-
-  homeButtonHover: {
-    backgroundColor: '#333333',
-    color: '#ffffff',
-    opacity: 1,
-    transform: 'scale(1.06)',
-  },
-
-  profileButton: {
-    backgroundColor: '#d946ef',
-    border: 'none',
-    borderRadius: '50%',
-    width: 28,
-    height: 28,
-    fontSize: 14,
-    cursor: 'pointer' as const,
-    color: '#ffffff',
-    fontWeight: 'bold',
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-
-  controlButton: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: '#b3b3b3',
-    cursor: 'pointer' as const,
-    padding: 0,
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-
-  dropdownMenu: {
-    position: 'absolute' as const,
-    top: 56,
-    left: 0,
-    backgroundColor: '#282828',
-    border: '1px solid #3a3a3a',
-    borderRadius: 6,
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
-    minWidth: 150,
-    zIndex: 1000,
-    overflow: 'hidden',
-  },
-
-  menuItem: {
-    padding: '10px 16px',
-    color: '#ffffff',
-    cursor: 'pointer' as const,
-    fontSize: 13,
-    borderBottom: '1px solid #3a3a3a',
-    transition: 'background-color 0.2s',
-  },
-
-  popupWrapper: {
-    position: 'relative' as const,
-    display: 'flex' as const,
-    alignItems: 'center' as const,
-  },
-
-  rightPopup: {
-    position: 'absolute' as const,
-    top: 38,
-    right: 0,
-    width: 220,
-    backgroundColor: '#282828',
-    border: '1px solid #3a3a3a',
-    borderRadius: 8,
-    padding: 12,
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
-    zIndex: 1000,
-  },
-
-  popupTitle: {
-    color: '#ffffff',
-    fontSize: 15,
-    margin: '0 0 10px 0',
-  },
-
-  popupText: {
-    color: '#b3b3b3',
-    fontSize: 13,
-    margin: 0,
-  },
-
-  popupButton: {
-    width: '100%',
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: '#ffffff',
-    textAlign: 'left' as const,
-    cursor: 'pointer' as const,
-    padding: '8px 6px',
-    borderRadius: 4,
-    fontSize: 13,
-  },
-};
-
-export default Navbar;
 </file>
 
 <file path="frontend/src/components/layout/Sidebar.tsx">
@@ -9455,6 +9235,491 @@ const styles = {
 export default MainLayout;
 </file>
 
+<file path="frontend/src/components/layout/Navbar.tsx">
+import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import {
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  Search,
+  Disc3,
+  Bell,
+  Settings,
+  Minus,
+  Square,
+  X,
+} from 'lucide-react';
+
+type PopupType = 'menu' | 'notifications' | 'settings' | 'profile' | null;
+
+const Navbar: React.FC = () => {
+  const navigate = useNavigate();
+
+  const [activePopup, setActivePopup] = useState<PopupType>(null);
+  const [searchValue, setSearchValue] = useState('');
+  const [isHomeHovered, setIsHomeHovered] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const menuItems = ['Tệp', 'Sửa', 'Xem', 'Phát lại', 'Trợ giúp'];
+
+  const handleTogglePopup = (popup: PopupType) => {
+    setActivePopup((current) => (current === popup ? null : popup));
+  };
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const handleForward = () => {
+    navigate(1);
+  };
+
+  const handleHome = () => {
+    navigate('/');
+    setActivePopup(null);
+  };
+
+  const handleSearchSubmit = () => {
+    const keyword = searchValue.trim();
+
+    if (!keyword) {
+      searchInputRef.current?.focus();
+      return;
+    }
+
+    navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
+    setActivePopup(null);
+  };
+
+  const handleBrowse = () => {
+    navigate('/search');
+
+    window.setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 0);
+  };
+
+  const handleMinimize = () => {
+    alert('Trình duyệt không cho web tự thu nhỏ cửa sổ. Nút này hiện đang để mô phỏng UI.');
+  };
+
+  const handleMaximize = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      alert('Không thể bật/tắt fullscreen trên trình duyệt này.');
+    }
+  };
+
+  const handleClose = () => {
+    alert('Web app không thể tự đóng tab nếu tab không được mở bằng script. Đây là nút mô phỏng giao diện.');
+  };
+
+  return (
+    <header style={styles.navbar}>
+      <div style={styles.leftContent}>
+        <button
+          onClick={() => handleTogglePopup('menu')}
+          style={styles.menuButton}
+          title="Menu"
+        >
+          <MoreHorizontal size={24} />
+        </button>
+
+        <div style={styles.arrowsContainer}>
+          <button style={styles.arrowButton} title="Back" onClick={handleBack}>
+            <ChevronLeft size={28} />
+          </button>
+
+          <button style={styles.arrowButton} title="Forward" onClick={handleForward}>
+            <ChevronRight size={28} />
+          </button>
+        </div>
+
+        {activePopup === 'menu' && (
+          <div style={styles.dropdownMenu}>
+            {menuItems.map((item) => (
+              <div
+                key={item}
+                style={styles.menuItem}
+                onClick={() => {
+                  alert(`Bạn vừa chọn: ${item}`);
+                  setActivePopup(null);
+                }}
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div style={styles.centerContent}>
+        <button
+          style={{
+            ...styles.iconButton,
+            ...styles.homeButton,
+            ...(isHomeHovered ? styles.homeButtonHover : {}),
+          }}
+          title="Home"
+          onClick={handleHome}
+          onMouseEnter={() => setIsHomeHovered(true)}
+          onMouseLeave={() => setIsHomeHovered(false)}
+        >
+          <Home size={24} strokeWidth={2.5} />
+        </button>
+
+        <div style={styles.searchContainer}>
+          <span
+            style={{ ...styles.searchIcon, cursor: 'text' }}
+            onClick={() => searchInputRef.current?.focus()}
+          >
+            <Search size={22} strokeWidth={2.4} />
+          </span>
+
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Bạn muốn phát nội dung gì?"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearchSubmit();
+              }
+            }}
+            style={styles.searchInput}
+          />
+
+          <span style={styles.searchDivider} />
+
+          <button style={styles.searchActionButton} title="Duyệt tìm" onClick={handleBrowse}>
+            <Disc3 size={22} strokeWidth={2.2} />
+          </button>
+        </div>
+      </div>
+
+      <div style={styles.rightContent}>
+        <div style={styles.popupWrapper}>
+          <button
+            style={styles.iconButton}
+            title="Notifications"
+            onClick={() => navigate('/notifications')}
+          >
+            <Bell size={20} />
+          </button>
+
+          {activePopup === 'notifications' && (
+            <div style={styles.rightPopup}>
+              <h4 style={styles.popupTitle}>Thông báo</h4>
+              <p style={styles.popupText}>Chưa có thông báo mới.</p>
+            </div>
+          )}
+        </div>
+
+        <div style={styles.popupWrapper}>
+          <button
+            style={styles.iconButton}
+            title="Settings"
+            onClick={() => handleTogglePopup('settings')}
+          >
+            <Settings size={20} />
+          </button>
+
+          {activePopup === 'settings' && (
+            <div style={styles.rightPopup}>
+              <h4 style={styles.popupTitle}>Cài đặt</h4>
+              <button style={styles.popupButton}>Dark mode</button>
+              <button style={styles.popupButton}>Ngôn ngữ</button>
+              <button style={styles.popupButton}>Chất lượng phát</button>
+            </div>
+          )}
+        </div>
+
+        <div style={styles.popupWrapper}>
+          <button
+            style={styles.profileButton}
+            title="Profile"
+          onClick={() => {
+        navigate('/profile'); // <--- Chuyển tới trang Hồ sơ
+        setActivePopup(null);
+      }}
+          >
+            T
+          </button>
+
+          {activePopup === 'profile' && (
+            <div style={styles.rightPopup}>
+              <h4 style={styles.popupTitle}>Tài khoản</h4>
+              <button style={styles.popupButton}>Hồ sơ</button>
+              <button style={styles.popupButton}>Đăng xuất</button>
+            </div>
+          )}
+        </div>
+
+        <button style={styles.controlButton} title="Minimize" onClick={handleMinimize}>
+          <Minus size={18} />
+        </button>
+
+        <button style={styles.controlButton} title="Maximize" onClick={handleMaximize}>
+          <Square size={14} />
+        </button>
+
+        <button style={styles.controlButton} title="Close" onClick={handleClose}>
+          <X size={18} />
+        </button>
+      </div>
+    </header>
+  );
+};
+
+const styles = {
+  navbar: {
+    height: 56,
+    backgroundColor: '#000000',
+    width: '100%',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    paddingLeft: 16,
+    paddingRight: 16,
+    position: 'relative' as const,
+    gap: 16,
+  },
+
+  leftContent: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    gap: 24,
+    position: 'relative' as const,
+  },
+
+  arrowsContainer: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    gap: 16,
+  },
+
+  centerContent: {
+    flex: 1,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    gap: 12,
+    justifyContent: 'center' as const,
+  },
+
+  rightContent: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    gap: 16,
+    position: 'relative' as const,
+  },
+
+  menuButton: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: '#ffffff',
+    cursor: 'pointer' as const,
+    padding: 0,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+
+  arrowButton: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: '#ffffff',
+    opacity: 0.7,
+    cursor: 'pointer' as const,
+    padding: 0,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+
+  searchContainer: {
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    backgroundColor: '#2a2a2a',
+    border: '1px solid transparent',
+    borderRadius: 999,
+    paddingLeft: 16,
+    paddingRight: 10,
+    height: 48,
+    width: 520,
+    maxWidth: '48vw',
+    boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.04)',
+  },
+
+  searchIcon: {
+    marginRight: 12,
+    color: '#b3b3b3',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+
+  searchInput: {
+    flex: 1,
+    border: 'none',
+    backgroundColor: 'transparent',
+    color: '#f5f5f5',
+    fontSize: 15,
+    fontWeight: 500,
+    outline: 'none',
+    padding: 0,
+  },
+
+  searchDivider: {
+    width: 1,
+    height: 24,
+    marginLeft: 14,
+    marginRight: 10,
+    backgroundColor: '#5a5a5a',
+  },
+
+  searchActionButton: {
+    width: 34,
+    height: 34,
+    border: 'none',
+    borderRadius: '50%',
+    backgroundColor: 'transparent',
+    color: '#b3b3b3',
+    cursor: 'pointer' as const,
+    padding: 0,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+
+  iconButton: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    cursor: 'pointer' as const,
+    padding: 0,
+    color: '#ffffff',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    opacity: 0.8,
+  },
+
+  homeButton: {
+    width: 38,
+    height: 38,
+    borderRadius: '50%',
+    transition: 'background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease',
+  },
+
+  homeButtonHover: {
+    backgroundColor: '#333333',
+    color: '#ffffff',
+    opacity: 1,
+    transform: 'scale(1.06)',
+  },
+
+  profileButton: {
+    backgroundColor: '#d946ef',
+    border: 'none',
+    borderRadius: '50%',
+    width: 28,
+    height: 28,
+    fontSize: 14,
+    cursor: 'pointer' as const,
+    color: '#ffffff',
+    fontWeight: 'bold',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+
+  controlButton: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: '#b3b3b3',
+    cursor: 'pointer' as const,
+    padding: 0,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+
+  dropdownMenu: {
+    position: 'absolute' as const,
+    top: 56,
+    left: 0,
+    backgroundColor: '#282828',
+    border: '1px solid #3a3a3a',
+    borderRadius: 6,
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+    minWidth: 150,
+    zIndex: 1000,
+    overflow: 'hidden',
+  },
+
+  menuItem: {
+    padding: '10px 16px',
+    color: '#ffffff',
+    cursor: 'pointer' as const,
+    fontSize: 13,
+    borderBottom: '1px solid #3a3a3a',
+    transition: 'background-color 0.2s',
+  },
+
+  popupWrapper: {
+    position: 'relative' as const,
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+  },
+
+  rightPopup: {
+    position: 'absolute' as const,
+    top: 38,
+    right: 0,
+    width: 220,
+    backgroundColor: '#282828',
+    border: '1px solid #3a3a3a',
+    borderRadius: 8,
+    padding: 12,
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+    zIndex: 1000,
+  },
+
+  popupTitle: {
+    color: '#ffffff',
+    fontSize: 15,
+    margin: '0 0 10px 0',
+  },
+
+  popupText: {
+    color: '#b3b3b3',
+    fontSize: 13,
+    margin: 0,
+  },
+
+  popupButton: {
+    width: '100%',
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: '#ffffff',
+    textAlign: 'left' as const,
+    cursor: 'pointer' as const,
+    padding: '8px 6px',
+    borderRadius: 4,
+    fontSize: 13,
+  },
+};
+
+export default Navbar;
+</file>
+
 <file path="frontend/package.json">
 {
   "name": "tunevault-frontend",
@@ -9684,11 +9949,13 @@ export default MainContent;
 </file>
 
 <file path="frontend/src/components/layout/Playbar.tsx">
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import PlaybackControls from '../ui/playbar/PlaybackControls';
 import PlaybarUtilities from '../ui/playbar/PlaybarUtilities';
 import TrackInfo from '../ui/playbar/TrackInfo';
 import { currentTrack } from '../../data/currentTrack';
+
+// FIX 1: Chỉ import usePlayerStore
 import { usePlayerStore } from '../../store/playerStore';
 
 const formatTime = (seconds: number): string => {
@@ -9698,44 +9965,71 @@ const formatTime = (seconds: number): string => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
-const Playbar: React.FC = () => {
-  const currentTrackStore = usePlayerStore((s) => s.currentTrack);
-  const volume = usePlayerStore((s) => s.volume);
-  const currentTime = usePlayerStore((s) => s.currentTime);
-  const duration = usePlayerStore((s) => s.duration);
+// FIX 2: Đã xóa dòng gọi hook sai nguyên tắc ở đây
 
-  // Calculate progress percentage
+const Playbar: React.FC = () => {
+  const audioRef = useRef<HTMLAudioElement>(null); // Trình phát nhạc ẩn
+
+  // Khai báo lấy state từ store (đã bao gồm setDuration) ở đúng vị trí TRONG Component
+  const { 
+    currentTrack: currentTrackStore, 
+    volume, currentTime, duration, 
+    isPlaying, setCurrentTime, setDuration, playNext 
+  } = usePlayerStore();
+
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  // If a track is selected from the store, use it; otherwise fallback to default
+  // Lấy thông tin bài hát (Dùng từ Store hoặc Mock mặc định)
   const activeTrack = currentTrackStore
     ? {
         artworkUrl: currentTrackStore.thumbnailPath || 'https://via.placeholder.com/64/1a1a1a/ffffff?text=Music',
         title: currentTrackStore.title,
         artist: currentTrackStore.ownerName || 'Unknown Artist',
+        previewUrl: currentTrackStore.previewUrl, // <--- Cần thiết để phát nhạc
         currentTime: formatTime(currentTime),
         duration: formatTime(duration || currentTrackStore.duration),
         progress: progressPercent,
         volume: volume,
       }
-    : {
-        artworkUrl: currentTrack.artworkUrl,
-        title: currentTrack.title,
-        artist: currentTrack.artist,
-        currentTime: currentTrack.currentTime,
-        duration: currentTrack.duration,
-        progress: currentTrack.progress,
-        volume: currentTrack.volume,
-      };
+    : { ...currentTrack, previewUrl: null };
+
+  // ĐỒNG BỘ PLAY/PAUSE & ÂM LƯỢNG
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = activeTrack.volume / 100;
+      if (isPlaying) {
+        audioRef.current.play().catch(e => console.log("Lỗi tự động phát:", e));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying, activeTrack.previewUrl, activeTrack.volume]);
 
   return (
     <footer style={styles.playbar}>
+      {/* THẺ AUDIO CẬP NHẬT */}
+      {activeTrack.previewUrl && (
+        <audio
+          ref={audioRef}
+          src={activeTrack.previewUrl}
+          onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
+          
+          // SỰ KIỆN NÀY LÀ CÚ CHỐT: Khi file mp3 tải xong thông tin, lấy chính xác độ dài file
+          onLoadedMetadata={() => {
+            if (audioRef.current) {
+              setDuration(audioRef.current.duration);
+            }
+          }}
+          
+          onEnded={playNext}
+        />
+      )}
+
       <TrackInfo
         artworkUrl={activeTrack.artworkUrl}
         title={activeTrack.title}
         artist={activeTrack.artist}
       />
-
       <PlaybackControls
         currentTime={activeTrack.currentTime}
         duration={activeTrack.duration}

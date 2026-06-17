@@ -3,6 +3,8 @@ import PlaybackControls from '../ui/playbar/PlaybackControls';
 import PlaybarUtilities from '../ui/playbar/PlaybarUtilities';
 import TrackInfo from '../ui/playbar/TrackInfo';
 import { currentTrack } from '../../data/currentTrack';
+
+// FIX 1: Chỉ import usePlayerStore
 import { usePlayerStore } from '../../store/playerStore';
 
 const formatTime = (seconds: number): string => {
@@ -12,14 +14,16 @@ const formatTime = (seconds: number): string => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
+// FIX 2: Đã xóa dòng gọi hook sai nguyên tắc ở đây
+
 const Playbar: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null); // Trình phát nhạc ẩn
-  
-  // Lấy toàn bộ state từ Store
+
+  // Khai báo lấy state từ store (đã bao gồm setDuration) ở đúng vị trí TRONG Component
   const { 
     currentTrack: currentTrackStore, 
     volume, currentTime, duration, 
-    isPlaying, setCurrentTime, playNext 
+    isPlaying, setCurrentTime, setDuration, playNext 
   } = usePlayerStore();
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -52,13 +56,21 @@ const Playbar: React.FC = () => {
 
   return (
     <footer style={styles.playbar}>
-      {/* THẺ AUDIO ẨN: Cỗ máy phát nhạc thực sự */}
+      {/* THẺ AUDIO CẬP NHẬT */}
       {activeTrack.previewUrl && (
         <audio
           ref={audioRef}
           src={activeTrack.previewUrl}
           onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
-          onEnded={playNext} // Hết bài tự chuyển bài tiếp
+          
+          // SỰ KIỆN NÀY LÀ CÚ CHỐT: Khi file mp3 tải xong thông tin, lấy chính xác độ dài file
+          onLoadedMetadata={() => {
+            if (audioRef.current) {
+              setDuration(audioRef.current.duration);
+            }
+          }}
+          
+          onEnded={playNext}
         />
       )}
 

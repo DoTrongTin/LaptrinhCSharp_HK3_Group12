@@ -4,6 +4,7 @@ using TuneVault.Infrastructure;
 using TuneVault.API.Middleware;
 using TuneVault.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,12 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader()
                         .AllowCredentials()); // Rất quan trọng nếu sau này dùng SignalR
 });
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Tự động ngắt khi phát hiện vòng lặp, thay vì bị Crash
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 builder.Services.AddEndpointsApiExplorer();
 
 // ==========================================
@@ -71,6 +77,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 // Kích hoạt CORS trước khi Auth
 app.UseCors("AllowReactApp");
