@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { authService } from '../services/authService';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -7,10 +8,28 @@ const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleRegister = (e: React.FormEvent) => {
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Đăng ký:', { email, username, password });
-    navigate('/login');
+    setError('');
+    setIsLoading(true);
+    try {
+      await authService.register({ email, userName: username, password });
+      navigate('/');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string; errors?: string[] } } } | undefined;
+      if (e?.response?.data?.errors && e.response.data.errors.length > 0) {
+        // Hiển thị chi tiết lỗi validation từ backend
+        setError(e.response.data.errors.join('\n'));
+      } else {
+        const errorMessage = e?.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+        setError(errorMessage);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -18,6 +37,7 @@ const Register: React.FC = () => {
       <div style={styles.formBox}>
         <h1 style={styles.title}>Đăng ký TuneVault</h1>
         
+        {error && <div style={styles.errorBox}>{error}</div>}
         <form onSubmit={handleRegister} style={styles.form}>
           <div style={styles.inputGroup}>
             <label style={styles.label}>Email của bạn</label>
@@ -34,7 +54,7 @@ const Register: React.FC = () => {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Tạo mật khẩu" style={styles.input} required />
           </div>
 
-          <button type="submit" style={styles.submitBtn}>Đăng ký</button>
+          <button type="submit" style={{ ...styles.submitBtn, opacity: isLoading ? 0.7 : 1 }} disabled={isLoading}>{isLoading ? 'Đang xử lý...' : 'Đăng ký'}</button>
         </form>
 
         <p style={styles.footerText}>
@@ -50,6 +70,8 @@ const styles = {
   container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#000000', color: '#ffffff' },
   formBox: { backgroundColor: '#121212', padding: '60px', borderRadius: '8px', width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column' as const, alignItems: 'center' },
   title: { fontSize: '32px', fontWeight: 800, marginBottom: '40px', textAlign: 'center' as const },
+  // Style cho hộp lỗi giống Login.tsx
+  errorBox: { width: '100%', backgroundColor: '#e22134', color: '#ffffff', padding: '12px 16px', borderRadius: '4px', marginBottom: '20px', fontSize: '14px', fontWeight: 500, textAlign: 'center' as const },
   form: { width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '20px' },
   inputGroup: { display: 'flex', flexDirection: 'column' as const, gap: '8px' },
   label: { fontSize: '14px', fontWeight: 700 },

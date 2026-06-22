@@ -10,17 +10,17 @@ namespace TuneVault.Application
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            // 1. Đăng ký AutoMapper (Nếu bạn có xài)
-           services.AddAutoMapper(cfg => cfg.AddMaps(typeof(DependencyInjection).Assembly));
+            // 1. Đăng ký AutoMapper
+            services.AddAutoMapper(cfg => cfg.AddMaps(typeof(DependencyInjection).Assembly));
 
-            // 2. Đăng ký toàn bộ FluentValidation Rules
+            // 2. Đăng ký toàn bộ FluentValidation Rules (Bao gồm cả UploadMediaCommandValidator mới thêm)
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // 3. Đăng ký MediatR và nhúng các Behaviors vào Pipeline
             services.AddMediatR(cfg => {
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
                 
-                // THỨ TỰ ĐĂNG KÝ BEHAVIOR CỰC KỲ QUAN TRỌNG (Cái nào đăng ký trước sẽ chạy trước)
+                // THỨ TỰ ĐĂNG KÝ BEHAVIOR CỰC KỲ QUAN TRỌNG (Giữ nguyên luồng chạy chuẩn của bạn)
                 // Luồng chạy: Logging -> Auth -> Validation -> Handler
                 cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
                 cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));

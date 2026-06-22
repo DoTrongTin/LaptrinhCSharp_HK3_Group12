@@ -9,7 +9,10 @@ using TuneVault.Domain.Entities;
 using TuneVault.Infrastructure.Persistence; 
 // using TuneVault.Infrastructure.Repositories;
 using TuneVault.Application.Common.Interfaces; 
-using TuneVault.Infrastructure.Services; // Mở comment để dùng TokenService
+using TuneVault.Infrastructure.Repositories;
+using TuneVault.Infrastructure.Services;
+using TuneVault.Domain.Interfaces; // Mở comment để dùng TokenService
+using Microsoft.AspNetCore.Http;
 
 namespace TuneVault.Infrastructure
 {
@@ -46,10 +49,19 @@ namespace TuneVault.Infrastructure
             // ==========================================
             // Ví dụ đăng ký PlaylistRepository (Sẽ mở ra khi bạn code class PlaylistRepository)
             // services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IMediaRepository, MediaRepository>();
+            services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IShareRepository, ShareRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             
             // ==========================================
             // 4. ĐĂNG KÝ EXTERNAL SERVICES
             // ==========================================
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<ITokenService, TokenService>();
             
             // services.AddScoped<IAnthropicService, AnthropicService>(); // Dùng cho AI sau này

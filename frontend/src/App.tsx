@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
 import ShareInbox from './pages/ShareInbox';
 import VideoPlayer from './pages/VideoPlayer';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 
 // Các trang độc lập
 import Login from './pages/Login';
@@ -21,20 +22,22 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Nhóm Route độc lập không có Sidebar/Playbar */}
+        {/* Public routes: login/register */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Nhóm Route bọc trong MainLayout */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomeContent />} />
-          <Route path="playlist/:id" element={<PlaylistDetail />} />
-          <Route path="search" element={<Search />} />
-          <Route path="library" element={<Library />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="notifications" element={<Notifications />} />
-          <Route path="share" element={<ShareInbox />} />
-          <Route path="video" element={<VideoPlayer />} />
+        {/* Protected app routes - require auth */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<HomeContent />} />
+            <Route path="playlist/:id" element={<PlaylistDetail />} />
+            <Route path="search" element={<Search />} />
+            <Route path="library" element={<Library />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="share" element={<ShareInbox />} />
+            <Route path="video" element={<VideoPlayer />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

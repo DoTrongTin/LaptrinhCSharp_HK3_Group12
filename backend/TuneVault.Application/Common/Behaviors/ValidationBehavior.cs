@@ -1,6 +1,9 @@
 using FluentValidation;
 using MediatR;
-using ValidationException = FluentValidation.ValidationException;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace TuneVault.Application.Common.Behaviors
 {
@@ -20,22 +23,20 @@ namespace TuneVault.Application.Common.Behaviors
             {
                 var context = new ValidationContext<TRequest>(request);
 
-                // Chạy tất cả các rule kiểm tra của FluentValidation
                 var validationResults = await Task.WhenAll(
                     _validators.Select(v => v.ValidateAsync(context, cancellationToken)));
 
-                // Gom các lỗi lại
                 var failures = validationResults
                     .SelectMany(r => r.Errors)
                     .Where(f => f != null)
                     .ToList();
 
-                // Nếu có lỗi -> ném Exception chặn luôn
                 if (failures.Count != 0)
+                {
+                    // Ném lỗi ra ngoài. Tầng API (Controller hoặc Global Middleware) sẽ bắt lỗi này và trả về HTTP 400
                     throw new ValidationException(failures);
+                }
             }
-
-            // Dữ liệu hợp lệ -> Cho phép đi tiếp tới trạm (Behavior) tiếp theo hoặc Handler
             return await next();
         }
     }

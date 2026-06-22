@@ -30,18 +30,15 @@ namespace TuneVault.API.Controllers
 [HttpPost("upload")]
 public async Task<IActionResult> UploadMedia([FromForm] UploadMediaRequest request)
 {
-    // 1. Chống lỗi Null Reference khi người dùng không truyền data hoặc form rỗng
     if (request == null || request.AudioFile == null || request.AudioFile.Length == 0) 
         return BadRequest("Vui lòng chọn file nhạc (AudioFile là bắt buộc).");
 
     try
     {
-        // 2. Sửa lỗi đường dẫn lưu file (Đảm bảo không bị lặp wwwroot/wwwroot)
         var webRoot = string.IsNullOrEmpty(_env.WebRootPath) ? Path.Combine(_env.ContentRootPath, "wwwroot") : _env.WebRootPath;
         var uploadPath = Path.Combine(webRoot, "uploads");
         if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
 
-        // Lưu file Audio
         var audioFileName = Guid.NewGuid().ToString() + Path.GetExtension(request.AudioFile.FileName);
         var audioFilePath = Path.Combine(uploadPath, audioFileName);
         using (var stream = new FileStream(audioFilePath, FileMode.Create))
@@ -77,14 +74,13 @@ public async Task<IActionResult> UploadMedia([FromForm] UploadMediaRequest reque
             await _context.SaveChangesAsync();
         }
 
-        // 4. Lưu bài hát vào Database
-        // Thay đổi đoạn tạo newMedia:
+
         var hostUrl = $"{Request.Scheme}://{Request.Host}"; // Lấy địa chỉ Backend (http://localhost:5078)
         var newMedia = new MediaItem
         {
             Title = string.IsNullOrWhiteSpace(request.Title) ? "Bài hát chưa đặt tên" : request.Title,
             FilePath = $"/uploads/{audioFileName}",
-            // Cộng hostUrl vào đây luôn
+       
             ThumbnailPath = imageFileName != null ? $"{hostUrl}/uploads/{imageFileName}" : "https://via.placeholder.com/150",
             OwnerId = owner.Id,
             CreatedAt = DateTime.UtcNow,

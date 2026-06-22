@@ -1,20 +1,38 @@
 using Bogus;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using TuneVault.Domain.Entities;
 
 namespace TuneVault.Infrastructure.Persistence
 {
     public static class TuneVaultDbContextSeed
     {
-        public static async Task SeedAsync(AppDbContext context)
+        public static async Task SeedAsync(AppDbContext context, UserManager<ApplicationUser> userManager)
         {
-            // Nếu trong DB đã có bài hát rồi thì bỏ qua, không đổ thêm nữa
-            if (await context.MediaItems.AnyAsync())
+            // Nếu trong DB đã có user rồi thì bỏ qua, không đổ thêm nữa
+            if (await context.Users.AnyAsync())
             {
                 return;
             }
 
-            // 1. Tạo danh sách 10 Người dùng mẫu
+            // 1. Tạo tài khoản mẫu chuẩn (có thể dùng để test)
+            
+            var defaultUser = new ApplicationUser
+            {
+                Id = Guid.NewGuid(),
+                UserName = "admin",
+                Email = "admin@tunevault.com",
+                EmailConfirmed = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var createResult = await userManager.CreateAsync(defaultUser, "Admin@123");
+            if (!createResult.Succeeded)
+            {
+                throw new Exception($"Không thể tạo user mặc định: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+            }
+
+            // 2. Tạo danh sách 10 Người dùng mẫu
             var userFaker = new Faker<ApplicationUser>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())
                 .RuleFor(u => u.UserName, f => f.Internet.UserName())

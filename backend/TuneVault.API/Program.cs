@@ -5,6 +5,8 @@ using TuneVault.API.Middleware;
 using TuneVault.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
+using TuneVault.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +22,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // Đổi port tùy React của bạn
+        policy => policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials()); // Rất quan trọng nếu sau này dùng SignalR
@@ -95,16 +97,18 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 // 1. DÒNG NÀY SẼ TỰ ĐỘNG TẠO DATABASE VÀ CÁC BẢNG NẾU CHƯA CÓ
         await context.Database.MigrateAsync(); 
         
         // 2. SAU KHI BẢNG ĐÃ TẠO XONG THÌ MỚI ĐỔ DỮ LIỆU VÀO
-        await TuneVaultDbContextSeed.SeedAsync(context);
+        await TuneVaultDbContextSeed.SeedAsync(context, userManager);
         Console.WriteLine("Đã đổ dữ liệu thành công vào TuneVault_DB!");
     }
     catch (Exception ex)
     {
         Console.WriteLine($"Đã xảy ra lỗi khi đổ dữ liệu: {ex.Message}");
+        Console.WriteLine("Backend vẫn chạy bình thường, bạn có thể đăng ký tài khoản thủ công.");
     }
 }
 

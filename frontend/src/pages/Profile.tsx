@@ -1,15 +1,47 @@
 import React from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 
 const Profile: React.FC = () => {
+  const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
+  if (!isAuthenticated) {
+    return (
+      <div style={styles.page}>
+        <h2 style={{ marginBottom: 12 }}>Bạn chưa đăng nhập</h2>
+        <p style={{ color: '#b3b3b3' }}>Đăng nhập để xem hồ sơ, danh sách phát và lịch sử nghe.</p>
+        <div style={{ marginTop: 18, display: 'flex', gap: 8 }}>
+          <button style={styles.authBtn} onClick={() => navigate('/login')}>Đăng nhập</button>
+          <Link to="/register" style={{ textDecoration: 'none' }}><button style={styles.createBtn}>Đăng ký</button></Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={styles.page}>
       <div style={styles.header}>
-        <div style={styles.avatar}>T</div>
+        <div style={styles.avatar}>{user?.userName?.[0]?.toUpperCase() || 'U'}</div>
         <div>
           <p style={styles.type}>Hồ sơ</p>
-          <h1 style={styles.name}>Tên Người Dùng</h1>
-          <p style={styles.stats}>0 Danh sách phát công khai • 10 Đang theo dõi</p>
+          <h1 style={styles.name}>{user?.userName || 'Người dùng'}</h1>
+          <p style={styles.stats}>{user?.email || ''}</p>
         </div>
+      </div>
+
+      <div>
+        <button
+          style={{ ...styles.createBtn, marginTop: 12 }}
+          onClick={() => {
+            logout();
+            navigate('/');
+          }}
+        >
+          Đăng xuất
+        </button>
       </div>
     </div>
   );
