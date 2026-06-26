@@ -16,18 +16,13 @@ const Login: React.FC = () => {
     setError(''); // Xóa lỗi cũ trước khi thử lại
     setIsLoading(true);
 
-    try {
-      // Gọi API thực tế
+try {
       await authService.login({ email, password });
-      
-      // Thành công -> Chuyển hướng về trang chủ
       navigate('/');
-    } catch (err: unknown) {
-      // Bắt lỗi từ Backend trả về (nếu có)
-      // Narrow the unknown error to expected shape without using `any`
-      const e = err as { response?: { data?: { message?: string } } } | undefined;
-      const errorMessage = e?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
-      setError(errorMessage);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+  
+      setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setIsLoading(false);
     }

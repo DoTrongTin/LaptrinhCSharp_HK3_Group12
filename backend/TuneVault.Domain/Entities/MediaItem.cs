@@ -27,4 +27,7 @@ public class MediaItem
     public ICollection<PlayHistory> PlayHistories { get; set; } = [];
     public ICollection<MediaShare> Shares { get; set; } = [];
     public ICollection<MediaTag> MediaTags { get; set; } = [];
+    public string Artist { get; set; } = "Nghệ sĩ ẩn danh";
+    public bool IsDeleted { get; set; } = false;
+    
 }

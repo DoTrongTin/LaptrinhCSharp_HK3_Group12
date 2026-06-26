@@ -24,6 +24,8 @@ namespace TuneVault.Application.Features.Media.Commands.UploadMedia
             var mediaItem = new MediaItem
             {
                 Id = Guid.NewGuid(),
+                Artist = string.IsNullOrWhiteSpace(request.Artist) ? "Nghệ sĩ ẩn danh" : request.Artist,
+                Duration = request.Duration,
                 Title = string.IsNullOrWhiteSpace(request.Title) ? "Bài hát chưa đặt tên" : request.Title,
                 FilePath = request.FilePath,
                 ThumbnailPath = request.ThumbnailPath,

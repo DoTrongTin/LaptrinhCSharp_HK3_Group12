@@ -56,6 +56,8 @@ namespace TuneVault.Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IShareRepository, ShareRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+            services.AddScoped<IPlayHistoryRepository, PlayHistoryRepository>();
             
             // ==========================================
             // 4. ĐĂNG KÝ EXTERNAL SERVICES

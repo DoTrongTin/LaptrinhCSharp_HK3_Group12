@@ -5,6 +5,8 @@ obj/
 .vs/
 appsettings.Development.json
 
+
+
 # Node
 node_modules/
 dist/

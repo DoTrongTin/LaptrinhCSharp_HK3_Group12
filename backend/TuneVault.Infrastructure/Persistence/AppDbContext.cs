@@ -29,6 +29,12 @@ namespace TuneVault.Infrastructure.Persistence
             builder.Entity<ApplicationUser>().ToTable("AppUsers");
             builder.Entity<IdentityRole<Guid>>().ToTable("AppRoles");
             builder.Entity<IdentityUserRole<Guid>>().ToTable("AppUserRoles");
+            builder.Entity<MediaItem>().HasQueryFilter(m => !m.IsDeleted);
+
+            builder.Entity<Favorite>().HasQueryFilter(f => !f.MediaItem.IsDeleted);
+            builder.Entity<PlayHistory>().HasQueryFilter(p => !p.MediaItem.IsDeleted);
+            builder.Entity<PlaylistTrack>().HasQueryFilter(pt => !pt.MediaItem.IsDeleted);
+            builder.Entity<MediaTag>().HasQueryFilter(mt => !mt.MediaItem.IsDeleted);
 
             // Tự động quét và áp dụng tất cả các file trong thư mục Configurations
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

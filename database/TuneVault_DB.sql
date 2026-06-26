@@ -28,6 +28,7 @@ CREATE TABLE MediaItems (
     IsPublic BIT,
     OwnerId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES AppUsers(Id),
     AlbumId UNIQUEIDENTIFIER FOREIGN KEY REFERENCES Albums(Id),
+    Artist NVARCHAR NOT NULL DEFAULT N'Nghệ sĩ ẩn danh',
     CreatedAt DATETIME
 );
 

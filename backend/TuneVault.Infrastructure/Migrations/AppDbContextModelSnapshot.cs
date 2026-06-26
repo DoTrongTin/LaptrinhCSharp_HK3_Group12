@@ -262,15 +262,13 @@ namespace TuneVault.Infrastructure.Migrations
                     b.Property<Guid>("MediaItemId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("UserId", "MediaItemId");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasKey("UserId", "MediaItemId");
 
                     b.HasIndex("MediaItemId");
 
@@ -304,6 +302,10 @@ namespace TuneVault.Infrastructure.Migrations
                     b.Property<Guid?>("AlbumId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Artist")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -316,6 +318,9 @@ namespace TuneVault.Infrastructure.Migrations
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
@@ -434,9 +439,6 @@ namespace TuneVault.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("MediaItemId")
                         .HasColumnType("uniqueidentifier");
 
@@ -447,8 +449,6 @@ namespace TuneVault.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("MediaItemId");
 
@@ -571,25 +571,19 @@ namespace TuneVault.Infrastructure.Migrations
 
             modelBuilder.Entity("TuneVault.Domain.Entities.Favorite", b =>
                 {
-                    b.HasOne("TuneVault.Domain.Entities.ApplicationUser", null)
-                        .WithMany("Favorites")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("TuneVault.Domain.Entities.MediaItem", "MediaItem")
                         .WithMany("Favorites")
                         .HasForeignKey("MediaItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TuneVault.Domain.Entities.ApplicationUser", "User")
-                        .WithMany()
+                    b.HasOne("TuneVault.Domain.Entities.ApplicationUser", null)
+                        .WithMany("Favorites")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("MediaItem");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TuneVault.Domain.Entities.Follow", b =>
@@ -687,25 +681,19 @@ namespace TuneVault.Infrastructure.Migrations
 
             modelBuilder.Entity("TuneVault.Domain.Entities.PlayHistory", b =>
                 {
-                    b.HasOne("TuneVault.Domain.Entities.ApplicationUser", null)
-                        .WithMany("PlayHistories")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("TuneVault.Domain.Entities.MediaItem", "MediaItem")
                         .WithMany("PlayHistories")
                         .HasForeignKey("MediaItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TuneVault.Domain.Entities.ApplicationUser", "User")
-                        .WithMany()
+                    b.HasOne("TuneVault.Domain.Entities.ApplicationUser", null)
+                        .WithMany("PlayHistories")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("MediaItem");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TuneVault.Domain.Entities.Playlist", b =>

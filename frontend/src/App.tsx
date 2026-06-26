@@ -14,6 +14,9 @@ import ShareInbox from './pages/ShareInbox';
 import VideoPlayer from './pages/VideoPlayer';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
+// 1. IMPORT TRANG QUẢN LÝ ADMIN
+import AdminMediaManager from './pages/AdminMediaManager';
+
 // Các trang độc lập
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -37,6 +40,8 @@ export default function App() {
             <Route path="notifications" element={<Notifications />} />
             <Route path="share" element={<ShareInbox />} />
             <Route path="video" element={<VideoPlayer />} />
+            <Route path="admin/media" element={<AdminMediaManager />} />
+            
           </Route>
         </Route>
       </Routes>

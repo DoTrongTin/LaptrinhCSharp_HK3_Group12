@@ -27,6 +27,7 @@ export const AppProvider: React.FC<{children: React.ReactNode}> = ({ children })
 };
 
 // Đảm bảo có chữ "export" ở đầu hàm và đúng chính tả "useAppContext"
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {

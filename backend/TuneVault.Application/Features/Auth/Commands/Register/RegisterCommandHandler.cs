@@ -49,7 +49,7 @@ namespace TuneVault.Application.Features.Auth.Commands.Register
                 UserId = user.Id,
                 UserName = user.UserName!,
                 Email = user.Email!,
-                AvatarPath = user.AvatarPath
+                AvatarPath = user.AvatarPath ?? string.Empty
             };
 
             return ApiResponse<AuthResponseDto>.SuccessResponse(responseDto, "Đăng ký tài khoản thành công!");

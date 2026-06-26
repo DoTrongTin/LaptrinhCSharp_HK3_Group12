@@ -20,19 +20,19 @@ namespace TuneVault.Infrastructure.Services
 
         public string CreateToken(ApplicationUser user, IList<string> roles)
         {
-            // 1. Tạo các Claims (Những thông tin cơ bản nhúng vào bên trong Token)
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName!)
-            };
+        var claims = new List<Claim>
+        {
+        
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email!),
+            new Claim(ClaimTypes.Name, user.UserName!)
+        };
 
-            // Thêm Role vào Token (Nếu có)
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
             // 2. Lấy Chìa khóa bí mật từ cấu hình để ký Token
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]!));

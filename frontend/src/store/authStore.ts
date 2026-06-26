@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware'; 
 import type { User } from '../types/user';
 
 interface AuthState {
@@ -10,21 +11,29 @@ interface AuthState {
 }
 
 
-const savedToken = localStorage.getItem('token');
 
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      // Trạng thái mặc định khi người dùng mới vào web lần đầu
+      user: null,
+      token: null,
+      isAuthenticated: false,
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: savedToken,
-  isAuthenticated: !!savedToken,
+      setAuth: (user, token) => {
+        // Vẫn ghi ra ngoài cho các hàm Axios hoặc hàm fetch gọi API dùng
+        localStorage.setItem('token', token); 
+        
+        set({ user, token, isAuthenticated: true });
+      },
 
-  setAuth: (user, token) => {
-    localStorage.setItem('token', token);
-    set({ user, token, isAuthenticated: true });
-  },
-
-  logout: () => {
-    localStorage.removeItem('token');
-    set({ user: null, token: null, isAuthenticated: false });
-  },
-}));
+      logout: () => {
+        localStorage.removeItem('token');
+        set({ user: null, token: null, isAuthenticated: false });
+      },
+    }),
+    {
+      name: 'auth-storage', // 3. Tên "chiếc hộp" sẽ lưu trong LocalStorage
+    }
+  )
+);

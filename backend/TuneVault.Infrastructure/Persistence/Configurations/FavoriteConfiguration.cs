@@ -11,9 +11,9 @@ namespace TuneVault.Infrastructure.Persistence.Configurations
             // 1. Khóa chính kép
             builder.HasKey(f => new { f.UserId, f.MediaItemId });
 
-            // 2. Liên kết với ApplicationUser
-            builder.HasOne(f => f.User)
-                   .WithMany() // (Để trống nếu trong ApplicationUser bạn không gọi lại List Favorites)
+            // 2. Liên kết với ApplicationUser (Favorite không có navigation User, chỉ có FK UserId)
+            builder.HasOne<ApplicationUser>()
+                   .WithMany(u => u.Favorites)
                    .HasForeignKey(f => f.UserId)
                    .OnDelete(DeleteBehavior.Cascade);
 

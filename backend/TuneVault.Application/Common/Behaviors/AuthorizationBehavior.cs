@@ -6,7 +6,7 @@ namespace TuneVault.Application.Common.Behaviors
     // 1. Interface đánh dấu: Command nào cần Auth thì kế thừa cái này
     public interface IAuthorizeableRequest<TResponse> : IRequest<TResponse>
     {
-        Guid UserId { get; set; } // Ép buộc Command phải có trường UserId
+        Guid UserId { get; set; } 
     }
 
     // 2. Logic của Behavior

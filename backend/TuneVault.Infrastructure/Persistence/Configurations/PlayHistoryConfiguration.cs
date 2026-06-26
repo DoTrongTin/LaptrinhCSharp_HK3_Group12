@@ -11,9 +11,9 @@ namespace TuneVault.Infrastructure.Persistence.Configurations
             // 1. Khóa chính (Primary Key) - Bảng này dùng Id riêng thay vì khóa kép
             builder.HasKey(ph => ph.Id);
 
-            // 2. Liên kết với ApplicationUser
-            builder.HasOne(ph => ph.User)
-                   .WithMany() // (Để trống nếu trong ApplicationUser bạn không gọi lại List PlayHistories)
+            // 2. Liên kết với ApplicationUser (PlayHistory không có navigation User, chỉ có FK UserId)
+            builder.HasOne<ApplicationUser>()
+                   .WithMany(u => u.PlayHistories)
                    .HasForeignKey(ph => ph.UserId)
                    .OnDelete(DeleteBehavior.Cascade); // Xóa user thì xóa lịch sử nghe nhạc của họ
 

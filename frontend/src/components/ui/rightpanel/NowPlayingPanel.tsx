@@ -70,7 +70,7 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
         playlistTitle: selectedTrack.artist,
         artworkUrl: selectedTrack.cover,
         title: selectedTrack.title,
-        artist: selectedTrack.artist,
+        artist: currentTrackStore?.artistName || currentTrackStore?.ownerName || currentTrack.artist,
         artistImageUrl: currentTrack.artistImageUrl,
         artistMonthlyListeners: currentTrack.artistMonthlyListeners,
       }

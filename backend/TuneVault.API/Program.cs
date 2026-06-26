@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using TuneVault.Domain.Entities;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +65,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // Cho phép upload file lên đến 100MB
+});
+
+// THÊM ĐOẠN NÀY ĐỂ KESTREL SERVER KHÔNG NGẮT KẾT NỐI
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 104857600; 
+});
+
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
 // ==========================================
@@ -77,8 +91,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else 
+{
+    app.UseHttpsRedirection(); 
+}
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 // Kích hoạt CORS trước khi Auth

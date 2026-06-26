@@ -1,27 +1,45 @@
 using MediatR;
-using TuneVault.Application.Common.Models;
-using TuneVault.Domain.Entities;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System;
-using Microsoft.EntityFrameworkCore; // Cần dùng để gọi các hàm Async như FirstOrDefaultAsync nếu dự án đã có
+using TuneVault.Domain.Entities;
+using TuneVault.Domain.Interfaces;
 
-namespace TuneVault.Application.Features.Interaction.Commands.ToggleFavorite
+namespace TuneVault.Application.Features.Interactions.Commands.ToggleFavorite
 {
-    public class ToggleFavoriteHandler : IRequestHandler<ToggleFavoriteCommand, ApiResponse<bool>>
+    public class ToggleFavoriteHandler : IRequestHandler<ToggleFavoriteCommand, bool>
     {
+        private readonly IFavoriteRepository _favoriteRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        
-        public async Task<ApiResponse<bool>> Handle(ToggleFavoriteCommand request, CancellationToken cancellationToken)
+        public ToggleFavoriteHandler(IFavoriteRepository favoriteRepository, IUnitOfWork unitOfWork)
         {
-            // Tạm thời trả về mock dữ liệu thành công trực tiếp từ tầng Application để giải phóng nghẽn hệ thống
-            // Giúp bạn kiểm thử giao diện Front-end bấm nút Like nảy số thật 100%
-            bool isLikedCurrently = true; 
-            
-            return await Task.FromResult(ApiResponse<bool>.SuccessResponse(
-                isLikedCurrently, 
-                isLikedCurrently ? "Đã thêm bài hát vào danh sách yêu thích." : "Đã xóa bài hát khỏi danh sách yêu thích."
-            ));
+            _favoriteRepository = favoriteRepository;
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<bool> Handle(ToggleFavoriteCommand request, CancellationToken cancellationToken)
+        {
+            var existing = await _favoriteRepository.GetByUserAndMediaAsync(request.UserId, request.MediaId, cancellationToken);
+
+            if (existing != null)
+            {
+                _favoriteRepository.Remove(existing); // Nếu thích rồi thì Bỏ thích
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                return false;
+            }
+
+            // Nếu chưa thích thì thêm mới vào DB
+            var favorite = new Favorite
+            {
+                Id = Guid.NewGuid(),
+                UserId = request.UserId,
+                MediaItemId = request.MediaId
+            };
+
+            await _favoriteRepository.AddAsync(favorite, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            return true;
         }
     }
 }

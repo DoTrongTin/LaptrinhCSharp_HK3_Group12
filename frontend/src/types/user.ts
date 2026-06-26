@@ -4,6 +4,7 @@ export interface User {
   email: string;
   bio?: string;
   avatarPath?: string;
+  role?: string;
 }
 
 export interface AuthResponse {

@@ -51,6 +51,7 @@ namespace TuneVault.Infrastructure.Persistence
                 .RuleFor(m => m.FilePath, f => f.Internet.Url())
                 .RuleFor(m => m.ThumbnailPath, f => f.Image.PicsumUrl())
                 .RuleFor(m => m.OwnerId, f => f.PickRandom(users).Id)
+                .RuleFor(m => m.Artist, f => f.Name.FullName())
                 .RuleFor(m => m.CreatedAt, f => f.Date.Past());
 
             var mediaItems = mediaFaker.Generate(100);

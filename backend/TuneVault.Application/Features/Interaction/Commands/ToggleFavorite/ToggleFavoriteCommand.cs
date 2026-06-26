@@ -1,12 +1,11 @@
 using MediatR;
-using TuneVault.Application.Common.Models;
+using System;
 
-namespace TuneVault.Application.Features.Interaction.Commands.ToggleFavorite
+namespace TuneVault.Application.Features.Interactions.Commands.ToggleFavorite
 {
-    public class ToggleFavoriteCommand : IRequest<ApiResponse<bool>>
+    public class ToggleFavoriteCommand : IRequest<bool> // Trả về true nếu vừa Thích, false nếu vừa Bỏ thích
     {
-        public Guid MediaItemId { get; set; }
-        // Tạm thời truyền UserId trực tiếp, ở Giai đoạn 3 khi có JWT sẽ dùng AuthorizationBehavior để tự bóc tách
-        public Guid UserId { get; set; } 
+        public Guid UserId { get; set; }
+        public Guid MediaId { get; set; }
     }
 }

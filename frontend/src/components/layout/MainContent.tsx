@@ -32,22 +32,22 @@ const MainContent: React.FC = () => {
     fetchMedia();
   }, []);
 
-  const handleMediaClick = (item: MediaItem) => {
-    // Set right panel data
+
+const handleMediaClick = (item: MediaItem) => {
     setRightPanelData({
       title: item.title,
-      artist: item.ownerName,
+      // Tự động nhận diện chuẩn mới hoặc cũ
+      artist: item.artistName || item.ownerName || 'Unknown Artist',
       cover: item.thumbnailPath || 'https://via.placeholder.com/300/1a1a1a/ffffff?text=Music',
       type: 'song',
     });
-
-    // Play the track via player store
     play(item);
   };
 
-  const formatDuration = (seconds: number): string => {
+const formatDuration = (seconds?: number): string => {
+    if (!seconds || isNaN(seconds)) return '0:00';
     const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
+    const s = Math.floor(seconds % 60);
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
@@ -102,12 +102,12 @@ const MainContent: React.FC = () => {
             <div style={styles.gridContainer}>
               {firstHalf.map((item) => (
                 <MediaCard
-                  key={item.id}
-                  title={item.title}
-                  subtitle={`${item.ownerName} • ${formatDuration(item.duration)}`}
-                  imageUrl={item.thumbnailPath || 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Music'}
-                  onClick={() => handleMediaClick(item)}
-                />
+              key={item.id}
+              title={item.title}
+             subtitle={`${item.artistName || 'Nghệ sĩ ẩn danh'}${item.duration ? ` • ${formatDuration(item.duration)}` : ''}`}
+              imageUrl={item.thumbnailPath || 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Music'}
+              onClick={() => handleMediaClick(item)}
+            />
               ))}
             </div>
           </section>
@@ -122,7 +122,7 @@ const MainContent: React.FC = () => {
                 <MediaCard
                   key={item.id}
                   title={item.title}
-                  subtitle={`${item.ownerName} • ${formatDuration(item.duration)}`}
+                  subtitle={`${item.artistName || 'Nghệ sĩ ẩn danh'}${item.duration ? ` • ${formatDuration(item.duration)}` : ''}`}
                   imageUrl={item.thumbnailPath || 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Music'}
                   onClick={() => handleMediaClick(item)}
                 />
