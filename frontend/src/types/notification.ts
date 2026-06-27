@@ -1,6 +1,7 @@
 export interface NotificationDto {
   id: string;
-  type: "share" | "follow" | "like";
+  userId: string;
+  type: string;
   payload: string;
   isRead: boolean;
   createdAt: string;

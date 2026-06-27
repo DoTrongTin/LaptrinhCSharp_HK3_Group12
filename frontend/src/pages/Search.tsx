@@ -46,6 +46,7 @@ const Search: React.FC = () => {
   const handleItemClick = (item: MediaItem) => {
     // 1. Cập nhật Panel bên phải
     setRightPanelData({
+      id: (item as any).id || (item as any).mediaItemId,
       title: item.title,
       artist: item.ownerName || 'Unknown User',
       cover: item.thumbnailPath || 'https://via.placeholder.com/150',

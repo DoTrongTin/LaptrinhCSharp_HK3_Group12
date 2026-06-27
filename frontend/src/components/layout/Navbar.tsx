@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom'; // Thêm Link
 import { useAuthStore } from '../../store/authStore'; // Import Zustand Store
 
+import { useNotifications } from '../../hooks/useNotifications';
+
 import {
   MoreHorizontal,
   ChevronLeft,
@@ -23,6 +25,7 @@ const Navbar: React.FC = () => {
 
   // 1. Lấy trạng thái đăng nhập từ Store
   const { isAuthenticated, user, logout } = useAuthStore();
+  const { unread, notifications, markAsRead, clearUnread } = useNotifications();
 
   const [activePopup, setActivePopup] = useState<PopupType>(null);
   const [searchValue, setSearchValue] = useState('');
@@ -81,6 +84,25 @@ const Navbar: React.FC = () => {
   };
   const handleClose = () => alert('Web app không thể tự đóng tab nếu tab không được mở bằng script. Đây là nút mô phỏng giao diện.');
 
+  const getNotificationText = (notification: any) => {
+  let payload: any = {};
+
+  try {
+    payload = JSON.parse(notification.payload || '{}');
+  } catch {
+    payload = {};
+  }
+
+  if (notification.type === 'share') {
+    const senderName = payload.senderName || 'Một người dùng';
+    const targetTitle = payload.targetTitle || 'một bài hát';
+    const message = payload.message ? ` - "${payload.message}"` : '';
+
+    return `${senderName} đã chia sẻ ${targetTitle} với bạn${message}`;
+  }
+
+  return 'Bạn có thông báo mới.';
+};
   return (
     <header style={styles.navbar}>
       <div style={styles.leftContent}>
@@ -156,13 +178,50 @@ const Navbar: React.FC = () => {
         {isAuthenticated ? (
           <>
             <div style={styles.popupWrapper}>
-              <button style={styles.iconButton} title="Notifications" onClick={() => handleTogglePopup('notifications')}>
+              <button
+                style={{ ...styles.iconButton, position: 'relative' }}
+                title="Notifications"
+                onClick={() => {
+                  handleTogglePopup('notifications');
+                  clearUnread();
+                }}
+              >
                 <Bell size={20} />
+
+                {unread > 0 && (
+                  <span style={styles.notificationBadge}>
+                    {unread}
+                  </span>
+                )}
               </button>
               {activePopup === 'notifications' && (
                 <div style={styles.rightPopup}>
                   <h4 style={styles.popupTitle}>Thông báo</h4>
-                  <p style={styles.popupText}>Chưa có thông báo mới.</p>
+
+                  {notifications.length === 0 ? (
+                    <p style={styles.popupText}>Chưa có thông báo mới.</p>
+                  ) : (
+                    <div style={styles.notificationList}>
+                      {notifications.map((notification) => (
+                        <button
+                          key={notification.id}
+                          style={{
+                            ...styles.notificationItem,
+                            ...(notification.isRead ? {} : styles.notificationItemUnread),
+                          }}
+                          onClick={() => markAsRead(notification.id)}
+                        >
+                          <div style={styles.notificationText}>
+                            {getNotificationText(notification)}
+                          </div>
+
+                          <div style={styles.notificationTime}>
+                            {new Date(notification.createdAt).toLocaleString('vi-VN')}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -267,6 +326,59 @@ const styles = {
   popupTitle: { color: '#ffffff', fontSize: 15, margin: '0 0 10px 0' },
   popupText: { color: '#b3b3b3', fontSize: 13, margin: 0 },
   popupButton: { width: '100%', backgroundColor: 'transparent', border: 'none', color: '#ffffff', textAlign: 'left' as const, cursor: 'pointer' as const, padding: '8px 6px', borderRadius: 4, fontSize: 13 },
+
+  notificationBadge: {
+  position: 'absolute' as const,
+  top: -6,
+  right: -8,
+  minWidth: 16,
+  height: 16,
+  padding: '0 4px',
+  borderRadius: 999,
+  backgroundColor: '#1db954',
+  color: '#000000',
+  fontSize: 10,
+  fontWeight: 900,
+  display: 'flex' as const,
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+},
+
+  notificationList: {
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    gap: 8,
+    maxHeight: 280,
+    overflowY: 'auto' as const,
+  },
+
+  notificationItem: {
+    width: '100%',
+    backgroundColor: '#1f1f1f',
+    border: '1px solid #3a3a3a',
+    color: '#ffffff',
+    textAlign: 'left' as const,
+    cursor: 'pointer' as const,
+    padding: '10px',
+    borderRadius: 6,
+  },
+
+  notificationItemUnread: {
+    borderColor: '#1db954',
+    backgroundColor: '#14301f',
+  },
+
+  notificationText: {
+    fontSize: 13,
+    lineHeight: 1.35,
+    color: '#ffffff',
+  },
+
+  notificationTime: {
+    marginTop: 6,
+    fontSize: 11,
+    color: '#b3b3b3',
+  },
 };
 
 export default Navbar;

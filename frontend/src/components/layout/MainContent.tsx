@@ -42,6 +42,7 @@ const MainContent: React.FC = () => {
 
 const handleMediaClick = (item: MediaItem) => {
     setRightPanelData({
+      id: (item as any).id || (item as any).mediaItemId,
       title: item.title,
       // Tự động nhận diện chuẩn mới hoặc cũ
       artist: item.artistName || item.ownerName || 'Unknown Artist',

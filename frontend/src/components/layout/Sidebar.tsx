@@ -137,6 +137,7 @@ const Sidebar: React.FC = () => {
 
     if (item.type === 'artist') {
       setRightPanelData({
+        id: (item as any).id || (item as any).mediaItemId,
         title: item.title,
         artist: 'Nghệ sĩ',
         cover: item.src,
