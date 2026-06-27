@@ -29,7 +29,7 @@ export const authService = {
         userName: data.userName,
         email: data.email,
         avatarPath: data.avatarPath,
-        role: userRole // 🌟 GÁN QUYỀN VÀO OBJECT USER
+        role: userRole 
       };
 
       // Cập nhật State toàn cục

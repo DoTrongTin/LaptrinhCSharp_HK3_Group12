@@ -58,19 +58,36 @@ backend/TuneVault.API/Services/CurrentUserService.cs
 backend/TuneVault.API/TuneVault.API.csproj
 backend/TuneVault.API/TuneVault.API.http
 backend/TuneVault.API/wwwroot/uploads/8c17ccb6-1a1e-48d2-b9ab-f04dcb5b01bd.jpg
+backend/TuneVault.API/wwwroot/uploads/audio/128f7498-8398-494b-b691-f7d993b41fe3.mp3
+backend/TuneVault.API/wwwroot/uploads/audio/2a49818a-db16-4202-b5bb-d05361fde526.mp3
+backend/TuneVault.API/wwwroot/uploads/audio/3af071bc-400d-45a1-a155-99a93eec0a40.mp3
+backend/TuneVault.API/wwwroot/uploads/audio/44f07923-edfc-4418-b344-fae2d2cda920.mp3
+backend/TuneVault.API/wwwroot/uploads/audio/81913677-44c0-47a9-a350-13fbbee2d969.mp3
 backend/TuneVault.API/wwwroot/uploads/audio/A little Dream Of Me.mp3
+backend/TuneVault.API/wwwroot/uploads/audio/aa09a224-d825-44c4-8d0b-d7142cdc8ffb.mp3
 backend/TuneVault.API/wwwroot/uploads/audio/Bầu Trời Mới - Da LAB ft. Minh Tốc & Lam (Official MV) [Z1D26z9l8y8].mp3
+backend/TuneVault.API/wwwroot/uploads/audio/c2a6bbb2-ce9e-4a52-b23c-625119096973.mp3
+backend/TuneVault.API/wwwroot/uploads/audio/c5563160-f70a-4a51-8dd3-700cb2f1d6e4.mp3
 backend/TuneVault.API/wwwroot/uploads/audio/CÒN GÌ ĐẸP HƠN (ca khúc lấy cảm hứng từ phim Mưa đỏ) - Nguyễn Hùng Lyric Video.mp3
 backend/TuneVault.API/wwwroot/uploads/audio/e0448a35-1270-4fda-9aa1-d202a48c47ef.mp3
 backend/TuneVault.API/wwwroot/uploads/audio/Hẹn Lần Sau - MAYDAYs Official Music Video.mp3
+backend/TuneVault.API/wwwroot/uploads/audio/in-love-ft-justatee--l2k-the-album.mp3
 backend/TuneVault.API/wwwroot/uploads/audio/KIẾM ĐÂU BÂY GIỜ - Nguyễn Hùng (OST CỤC VÀNG CỦA NGOẠI) OFFICIAL MUSIC VIDEO (1).mp3
 backend/TuneVault.API/wwwroot/uploads/audio/mounter-x-maydays-minh-tốc--official-mv.mp3
 backend/TuneVault.API/wwwroot/uploads/audio/Nguyễn Hùng - Ở Trong Khu Rừng _ Cảm Ơn Người Đã Thức Cùng Tôi OST _ Official Visualizer [MtDik4dz3IA].mp3
 backend/TuneVault.API/wwwroot/uploads/audio/Quang Hùng MasterD - 'Chất Gây Hại' (ft. Low G) - Official Audio _ BLOOMEVER Album 'Bonus Track' [tGKwX5yq9ho] (1).mp3
 backend/TuneVault.API/wwwroot/uploads/ce906ff5-51dd-4f68-8e84-862deb34f696.mp3
+backend/TuneVault.API/wwwroot/uploads/covers/047094b5-f75a-4a25-8999-62b873ad0725.jpg
+backend/TuneVault.API/wwwroot/uploads/covers/3c3e354b-54f0-4488-84ea-956195525e38.jpg
+backend/TuneVault.API/wwwroot/uploads/covers/4c7b0b1c-f2f3-4137-9573-75c07b697aea.jpg
 backend/TuneVault.API/wwwroot/uploads/covers/6cf811f2-ae94-4f26-9ce2-ea00b7dd4897.jpg
+backend/TuneVault.API/wwwroot/uploads/covers/9a097169-5f64-4e72-b22d-9157249e51e0.jpg
 backend/TuneVault.API/wwwroot/uploads/covers/A Little Dream Of Me.jpg
+backend/TuneVault.API/wwwroot/uploads/covers/a8d14df1-86ec-48aa-87c5-f57011918c82.jpg
+backend/TuneVault.API/wwwroot/uploads/covers/b0e503b3-8b9d-4451-8a4e-cc4aabcc9ed8.jpg
 backend/TuneVault.API/wwwroot/uploads/covers/bautroimoi.jpg
+backend/TuneVault.API/wwwroot/uploads/covers/be8086f9-0b2a-4082-bd16-720f5b0c76bd.jpg
+backend/TuneVault.API/wwwroot/uploads/covers/cafbe3d9-e2d2-4a74-acbc-116794f8e5de.jpg
 backend/TuneVault.API/wwwroot/uploads/covers/chatgayhai.jpg
 backend/TuneVault.API/wwwroot/uploads/covers/congidephon.jpg
 backend/TuneVault.API/wwwroot/uploads/covers/henlansau.jpg
@@ -86,6 +103,7 @@ backend/TuneVault.Application/Common/Interfaces/IAppDbContext.cs
 backend/TuneVault.Application/Common/Interfaces/ICurrentUserService.cs
 backend/TuneVault.Application/Common/Interfaces/IFileStorageService.cs
 backend/TuneVault.Application/Common/Interfaces/INotificationHub.cs
+backend/TuneVault.Application/Common/Interfaces/INotificationRealtimeService.cs
 backend/TuneVault.Application/Common/Interfaces/ITokenService.cs
 backend/TuneVault.Application/Common/Models/ApiResponse.cs
 backend/TuneVault.Application/Common/Models/PaginatedList.cs
@@ -223,6 +241,7 @@ backend/TuneVault.Infrastructure/Repositories/UnitOfWork.cs
 backend/TuneVault.Infrastructure/Repositories/UserRepository.cs
 backend/TuneVault.Infrastructure/Services/CurrentUserService.cs
 backend/TuneVault.Infrastructure/Services/FileStorageService.cs
+backend/TuneVault.Infrastructure/Services/NotificationRealtimeService.cs
 backend/TuneVault.Infrastructure/Services/TokenService.cs
 backend/TuneVault.Infrastructure/TuneVault.Infrastructure.csproj
 backend/TuneVault.sln
@@ -249,28 +268,20 @@ frontend/src/components/layout/Playbar.tsx
 frontend/src/components/layout/ProtectedRoute.tsx
 frontend/src/components/layout/RightPanel.tsx
 frontend/src/components/layout/Sidebar.tsx
-frontend/src/components/ui/ArtistCard.tsx
-frontend/src/components/ui/Avatar.tsx
-frontend/src/components/ui/FavoriteButton.tsx
-frontend/src/components/ui/LoadingSpinner.tsx
 frontend/src/components/ui/maincontent/FilterPill.tsx
 frontend/src/components/ui/maincontent/MediaCard.tsx
 frontend/src/components/ui/maincontent/SectionHeader.tsx
-frontend/src/components/ui/MediaUploadModal.tsx
-frontend/src/components/ui/NotificationBadge.tsx
+frontend/src/components/ui/playbar/FavoriteButton.tsx
 frontend/src/components/ui/playbar/PlaybackControls.tsx
 frontend/src/components/ui/playbar/PlaybarIconButton.tsx
 frontend/src/components/ui/playbar/PlaybarUtilities.tsx
 frontend/src/components/ui/playbar/ProgressBar.tsx
 frontend/src/components/ui/playbar/TrackInfo.tsx
-frontend/src/components/ui/PlaylistCard.tsx
 frontend/src/components/ui/rightpanel/ArtistAboutCard.tsx
 frontend/src/components/ui/rightpanel/IconButton.tsx
 frontend/src/components/ui/rightpanel/NowPlayingPanel.tsx
 frontend/src/components/ui/rightpanel/PanelHeader.tsx
 frontend/src/components/ui/rightpanel/TrackDetails.tsx
-frontend/src/components/ui/ShareModal.tsx
-frontend/src/components/ui/SongCard.tsx
 frontend/src/context/AppContext.tsx
 frontend/src/data/currentTrack.ts
 frontend/src/hooks/useAuth.ts
@@ -331,16 +342,48 @@ This section contains the contents of the repository's files.
 
 </file>
 
-<file path="backend/TuneVault.API/Controllers/NotificationController.cs">
-
-</file>
-
 <file path="backend/TuneVault.API/Controllers/PlaylistController.cs">
 
 </file>
 
 <file path="backend/TuneVault.API/Controllers/ProfileController.cs">
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using TuneVault.Application.Features.Profile.Commands.UpdateProfile;
+using TuneVault.Application.Features.Profile.DTOs;
+using TuneVault.Application.Features.Profile.Queries.GetProfile;
 
+namespace TuneVault.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class ProfileController : ControllerBase
+{
+    private readonly IMediator _mediator;
+
+    public ProfileController(IMediator mediator) => _mediator = mediator;
+
+    [HttpGet]
+    public async Task<IActionResult> GetProfile()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await _mediator.Send(new GetProfileQuery(userId));
+        return Ok(result);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var command = new UpdateProfileCommand { UserId = userId, UserName = dto.UserName, Bio = dto.Bio };
+        
+        var success = await _mediator.Send(command);
+        return success ? Ok() : BadRequest("Cập nhật thất bại.");
+    }
+}
 </file>
 
 <file path="backend/TuneVault.API/Hubs/NotificationHubRegistration.cs">
@@ -435,23 +478,6 @@ Accept: application/json
 ###
 </file>
 
-<file path="backend/TuneVault.Application/Common/Interfaces/IAppDbContext.cs">
-using Microsoft.EntityFrameworkCore;
-using TuneVault.Domain.Entities;
-
-namespace TuneVault.Application.Common.Interfaces;
-
-public interface IAppDbContext
-{
-    DbSet<ApplicationUser> Users { get; }
-    DbSet<MediaItem> MediaItems { get; }
-    DbSet<Playlist> Playlists { get; }
-    DbSet<MediaShare> MediaShares { get; }
-
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-}
-</file>
-
 <file path="backend/TuneVault.Application/Common/Interfaces/ICurrentUserService.cs">
 namespace TuneVault.Application.Common.Interfaces
 {
@@ -460,6 +486,20 @@ namespace TuneVault.Application.Common.Interfaces
         Guid? UserId { get; }
         bool IsAuthenticated { get; }
     }
+}
+</file>
+
+<file path="backend/TuneVault.Application/Common/Interfaces/INotificationRealtimeService.cs">
+using TuneVault.Application.Features.Notification.DTOs;
+
+namespace TuneVault.Application.Common.Interfaces;
+
+public interface INotificationRealtimeService
+{
+    Task SendNotificationAsync(
+        Guid receiverUserId,
+        NotificationDto notification,
+        CancellationToken cancellationToken = default);
 }
 </file>
 
@@ -592,10 +632,6 @@ namespace TuneVault.Application.Features.Media.Queries.GetTrendingMedia
 
 </file>
 
-<file path="backend/TuneVault.Application/Features/Notification/DTOs/NotificationDto.cs">
-
-</file>
-
 <file path="backend/TuneVault.Application/Features/Notification/Queries/GetNotifications/GetNotificationsHandler.cs">
 
 </file>
@@ -661,23 +697,87 @@ namespace TuneVault.Application.Features.Media.Queries.GetTrendingMedia
 </file>
 
 <file path="backend/TuneVault.Application/Features/Profile/Commands/UpdateProfile/UpdateProfileCommand.cs">
+using MediatR;
 
+namespace TuneVault.Application.Features.Profile.Commands.UpdateProfile;
+
+public class UpdateProfileCommand : IRequest<bool>
+{
+    public Guid UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+}
 </file>
 
 <file path="backend/TuneVault.Application/Features/Profile/Commands/UpdateProfile/UpdateProfileHandler.cs">
+using MediatR;
+using TuneVault.Application.Common.Interfaces;
+using TuneVault.Domain.Entities;
 
+namespace TuneVault.Application.Features.Profile.Commands.UpdateProfile;
+
+public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, bool>
+{
+    private readonly IAppDbContext _context;
+
+    public UpdateProfileHandler(IAppDbContext context) => _context = context;
+
+    public async Task<bool> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
+    {
+        var user = await _context.Users.FindAsync(new object[] { request.UserId }, cancellationToken);
+        if (user == null) return false;
+
+        user.UserName = request.UserName;
+        user.Bio = request.Bio;
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+}
 </file>
 
 <file path="backend/TuneVault.Application/Features/Profile/Commands/UpdateProfile/UpdateProfileValidator.cs">
+using FluentValidation;
 
+namespace TuneVault.Application.Features.Profile.Commands.UpdateProfile;
+
+public class UpdateProfileValidator : AbstractValidator<UpdateProfileCommand>
+{
+    public UpdateProfileValidator()
+    {
+        // Kiểm tra UserName
+        RuleFor(x => x.UserName)
+            .NotEmpty().WithMessage("Tên người dùng không được để trống.")
+            .MaximumLength(50).WithMessage("Tên người dùng không được vượt quá 50 ký tự.");
+
+        // Kiểm tra Bio
+        RuleFor(x => x.Bio)
+            .MaximumLength(200).WithMessage("Tiểu sử không được vượt quá 200 ký tự.");
+    }
+}
 </file>
 
 <file path="backend/TuneVault.Application/Features/Profile/DTOs/ProfileDto.cs">
+namespace TuneVault.Application.Features.Profile.DTOs;
 
+public class ProfileDto
+{
+    public Guid UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    // Bạn có thể thêm các trường khác như AvatarUrl nếu có
+}
 </file>
 
 <file path="backend/TuneVault.Application/Features/Profile/DTOs/UpdateProfileDto.cs">
+namespace TuneVault.Application.Features.Profile.DTOs;
 
+public class UpdateProfileDto
+{
+    public string UserName { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+}
 </file>
 
 <file path="backend/TuneVault.Application/Features/Profile/Queries/GetProfile/GetProfileHandler.cs">
@@ -768,10 +868,6 @@ namespace TuneVault.Domain.Interfaces
 </file>
 
 <file path="backend/TuneVault.Infrastructure/AI/AnthropicService.cs">
-
-</file>
-
-<file path="backend/TuneVault.Infrastructure/Hubs/NotificationHub.cs">
 
 </file>
 
@@ -4852,6 +4948,36 @@ namespace TuneVault.Infrastructure.Services
 
 </file>
 
+<file path="backend/TuneVault.Infrastructure/Services/NotificationRealtimeService.cs">
+using Microsoft.AspNetCore.SignalR;
+using TuneVault.Application.Common.Interfaces;
+using TuneVault.Application.Features.Notification.DTOs;
+using TuneVault.Infrastructure.Hubs;
+
+namespace TuneVault.Infrastructure.Services;
+
+public class NotificationRealtimeService : INotificationRealtimeService
+{
+    private readonly IHubContext<NotificationHub> _hubContext;
+
+    public NotificationRealtimeService(IHubContext<NotificationHub> hubContext)
+    {
+        _hubContext = hubContext;
+    }
+
+    public async Task SendNotificationAsync(
+        Guid receiverUserId,
+        NotificationDto notification,
+        CancellationToken cancellationToken = default)
+    {
+        await _hubContext
+            .Clients
+            .Group(NotificationHub.GetUserGroup(receiverUserId.ToString()))
+            .SendAsync("ReceiveNotification", notification, cancellationToken);
+    }
+}
+</file>
+
 <file path="backend/TuneVault.sln">
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
@@ -5086,77 +5212,6 @@ export default defineConfig([
 <svg xmlns="http://www.w3.org/2000/svg" width="77" height="47" fill="none" aria-labelledby="vite-logo-title" viewBox="0 0 77 47"><title id="vite-logo-title">Vite</title><style>.parenthesis{fill:#000}@media (prefers-color-scheme:dark){.parenthesis{fill:#fff}}</style><path fill="#9135ff" d="M40.151 45.71c-.663.844-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.493c-.92 0-1.457-1.04-.92-1.788l7.479-10.471c1.07-1.498 0-3.578-1.842-3.578H15.443c-.92 0-1.456-1.04-.92-1.788l9.696-13.576c.213-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.472c-1.07 1.497 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.087.89 1.83L40.153 45.712z"/><mask id="a" width="48" height="47" x="14" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M40.047 45.71c-.663.843-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.389c-.92 0-1.457-1.04-.92-1.788l7.479-10.472c1.07-1.497 0-3.578-1.842-3.578H15.34c-.92 0-1.456-1.04-.92-1.788l9.696-13.575c.213-.297.556-.474.92-.474H53.93c.92 0 1.456 1.04.92 1.788L47.37 13.03c-1.07 1.498 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.088.89 1.831L40.049 45.712z"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#eee6ff" rx="5.508" ry="14.704" transform="rotate(269.814 20.96 11.29)scale(-1 1)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#eee6ff" rx="10.399" ry="29.851" transform="rotate(89.814 -16.902 -8.275)scale(1 -1)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#8900ff" rx="5.508" ry="30.487" transform="rotate(89.814 -19.197 -7.127)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.928 4.177)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.738 5.52)scale(1 -1)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#eee6ff" rx="14.072" ry="22.078" transform="rotate(93.35 31.245 55.578)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx="14.592" cy="9.743" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(39.51 14.592 9.743)"/></g><g filter="url(#k)"><ellipse cx="61.728" cy="-5.321" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 61.728 -5.32)"/></g><g filter="url(#l)"><ellipse cx="55.618" cy="7.104" fill="#00c2ff" rx="5.971" ry="9.665" transform="rotate(37.892 55.618 7.104)"/></g><g filter="url(#m)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#n)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#o)"><ellipse cx="49.857" cy="30.678" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 49.857 30.678)"/></g><g filter="url(#p)"><ellipse cx="52.623" cy="33.171" fill="#00c2ff" rx="5.971" ry="15.297" transform="rotate(37.892 52.623 33.17)"/></g></g><path d="M6.919 0c-9.198 13.166-9.252 33.575 0 46.789h6.215c-9.25-13.214-9.196-33.623 0-46.789zm62.424 0h-6.215c9.198 13.166 9.252 33.575 0 46.789h6.215c9.25-13.214 9.196-33.623 0-46.789" class="parenthesis"/><defs><filter id="b" width="60.045" height="41.654" x="-5.564" y="16.92" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-40.407" y="-6.762" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-35.435" y="2.801" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-30.84" y="20.8" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-29.307" y="21.949" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="29.961" y="-17.13" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-13.43" y="-22.082" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="34.321" y="-37.644" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="38.847" y="-10.552" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="22.45" y="-1.645" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="32.919" y="11.36" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter></defs></svg>
 </file>
 
-<file path="frontend/src/components/ui/Avatar.tsx">
-
-</file>
-
-<file path="frontend/src/components/ui/FavoriteButton.tsx">
-import React, { useState } from 'react';
-import { Heart } from 'lucide-react';
-import { mediaService } from '../../services/mediaService'; 
-import { useAuthStore } from '../../store/authStore';
-
-interface FavoriteButtonProps {
-  mediaId: string;
-  initialIsFavorite?: boolean; 
-  size?: number;
-}
-
-const FavoriteButton: React.FC<FavoriteButtonProps> = ({ mediaId, initialIsFavorite = false, size = 20 }) => {
-  const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
-  
-  // Lấy trạng thái đăng nhập để chặn người dùng khách
-  const { isAuthenticated } = useAuthStore();
-
-  const handleToggle = async (e: React.MouseEvent) => {
-    e.stopPropagation(); 
-
-    if (!isAuthenticated) {
-      alert('Vui lòng đăng nhập để lưu bài hát vào thư viện!');
-      return;
-    }
-
-
-    setIsFavorite(!isFavorite);
-
-    try {
-  
-      await mediaService.toggleFavorite(mediaId);
-    } catch (error) {
-      setIsFavorite(isFavorite);
-      console.error('Lỗi khi thả tim:', error);
-    }
-  };
-
-  return (
-    <button
-      onClick={handleToggle}
-      style={{
-        backgroundColor: 'transparent',
-        border: 'none',
-        cursor: isAuthenticated ? 'pointer' : 'not-allowed',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: isFavorite ? '#1db954' : '#b3b3b3', 
-        transition: 'color 0.2s, transform 0.1s',
-        transform: isFavorite ? 'scale(1.1)' : 'scale(1)', 
-        padding: 0,
-      }}
-      title={isFavorite ? 'Xóa khỏi thư viện' : 'Lưu vào thư viện'}
-    >
-      <Heart size={size} fill={isFavorite ? '#1db954' : 'none'} />
-    </button>
-  );
-};
-
-export default FavoriteButton;
-</file>
-
-<file path="frontend/src/components/ui/LoadingSpinner.tsx">
-
-</file>
-
 <file path="frontend/src/components/ui/maincontent/FilterPill.tsx">
 import React from 'react';
 
@@ -5278,12 +5333,67 @@ const styles = {
 export default SectionHeader;
 </file>
 
-<file path="frontend/src/components/ui/MediaUploadModal.tsx">
+<file path="frontend/src/components/ui/playbar/FavoriteButton.tsx">
+import React, { useState } from 'react';
+import { Heart } from 'lucide-react';
+import { mediaService } from '../../../services/mediaService'; 
+import { useAuthStore } from '../../../store/authStore';
 
-</file>
+interface FavoriteButtonProps {
+  mediaId: string;
+  initialIsFavorite?: boolean; 
+  size?: number;
+}
 
-<file path="frontend/src/components/ui/NotificationBadge.tsx">
+const FavoriteButton: React.FC<FavoriteButtonProps> = ({ mediaId, initialIsFavorite = false, size = 20 }) => {
+  const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
+  
+  // Lấy trạng thái đăng nhập để chặn người dùng khách
+  const { isAuthenticated } = useAuthStore();
 
+  const handleToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation(); 
+
+    if (!isAuthenticated) {
+      alert('Vui lòng đăng nhập để lưu bài hát vào thư viện!');
+      return;
+    }
+
+
+    setIsFavorite(!isFavorite);
+
+    try {
+  
+      await mediaService.toggleFavorite(mediaId);
+    } catch (error) {
+      setIsFavorite(isFavorite);
+      console.error('Lỗi khi thả tim:', error);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleToggle}
+      style={{
+        backgroundColor: 'transparent',
+        border: 'none',
+        cursor: isAuthenticated ? 'pointer' : 'not-allowed',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: isFavorite ? '#1db954' : '#b3b3b3', 
+        transition: 'color 0.2s, transform 0.1s',
+        transform: isFavorite ? 'scale(1.1)' : 'scale(1)', 
+        padding: 0,
+      }}
+      title={isFavorite ? 'Xóa khỏi thư viện' : 'Lưu vào thư viện'}
+    >
+      <Heart size={size} fill={isFavorite ? '#1db954' : 'none'} />
+    </button>
+  );
+};
+
+export default FavoriteButton;
 </file>
 
 <file path="frontend/src/components/ui/playbar/PlaybarUtilities.tsx">
@@ -5429,10 +5539,6 @@ const styles = {
 };
 
 export default TrackInfo;
-</file>
-
-<file path="frontend/src/components/ui/ShareModal.tsx">
-
 </file>
 
 <file path="frontend/src/data/currentTrack.ts">
@@ -5678,58 +5784,6 @@ export default api;
 
 </file>
 
-<file path="frontend/src/services/playlistService.ts">
-import api from './api';
-import type { Playlist } from '../types/playlist';
-
-export const playlistService = {
-  // Tạo playlist mới (Dùng cho Sidebar)
-  createPlaylist: async (title: string): Promise<Playlist> => {
-    try {
-      const response = await api.post('/playlist', { 
-        title: title,
-        description: "",
-        isPublic: true
-      });
-      return response.data?.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Không thể tạo danh sách phát.';
-      // eslint-disable-next-line preserve-caught-error
-      throw new Error(errorMessage);
-    }
-  },
-
-  // Lấy danh sách playlist của người dùng
-  getUserPlaylists: async (): Promise<Playlist[]> => {
-    try {
-      const response = await api.get('/playlist/user');
-      return response.data?.data ?? [];
-    } catch (error) {
-      console.error('Lỗi tải danh sách playlist:', error);
-      return []; 
-    }
-  },
-
-  // Lấy chi tiết playlist kèm danh sách bài hát bên trong
-  getPlaylistDetail: async (id: string): Promise<Playlist> => {
-    try {
-      const response = await api.get(`/playlist/${id}`);
-      return response.data?.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.error('Lỗi tải chi tiết playlist:', error);
-      // eslint-disable-next-line preserve-caught-error
-      throw new Error('Không tìm thấy danh sách phát này.');
-    }
-  }
-};
-</file>
-
-<file path="frontend/src/services/profileService.ts">
-
-</file>
-
 <file path="frontend/src/services/shareService.ts">
 
 </file>
@@ -5769,23 +5823,6 @@ export interface NotificationDto {
   payload: string;
   isRead: boolean;
   createdAt: string;
-}
-</file>
-
-<file path="frontend/src/types/playlist.ts">
-import type { MediaItem } from './media';
-
-export interface Playlist {
-  id: string;
-  title: string;
-  description?: string;
-  coverImageUrl: string | null;
-  isPublic?: boolean;
-  userId?: string;
-  createdAt?: string;
-  
-  // Mảng chứa các bài hát thuộc playlist này (sẽ có dữ liệu khi gọi API GetPlaylistDetail)
-  tracks?: MediaItem[]; 
 }
 </file>
 
@@ -6151,6 +6188,138 @@ namespace TuneVault.API.Controllers
 }
 </file>
 
+<file path="backend/TuneVault.API/Controllers/NotificationController.cs">
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TuneVault.Application.Common.Interfaces;
+using TuneVault.Application.Features.Notification.DTOs;
+
+namespace TuneVault.API.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/notifications")]
+public class NotificationsController : ControllerBase
+{
+    private readonly IAppDbContext _context;
+    private readonly ICurrentUserService _currentUserService;
+
+    public NotificationsController(
+        IAppDbContext context,
+        ICurrentUserService currentUserService)
+    {
+        _context = context;
+        _currentUserService = currentUserService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetMyNotifications(CancellationToken cancellationToken)
+    {
+        var userId = _currentUserService.UserId;
+
+        if (userId == null)
+        {
+            return Unauthorized(new
+            {
+                success = false,
+                message = "Không xác định được người dùng hiện tại."
+            });
+        }
+
+        var notifications = await _context.Notifications
+            .Where(n => n.UserId == userId.Value)
+            .OrderByDescending(n => n.CreatedAt)
+            .Select(n => new NotificationDto
+            {
+                Id = n.Id,
+                UserId = n.UserId,
+                Type = n.Type,
+                Payload = n.Payload,
+                IsRead = n.IsRead,
+                CreatedAt = n.CreatedAt
+            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(new
+        {
+            success = true,
+            data = notifications
+        });
+    }
+
+    [HttpPut("{id:guid}/read")]
+    public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken cancellationToken)
+    {
+        var userId = _currentUserService.UserId;
+
+        if (userId == null)
+        {
+            return Unauthorized(new
+            {
+                success = false,
+                message = "Không xác định được người dùng hiện tại."
+            });
+        }
+
+        var notification = await _context.Notifications
+            .FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId.Value, cancellationToken);
+
+        if (notification == null)
+        {
+            return NotFound(new
+            {
+                success = false,
+                message = "Không tìm thấy thông báo."
+            });
+        }
+
+        notification.IsRead = true;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Ok(new
+        {
+            success = true,
+            message = "Đã đánh dấu thông báo là đã đọc."
+        });
+    }
+
+    [HttpPut("read-all")]
+    public async Task<IActionResult> MarkAllAsRead(CancellationToken cancellationToken)
+    {
+        var userId = _currentUserService.UserId;
+
+        if (userId == null)
+        {
+            return Unauthorized(new
+            {
+                success = false,
+                message = "Không xác định được người dùng hiện tại."
+            });
+        }
+
+        var notifications = await _context.Notifications
+            .Where(n => n.UserId == userId.Value && !n.IsRead)
+            .ToListAsync(cancellationToken);
+
+        foreach (var notification in notifications)
+        {
+            notification.IsRead = true;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Ok(new
+        {
+            success = true,
+            message = "Đã đánh dấu tất cả thông báo là đã đọc.",
+            count = notifications.Count
+        });
+    }
+}
+</file>
+
 <file path="backend/TuneVault.API/Controllers/ShareController.cs">
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -6336,6 +6505,24 @@ namespace TuneVault.Application.Common.Interfaces
     {
         Task<string> CompleteAsync(string prompt, CancellationToken cancellationToken = default);
     }
+}
+</file>
+
+<file path="backend/TuneVault.Application/Common/Interfaces/IAppDbContext.cs">
+using Microsoft.EntityFrameworkCore;
+using TuneVault.Domain.Entities;
+
+namespace TuneVault.Application.Common.Interfaces;
+
+public interface IAppDbContext
+{
+    DbSet<ApplicationUser> Users { get; }
+    DbSet<MediaItem> MediaItems { get; }
+    DbSet<Playlist> Playlists { get; }
+    DbSet<MediaShare> MediaShares { get; }
+    DbSet<Notification> Notifications { get; }
+
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 </file>
 
@@ -6767,6 +6954,22 @@ namespace TuneVault.Application.Features.Media.Queries.SearchMedia
 }
 </file>
 
+<file path="backend/TuneVault.Application/Features/Notification/DTOs/NotificationDto.cs">
+namespace TuneVault.Application.Features.Notification.DTOs;
+
+public class NotificationDto
+{
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+
+    public string Type { get; set; } = "";
+    public string Payload { get; set; } = "{}";
+
+    public bool IsRead { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+</file>
+
 <file path="backend/TuneVault.Application/Features/Share/Commands/ShareMedia/ShareMediaCommand.cs">
 using MediatR;
 using TuneVault.Application.Features.Share.DTOs;
@@ -6782,142 +6985,6 @@ public class ShareMediaCommand : IRequest<ShareMediaDto>
     public Guid? PlaylistId { get; set; }
 
     public string? Message { get; set; }
-}
-</file>
-
-<file path="backend/TuneVault.Application/Features/Share/Commands/ShareMedia/ShareMediaHandler.cs">
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using TuneVault.Application.Common.Interfaces;
-using TuneVault.Application.Features.Share.DTOs;
-using TuneVault.Domain.Entities;
-
-namespace TuneVault.Application.Features.Share.Commands.ShareMedia;
-
-public class ShareMediaHandler : IRequestHandler<ShareMediaCommand, ShareMediaDto>
-{
-    private readonly IAppDbContext _context;
-
-    public ShareMediaHandler(IAppDbContext context)
-    {
-        _context = context;
-    }
-
-    public async Task<ShareMediaDto> Handle(ShareMediaCommand request, CancellationToken cancellationToken)
-    {
-        var sender = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == request.SenderId, cancellationToken);
-
-        if (sender == null)
-        {
-            throw new KeyNotFoundException("Không tìm thấy người gửi.");
-        }
-
-        var receiver = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == request.ReceiverId, cancellationToken);
-
-        if (receiver == null)
-        {
-            throw new KeyNotFoundException("Không tìm thấy người nhận.");
-        }
-
-        string targetType;
-        string targetTitle;
-
-        if (request.MediaItemId.HasValue)
-        {
-            var media = await _context.MediaItems
-                .FirstOrDefaultAsync(m => m.Id == request.MediaItemId.Value, cancellationToken);
-
-            if (media == null)
-            {
-                throw new KeyNotFoundException("Không tìm thấy media cần chia sẻ.");
-            }
-
-            if (!media.IsPublic && media.OwnerId != request.SenderId)
-            {
-                throw new UnauthorizedAccessException("Bạn không có quyền chia sẻ media này.");
-            }
-
-            targetType = media.MediaType.ToString();
-            targetTitle = media.Title;
-        }
-        else
-        {
-            var playlist = await _context.Playlists
-                .FirstOrDefaultAsync(p => p.Id == request.PlaylistId!.Value, cancellationToken);
-
-            if (playlist == null)
-            {
-                throw new KeyNotFoundException("Không tìm thấy playlist cần chia sẻ.");
-            }
-
-            if (!playlist.IsPublic && playlist.UserId != request.SenderId)
-            {
-                throw new UnauthorizedAccessException("Bạn không có quyền chia sẻ playlist này.");
-            }
-
-            targetType = "Playlist";
-            targetTitle = playlist.Title;
-        }
-
-        var existedShare = await _context.MediaShares
-            .FirstOrDefaultAsync(ms =>
-                ms.SenderId == request.SenderId &&
-                ms.ReceiverId == request.ReceiverId &&
-                ms.MediaItemId == request.MediaItemId &&
-                ms.PlaylistId == request.PlaylistId,
-                cancellationToken);
-
-        if (existedShare != null)
-        {
-            return new ShareMediaDto
-            {
-                Id = existedShare.Id,
-                SenderId = sender.Id,
-                SenderName = sender.UserName ?? "",
-                ReceiverId = receiver.Id,
-                ReceiverName = receiver.UserName ?? "",
-                MediaItemId = existedShare.MediaItemId,
-                PlaylistId = existedShare.PlaylistId,
-                TargetType = targetType,
-                TargetTitle = targetTitle,
-                Message = existedShare.Message,
-                SharedAt = existedShare.SharedAt,
-                AlreadyExisted = true
-            };
-        }
-
-        var share = new MediaShare
-        {
-            Id = Guid.NewGuid(),
-            SenderId = request.SenderId,
-            ReceiverId = request.ReceiverId,
-            MediaItemId = request.MediaItemId,
-            PlaylistId = request.PlaylistId,
-            Message = request.Message,
-            SharedAt = DateTime.UtcNow
-        };
-
-        _context.MediaShares.Add(share);
-        await _context.SaveChangesAsync(cancellationToken);
-
-        return new ShareMediaDto
-        {
-            Id = share.Id,
-            SenderId = sender.Id,
-            SenderName = sender.UserName ?? "",
-            ReceiverId = receiver.Id,
-            ReceiverName = receiver.UserName ?? "",
-            MediaItemId = share.MediaItemId,
-            PlaylistId = share.PlaylistId,
-            TargetType = targetType,
-            TargetTitle = targetTitle,
-            Message = share.Message,
-            SharedAt = share.SharedAt,
-            AlreadyExisted = false
-        };
-    }
 }
 </file>
 
@@ -7364,6 +7431,51 @@ namespace TuneVault.Domain.Interfaces
         // Lấy lịch sử nghe nhạc gần đây (Phục vụ chức năng 10)
         Task<IEnumerable<PlayHistory>> GetRecentPlayHistoryAsync(Guid userId, int limit = 10, CancellationToken cancellationToken = default);
         Task AddPlayHistoryAsync(PlayHistory history, CancellationToken cancellationToken = default);
+    }
+}
+</file>
+
+<file path="backend/TuneVault.Infrastructure/Hubs/NotificationHub.cs">
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
+
+namespace TuneVault.Infrastructure.Hubs;
+
+[Authorize]
+public class NotificationHub : Hub
+{
+    public override async Task OnConnectedAsync()
+    {
+        var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? Context.User?.FindFirstValue("sub")
+                     ?? Context.User?.FindFirstValue("uid");
+
+        if (!string.IsNullOrWhiteSpace(userId))
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, GetUserGroup(userId));
+        }
+
+        await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? Context.User?.FindFirstValue("sub")
+                     ?? Context.User?.FindFirstValue("uid");
+
+        if (!string.IsNullOrWhiteSpace(userId))
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, GetUserGroup(userId));
+        }
+
+        await base.OnDisconnectedAsync(exception);
+    }
+
+    public static string GetUserGroup(string userId)
+    {
+        return $"user-{userId}";
     }
 }
 </file>
@@ -8249,26 +8361,6 @@ namespace TuneVault.Infrastructure.Persistence.Configurations
                    .WithMany(m => m.MediaTags)
                    .HasForeignKey(mt => mt.MediaItemId)
                    .OnDelete(DeleteBehavior.Cascade); // Khi xóa bài hát, xóa luôn các thẻ Tag của nó
-        }
-    }
-}
-</file>
-
-<file path="backend/TuneVault.Infrastructure/Persistence/Configurations/NotificationConfiguration.cs">
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TuneVault.Domain.Entities;
-
-namespace TuneVault.Infrastructure.Persistence.Configurations
-{
-    public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
-    {
-        public void Configure(EntityTypeBuilder<Notification> builder)
-        {
-            builder.HasOne(n => n.User) // Mối quan hệ 1 Notification thuộc về 1 User
-                   .WithMany() // 1 User có nhiều Notification (để trống nếu class User ko khai báo ICollection<Notification>)
-                   .HasForeignKey(n => n.UserId)
-                   .OnDelete(DeleteBehavior.Cascade); // Xóa user thì xóa luôn thông báo
         }
     }
 }
@@ -9536,156 +9628,6 @@ const Notifications: React.FC = () => {
 export default Notifications;
 </file>
 
-<file path="frontend/src/pages/PlaylistDetail.tsx">
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
-import { usePlayerStore } from '../store/playerStore';import { playlistService } from '../services/playlistService';
-import type { Playlist } from '../types/playlist';
-import { mediaService } from '../services/mediaService';
-import type { MediaItem } from '../types/media';
-
-// Hàm xử lý đường dẫn ảnh (Chống lỗi vỡ hình)
-const getImageUrl = (path?: string | null) => {
-  if (!path) return 'https://via.placeholder.com/40/1a1a1a/ffffff?text=Music';
-  if (path.startsWith('http')) return path;
-  return `http://localhost:5078${path}`;
-};
-
-const PlaylistDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const { setRightPanelData } = useAppContext();
-  const play = usePlayerStore((s) => s.play);
-  
-  const [playlist, setPlaylist] = useState<Playlist | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchDetail = async () => {
-      if (!id) return;
-
-      try {
-        setLoading(true);
-        
-        // Phân nhánh: Nếu là danh sách "Bài hát đã thích"
-        if (id === 'liked') {
-          const favorites = await mediaService.getFavorites();
-          setPlaylist({
-            id: 'liked',
-            title: 'Bài hát đã thích',
-            coverImageUrl: 'https://via.placeholder.com/150/6366f1/ffffff?text=♥',
-            tracks: favorites
-          });
-        } 
-        // Nếu là Playlist bình thường
-        else {
-          const data = await playlistService.getPlaylistDetail(id);
-          setPlaylist(data);
-        }
-      } catch (error) {
-        console.error("Lỗi khi tải danh sách phát:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDetail();
-  }, [id]);
-
-  const handlePlayTrack = (song: MediaItem) => {
-    // 1. Đẩy thông tin lên Panel bên phải
-    setRightPanelData({
-      title: song.title,
-      artist: song.artistName || song.ownerName || 'Ẩn danh',
-      cover: getImageUrl(song.thumbnailPath),
-      type: 'song'
-    });
-    
-    // 2. Chuyển bài hát xuống Playbar để phát
-    play(song);
-  };
-
-  // Trạng thái chờ
-  if (loading) {
-    return <div style={{ padding: 24, color: '#fff' }}>Đang tải danh sách phát...</div>;
-  }
-
-  // Trạng thái lỗi không tìm thấy
-  if (!playlist) {
-    return <div style={{ padding: 24, color: '#fff' }}>Không tìm thấy danh sách phát này.</div>;
-  }
-
-  const songs = playlist.tracks || [];
-
-  return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <img 
-          src={getImageUrl(playlist.coverImageUrl)} 
-          alt="Playlist Cover" 
-          style={styles.coverImage} 
-        />
-        <div style={styles.headerInfo}>
-          <span style={styles.typeText}>Danh sách phát</span>
-          <h2 style={styles.title}>{playlist.title}</h2>
-          <p style={styles.stats}>{songs.length} bài hát</p>
-        </div>
-      </div>
-      
-      {songs.length === 0 ? (
-        <p style={{ color: '#b3b3b3', fontSize: '14px', marginTop: '24px' }}>
-          Chưa có bài hát nào trong danh sách phát này.
-        </p>
-      ) : (
-        <div style={styles.trackList}>
-          {songs.map((song, index) => (
-            <div 
-              key={song.id}
-              onClick={() => handlePlayTrack(song)}
-              style={styles.trackItem}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2a2a2a')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-            >
-              <span style={styles.trackIndex}>{index + 1}</span>
-              <img 
-                src={getImageUrl(song.thumbnailPath)} 
-                alt={song.title} 
-                style={styles.trackImage} 
-              />
-              <div style={styles.trackInfo}>
-                <div style={styles.trackTitle}>{song.title}</div>
-                <div style={styles.trackArtist}>
-                  {song.artistName || song.ownerName || 'Ẩn danh'}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const styles = {
-  container: { padding: '24px', color: '#ffffff', backgroundColor: '#121212', minHeight: '100%', borderRadius: '8px' },
-  header: { display: 'flex', alignItems: 'flex-end', gap: '24px', paddingBottom: '24px', borderBottom: '1px solid #282828' },
-  coverImage: { width: '192px', height: '192px', borderRadius: '4px', objectFit: 'cover' as const, boxShadow: '0 4px 60px rgba(0,0,0,.5)' },
-  headerInfo: { display: 'flex', flexDirection: 'column' as const },
-  typeText: { fontSize: '14px', fontWeight: 700, marginBottom: '8px' },
-  title: { fontSize: '64px', fontWeight: 900, margin: '0 0 16px 0', letterSpacing: '-0.04em' },
-  stats: { color: '#b3b3b3', fontSize: '14px', margin: 0 },
-  trackList: { display: 'flex', flexDirection: 'column' as const, gap: '4px', marginTop: '24px' },
-  trackItem: { display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', transition: 'background-color 0.2s' },
-  trackIndex: { color: '#b3b3b3', width: '24px', textAlign: 'center' as const, fontSize: '16px' },
-  trackImage: { width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' as const },
-  trackInfo: { flex: 1 },
-  trackTitle: { fontWeight: 600, fontSize: '16px', color: '#ffffff', marginBottom: '4px' },
-  trackArtist: { fontSize: '14px', color: '#b3b3b3' }
-};
-
-export default PlaylistDetail;
-</file>
-
 <file path="frontend/src/pages/ShareInbox.tsx">
 import React from 'react';
 
@@ -9814,6 +9756,69 @@ const styles = {
 export default VideoPlayer;
 </file>
 
+<file path="frontend/src/services/playlistService.ts">
+import api from './api';
+import type { Playlist } from '../types/playlist';
+
+export const playlistService = {
+  // Tạo playlist mới (Dùng cho Sidebar)
+  createPlaylist: async (title: string): Promise<Playlist> => {
+    try {
+      const response = await api.post('/playlist', { 
+        title: title,
+        description: "",
+        isPublic: true
+      });
+      return response.data?.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Không thể tạo danh sách phát.';
+      // eslint-disable-next-line preserve-caught-error
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Lấy danh sách playlist của người dùng
+  getUserPlaylists: async (): Promise<Playlist[]> => {
+    try {
+      const response = await api.get('/playlist/user');
+      return response.data?.data ?? [];
+    } catch (error) {
+      console.error('Lỗi tải danh sách playlist:', error);
+      return []; 
+    }
+  },
+
+  // Lấy chi tiết playlist kèm danh sách bài hát bên trong
+  getPlaylistDetail: async (id: string): Promise<Playlist> => {
+    try {
+      const response = await api.get(`/playlist/${id}`);
+      return response.data?.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error('Lỗi tải chi tiết playlist:', error);
+      // eslint-disable-next-line preserve-caught-error
+      throw new Error('Không tìm thấy danh sách phát này.');
+    }
+  }
+};
+</file>
+
+<file path="frontend/src/services/profileService.ts">
+import api from './api';
+
+export const profileService = {
+  getProfile: async () => {
+    const response = await api.get('/profile');
+    return response.data.data;
+  },
+  updateProfile: async (data: { userName: string; bio: string }) => {
+    const response = await api.put('/profile', data);
+    return response.data.data;
+  }
+};
+</file>
+
 <file path="frontend/src/styles/globals.css">
 :root {
   /* Colors - Spotify Dark Theme */
@@ -9923,6 +9928,23 @@ export interface RegisterDto {
   email: string;
   userName: string;
   password: string;
+}
+</file>
+
+<file path="frontend/src/types/playlist.ts">
+import type { MediaItem } from './media';
+
+export interface Playlist {
+  id: string;
+  title: string;
+  description?: string;
+  coverImageUrl: string | null;
+  isPublic?: boolean;
+  userId?: string;
+  createdAt?: string;
+  
+  // Mảng chứa các bài hát thuộc playlist này (sẽ có dữ liệu khi gọi API GetPlaylistDetail)
+  tracks?: MediaItem[]; 
 }
 </file>
 
@@ -10337,6 +10359,186 @@ namespace TuneVault.Application.Features.Media.Commands.UploadMedia
 }
 </file>
 
+<file path="backend/TuneVault.Application/Features/Share/Commands/ShareMedia/ShareMediaHandler.cs">
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using TuneVault.Application.Common.Interfaces;
+using TuneVault.Application.Features.Notification.DTOs;
+using TuneVault.Application.Features.Share.DTOs;
+using TuneVault.Domain.Entities;
+
+namespace TuneVault.Application.Features.Share.Commands.ShareMedia;
+using NotificationEntity = TuneVault.Domain.Entities.Notification;
+
+public class ShareMediaHandler : IRequestHandler<ShareMediaCommand, ShareMediaDto>
+{
+    private readonly IAppDbContext _context;
+    private readonly INotificationRealtimeService _notificationRealtimeService;
+
+    public ShareMediaHandler(
+        IAppDbContext context,
+        INotificationRealtimeService notificationRealtimeService)
+    {
+        _context = context;
+        _notificationRealtimeService = notificationRealtimeService;
+    }
+
+    public async Task<ShareMediaDto> Handle(ShareMediaCommand request, CancellationToken cancellationToken)
+    {
+        var sender = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.SenderId, cancellationToken);
+
+        if (sender == null)
+        {
+            throw new KeyNotFoundException("Không tìm thấy người gửi.");
+        }
+
+        var receiver = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == request.ReceiverId, cancellationToken);
+
+        if (receiver == null)
+        {
+            throw new KeyNotFoundException("Không tìm thấy người nhận.");
+        }
+
+        string targetType;
+        string targetTitle;
+
+        if (request.MediaItemId.HasValue)
+        {
+            var media = await _context.MediaItems
+                .FirstOrDefaultAsync(m => m.Id == request.MediaItemId.Value, cancellationToken);
+
+            if (media == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy media cần chia sẻ.");
+            }
+
+            if (!media.IsPublic && media.OwnerId != request.SenderId)
+            {
+                throw new UnauthorizedAccessException("Bạn không có quyền chia sẻ media này.");
+            }
+
+            targetType = media.MediaType.ToString();
+            targetTitle = media.Title;
+        }
+        else
+        {
+            var playlist = await _context.Playlists
+                .FirstOrDefaultAsync(p => p.Id == request.PlaylistId!.Value, cancellationToken);
+
+            if (playlist == null)
+            {
+                throw new KeyNotFoundException("Không tìm thấy playlist cần chia sẻ.");
+            }
+
+            if (!playlist.IsPublic && playlist.UserId != request.SenderId)
+            {
+                throw new UnauthorizedAccessException("Bạn không có quyền chia sẻ playlist này.");
+            }
+
+            targetType = "Playlist";
+            targetTitle = playlist.Title;
+        }
+
+        var existedShare = await _context.MediaShares
+            .FirstOrDefaultAsync(ms =>
+                ms.SenderId == request.SenderId &&
+                ms.ReceiverId == request.ReceiverId &&
+                ms.MediaItemId == request.MediaItemId &&
+                ms.PlaylistId == request.PlaylistId,
+                cancellationToken);
+
+        if (existedShare != null)
+        {
+            return new ShareMediaDto
+            {
+                Id = existedShare.Id,
+                SenderId = sender.Id,
+                SenderName = sender.UserName ?? "",
+                ReceiverId = receiver.Id,
+                ReceiverName = receiver.UserName ?? "",
+                MediaItemId = existedShare.MediaItemId,
+                PlaylistId = existedShare.PlaylistId,
+                TargetType = targetType,
+                TargetTitle = targetTitle,
+                Message = existedShare.Message,
+                SharedAt = existedShare.SharedAt,
+                AlreadyExisted = true
+            };
+        }
+
+        var share = new MediaShare
+        {
+            Id = Guid.NewGuid(),
+            SenderId = request.SenderId,
+            ReceiverId = request.ReceiverId,
+            MediaItemId = request.MediaItemId,
+            PlaylistId = request.PlaylistId,
+            Message = request.Message,
+            SharedAt = DateTime.UtcNow
+        };
+
+        var notification = new NotificationEntity
+        {
+            Id = Guid.NewGuid(),
+            UserId = request.ReceiverId,
+            Type = "share",
+            Payload = JsonSerializer.Serialize(new
+            {
+                shareId = share.Id,
+                senderId = sender.Id,
+                senderName = sender.UserName,
+                mediaItemId = share.MediaItemId,
+                playlistId = share.PlaylistId,
+                targetType,
+                targetTitle,
+                message = share.Message
+            }),
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.MediaShares.Add(share);
+        _context.Notifications.Add(notification);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        var notificationDto = new NotificationDto
+        {
+            Id = notification.Id,
+            UserId = notification.UserId,
+            Type = notification.Type,
+            Payload = notification.Payload,
+            IsRead = notification.IsRead,
+            CreatedAt = notification.CreatedAt
+        };
+
+        await _notificationRealtimeService.SendNotificationAsync(
+            request.ReceiverId,
+            notificationDto,
+            cancellationToken);
+
+        return new ShareMediaDto
+        {
+            Id = share.Id,
+            SenderId = sender.Id,
+            SenderName = sender.UserName ?? "",
+            ReceiverId = receiver.Id,
+            ReceiverName = receiver.UserName ?? "",
+            MediaItemId = share.MediaItemId,
+            PlaylistId = share.PlaylistId,
+            TargetType = targetType,
+            TargetTitle = targetTitle,
+            Message = share.Message,
+            SharedAt = share.SharedAt,
+            AlreadyExisted = false
+        };
+    }
+}
+</file>
+
 <file path="backend/TuneVault.Domain/Entities/Favorite.cs">
 using System;
 
@@ -10414,6 +10616,26 @@ namespace TuneVault.Infrastructure.Persistence.Configurations
                    .WithMany(m => m.Favorites) 
                    .HasForeignKey(f => f.MediaItemId)
                    .OnDelete(DeleteBehavior.Restrict); // Chặn vòng lặp xóa dây chuyền
+        }
+    }
+}
+</file>
+
+<file path="backend/TuneVault.Infrastructure/Persistence/Configurations/NotificationConfiguration.cs">
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TuneVault.Domain.Entities;
+
+namespace TuneVault.Infrastructure.Persistence.Configurations
+{
+    public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
+    {
+        public void Configure(EntityTypeBuilder<Notification> builder)
+        {
+            builder.HasOne(n => n.User) // Mối quan hệ 1 Notification thuộc về 1 User
+                   .WithMany(u => u.Notifications) 
+                   .HasForeignKey(n => n.UserId)
+                   .OnDelete(DeleteBehavior.Cascade); // Xóa user thì xóa luôn thông báo
         }
     }
 }
@@ -10595,18 +10817,6 @@ CREATE TABLE MediaTags (
 </html>
 </file>
 
-<file path="frontend/src/components/ui/ArtistCard.tsx">
-
-</file>
-
-<file path="frontend/src/components/ui/PlaylistCard.tsx">
-
-</file>
-
-<file path="frontend/src/components/ui/SongCard.tsx">
-
-</file>
-
 <file path="frontend/src/main.tsx">
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -10623,66 +10833,154 @@ createRoot(document.getElementById('root')!).render(
 );
 </file>
 
-<file path="frontend/src/pages/Profile.tsx">
-import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
+<file path="frontend/src/pages/PlaylistDetail.tsx">
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
+import { usePlayerStore } from '../store/playerStore';import { playlistService } from '../services/playlistService';
+import type { Playlist } from '../types/playlist';
+import { mediaService } from '../services/mediaService';
+import type { MediaItem } from '../types/media';
 
-const Profile: React.FC = () => {
-  const navigate = useNavigate();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+// Hàm xử lý đường dẫn ảnh (Chống lỗi vỡ hình)
+const getImageUrl = (path?: string | null) => {
+  if (!path) return 'https://via.placeholder.com/40/1a1a1a/ffffff?text=Music';
+  if (path.startsWith('http')) return path;
+  return `http://localhost:5078${path}`;
+};
 
-  if (!isAuthenticated) {
-    return (
-      <div style={styles.page}>
-        <h2 style={{ marginBottom: 12 }}>Bạn chưa đăng nhập</h2>
-        <p style={{ color: '#b3b3b3' }}>Đăng nhập để xem hồ sơ, danh sách phát và lịch sử nghe.</p>
-        <div style={{ marginTop: 18, display: 'flex', gap: 8 }}>
-          <button style={styles.authBtn} onClick={() => navigate('/login')}>Đăng nhập</button>
-          <Link to="/register" style={{ textDecoration: 'none' }}><button style={styles.createBtn}>Đăng ký</button></Link>
-        </div>
-      </div>
-    );
+const PlaylistDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const { setRightPanelData } = useAppContext();
+  const play = usePlayerStore((s) => s.play);
+  
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDetail = async () => {
+      if (!id) return;
+
+      try {
+        setLoading(true);
+        
+        // Phân nhánh: Nếu là danh sách "Bài hát đã thích"
+        if (id === 'liked') {
+          const favorites = await mediaService.getFavorites();
+          setPlaylist({
+            id: 'liked',
+            title: 'Bài hát đã thích',
+            coverImageUrl: 'https://via.placeholder.com/150/6366f1/ffffff?text=♥',
+            tracks: favorites
+          });
+        } 
+        // Nếu là Playlist bình thường
+        else {
+          const data = await playlistService.getPlaylistDetail(id);
+          setPlaylist(data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách phát:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetail();
+  }, [id]);
+
+  const handlePlayTrack = (song: MediaItem) => {
+    // 1. Đẩy thông tin lên Panel bên phải
+    setRightPanelData({
+      title: song.title,
+      artist: song.artistName || song.ownerName || 'Ẩn danh',
+      cover: getImageUrl(song.thumbnailPath),
+      type: 'song'
+    });
+    
+    // 2. Chuyển bài hát xuống Playbar để phát
+    play(song);
+  };
+
+  // Trạng thái chờ
+  if (loading) {
+    return <div style={{ padding: 24, color: '#fff' }}>Đang tải danh sách phát...</div>;
   }
 
+  // Trạng thái lỗi không tìm thấy
+  if (!playlist) {
+    return <div style={{ padding: 24, color: '#fff' }}>Không tìm thấy danh sách phát này.</div>;
+  }
+
+  const songs = playlist.tracks || [];
+
   return (
-    <div style={styles.page}>
+    <div style={styles.container}>
       <div style={styles.header}>
-        <div style={styles.avatar}>{user?.userName?.[0]?.toUpperCase() || 'U'}</div>
-        <div>
-          <p style={styles.type}>Hồ sơ</p>
-          <h1 style={styles.name}>{user?.userName || 'Người dùng'}</h1>
-          <p style={styles.stats}>{user?.email || ''}</p>
+        <img 
+          src={getImageUrl(playlist.coverImageUrl)} 
+          alt="Playlist Cover" 
+          style={styles.coverImage} 
+        />
+        <div style={styles.headerInfo}>
+          <span style={styles.typeText}>Danh sách phát</span>
+          <h2 style={styles.title}>{playlist.title}</h2>
+          <p style={styles.stats}>{songs.length} bài hát</p>
         </div>
       </div>
-
-      <div>
-        <button
-          style={{ ...styles.createBtn, marginTop: 12 }}
-          onClick={() => {
-            logout();
-            navigate('/');
-          }}
-        >
-          Đăng xuất
-        </button>
-      </div>
+      
+      {songs.length === 0 ? (
+        <p style={{ color: '#b3b3b3', fontSize: '14px', marginTop: '24px' }}>
+          Chưa có bài hát nào trong danh sách phát này.
+        </p>
+      ) : (
+        <div style={styles.trackList}>
+          {songs.map((song, index) => (
+            <div 
+              key={song.id}
+              onClick={() => handlePlayTrack(song)}
+              style={styles.trackItem}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2a2a2a')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            >
+              <span style={styles.trackIndex}>{index + 1}</span>
+              <img 
+                src={getImageUrl(song.thumbnailPath)} 
+                alt={song.title} 
+                style={styles.trackImage} 
+              />
+              <div style={styles.trackInfo}>
+                <div style={styles.trackTitle}>{song.title}</div>
+                <div style={styles.trackArtist}>
+                  {song.artistName || song.ownerName || 'Ẩn danh'}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
 const styles = {
-  page: { padding: 24, color: '#ffffff', minHeight: '100%', backgroundColor: '#121212' },
-  header: { display: 'flex', alignItems: 'flex-end', gap: '24px', marginBottom: '32px' },
-  avatar: { width: '192px', height: '192px', borderRadius: '50%', backgroundColor: '#282828', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '64px', fontWeight: 'bold', boxShadow: '0 4px 60px rgba(0,0,0,.5)' },
-  type: { margin: 0, fontSize: '14px', fontWeight: 700 },
-  name: { margin: '8px 0', fontSize: '72px', fontWeight: 900, letterSpacing: '-0.04em' },
-  stats: { margin: 0, color: '#b3b3b3', fontSize: '14px' }
+  container: { padding: '24px', color: '#ffffff', backgroundColor: '#121212', minHeight: '100%', borderRadius: '8px' },
+  header: { display: 'flex', alignItems: 'flex-end', gap: '24px', paddingBottom: '24px', borderBottom: '1px solid #282828' },
+  coverImage: { width: '192px', height: '192px', borderRadius: '4px', objectFit: 'cover' as const, boxShadow: '0 4px 60px rgba(0,0,0,.5)' },
+  headerInfo: { display: 'flex', flexDirection: 'column' as const },
+  typeText: { fontSize: '14px', fontWeight: 700, marginBottom: '8px' },
+  title: { fontSize: '64px', fontWeight: 900, margin: '0 0 16px 0', letterSpacing: '-0.04em' },
+  stats: { color: '#b3b3b3', fontSize: '14px', margin: 0 },
+  trackList: { display: 'flex', flexDirection: 'column' as const, gap: '4px', marginTop: '24px' },
+  trackItem: { display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', transition: 'background-color 0.2s' },
+  trackIndex: { color: '#b3b3b3', width: '24px', textAlign: 'center' as const, fontSize: '16px' },
+  trackImage: { width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' as const },
+  trackInfo: { flex: 1 },
+  trackTitle: { fontWeight: 600, fontSize: '16px', color: '#ffffff', marginBottom: '4px' },
+  trackArtist: { fontSize: '14px', color: '#b3b3b3' }
 };
 
-export default Profile;
+export default PlaylistDetail;
 </file>
 
 <file path="frontend/src/pages/Register.tsx">
@@ -11153,6 +11451,90 @@ const styles = {
 export default Login;
 </file>
 
+<file path="frontend/src/pages/Profile.tsx">
+import React, { useState } from 'react';
+import { useAuthStore } from '../store/authStore';
+import { profileService } from '../services/profileService';
+
+const Profile: React.FC = () => {
+  const { user, isAuthenticated, setAuth } = useAuthStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ 
+    userName: user?.userName || '', 
+    bio: user?.bio || '' 
+  });
+
+  const handleUpdate = async () => {
+    try {
+      const updatedUser = await profileService.updateProfile(formData);
+      // Giả sử service trả về user mới, cập nhật lại store
+      setAuth({ ...user!, ...updatedUser }, localStorage.getItem('token')!);
+      setIsEditing(false);
+      alert("Cập nhật thành công!");
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      alert("Có lỗi xảy ra khi cập nhật.");
+    }
+  };
+
+  if (!isAuthenticated) return <div style={styles.container}>Vui lòng đăng nhập.</div>;
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <div style={styles.avatarLarge}>{user?.userName?.[0]?.toUpperCase()}</div>
+        <div style={styles.info}>
+          <p style={styles.subTitle}>Hồ sơ</p>
+          {isEditing ? (
+            <input 
+              style={styles.input} 
+              value={formData.userName} 
+              onChange={(e) => setFormData({...formData, userName: e.target.value})} 
+            />
+          ) : (
+            <h1 style={styles.title}>{user?.userName}</h1>
+          )}
+        </div>
+      </div>
+
+      <div style={styles.bioSection}>
+        <h3>Bio</h3>
+        {isEditing ? (
+          <textarea 
+            style={styles.textarea} 
+            value={formData.bio} 
+            onChange={(e) => setFormData({...formData, bio: e.target.value})} 
+          />
+        ) : (
+          <p style={styles.bioText}>{user?.bio || "Chưa có tiểu sử."}</p>
+        )}
+      </div>
+
+      <button style={styles.editButton} onClick={() => isEditing ? handleUpdate() : setIsEditing(true)}>
+        {isEditing ? "Lưu thay đổi" : "Chỉnh sửa hồ sơ"}
+      </button>
+    </div>
+  );
+};
+
+const styles = {
+  container: { padding: '40px', color: '#fff', backgroundColor: '#121212', minHeight: '100vh' },
+  header: { display: 'flex', alignItems: 'center', gap: '32px', marginBottom: '40px' },
+  avatarLarge: { width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '60px' },
+  title: { fontSize: '60px', fontWeight: 900 },
+  subTitle: { color: '#b3b3b3', textTransform: 'uppercase' as const },
+  // THÊM THUỘC TÍNH NÀY VÀO:
+  info: { display: 'flex', flexDirection: 'column' as const, gap: '8px' }, 
+  input: { fontSize: '40px', background: 'transparent', color: '#fff', border: '1px solid #555', padding: '5px' },
+  bioSection: { backgroundColor: '#181818', padding: '20px', borderRadius: '8px', maxWidth: '600px' },
+  textarea: { width: '100%', height: '100px', background: '#333', color: '#fff', padding: '10px', marginTop: '10px' },
+  bioText: { color: '#b3b3b3', marginTop: '10px' },
+  editButton: { marginTop: '20px', padding: '10px 25px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }
+};
+
+export default Profile;
+</file>
+
 <file path="frontend/src/pages/Search.tsx">
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -11298,7 +11680,7 @@ export const authService = {
         userName: data.userName,
         email: data.email,
         avatarPath: data.avatarPath,
-        role: userRole // 🌟 GÁN QUYỀN VÀO OBJECT USER
+        role: userRole 
       };
 
       // Cập nhật State toàn cục
@@ -11479,7 +11861,7 @@ namespace TuneVault.Infrastructure.Persistence
     public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IAppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
+        public DbSet<ApplicationUser> Users => base.Users;
         public DbSet<Album> Albums => Set<Album>();
         public DbSet<MediaItem> MediaItems => Set<MediaItem>();
         public DbSet<Playlist> Playlists => Set<Playlist>();
@@ -11513,10 +11895,194 @@ namespace TuneVault.Infrastructure.Persistence
 }
 </file>
 
+<file path="backend/TuneVault.API/TuneVault.API.csproj">
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.27" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TuneVault.Application\TuneVault.Application.csproj" />
+    <ProjectReference Include="..\TuneVault.Infrastructure\TuneVault.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
+</file>
+
+<file path="backend/TuneVault.Infrastructure/TuneVault.Infrastructure.csproj">
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\TuneVault.Application\TuneVault.Application.csproj" />
+    <ProjectReference Include="..\TuneVault.Domain\TuneVault.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="35.6.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    </ItemGroup>
+
+</Project>
+</file>
+
+<file path="frontend/src/App.tsx">
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+// Layout chính
+import MainLayout from './components/layout/MainLayout';
+
+// Các trang có thanh nhạc (Nằm trong MainLayout)
+import HomeContent from './components/layout/MainContent';
+import PlaylistDetail from './pages/PlaylistDetail';
+import Search from './pages/Search';
+import Library from './pages/Library';
+import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
+import ShareInbox from './pages/ShareInbox';
+import VideoPlayer from './pages/VideoPlayer';
+import ProtectedRoute from './components/layout/ProtectedRoute';
+
+// 1. IMPORT TRANG QUẢN LÝ ADMIN
+import AdminMediaManager from './pages/AdminMediaManager';
+
+// Các trang độc lập
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public routes: login/register */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected app routes - require auth */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<HomeContent />} />
+            <Route path="playlist/:id" element={<PlaylistDetail />} />
+            <Route path="search" element={<Search />} />
+            <Route path="library" element={<Library />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="share" element={<ShareInbox />} />
+            <Route path="video" element={<VideoPlayer />} />
+            <Route path="admin/media" element={<AdminMediaManager />} />
+            
+          </Route>
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+</file>
+
+<file path="frontend/src/components/layout/MainLayout.tsx">
+import React from 'react';
+import { Outlet } from 'react-router-dom'; // ĐỒNG BỘ ROUTER: Cổng chờ cho vùng trung tâm
+import Navbar from './Navbar';
+import Sidebar from './Sidebar';
+import RightPanel from './RightPanel';
+import Playbar from './Playbar';
+import '../../styles/globals.css';
+
+const MainLayout: React.FC = () => {
+  return (
+    <div style={styles.layout}>
+      <Navbar />
+      <div style={styles.contentArea}>
+        {/* 1. Thanh điều hướng bên trái cố định */}
+        <Sidebar />
+        
+        {/* 2. VÙNG TRUNG TÂM TỰ ĐỘNG THAY ĐỔI: 
+            Thay <MainContent /> bằng <Outlet />. Khi URL thay đổi, 
+            các trang con (như HomeContent hoặc PlaylistDetail) sẽ tự động hiển thị ở đây. */}
+        <div style={styles.mainContentWrapper}>
+          <Outlet />
+        </div>
+        
+        {/* 3. Panel bên phải hiển thị chi tiết nghệ sĩ/bài hát */}
+        <RightPanel />
+      </div>
+      <Playbar />
+    </div>
+  );
+};
+
+const styles = {
+  layout: {
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: '#000000',
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    overflow: 'hidden',
+  },
+  contentArea: {
+    display: 'flex' as const,
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+    gap: 8,             // ĐIỂM CỐT LÕI: Tạo rãnh đen 8px giữa 3 cột
+    padding: '0 8px',   // Đẩy 3 cột thụt vào so với mép màn hình trái/phải 8px
+  },
+  // Thêm style bọc ngoài Outlet để đảm bảo vùng trung tâm có thể cuộn nội dung độc lập
+  mainContentWrapper: {
+    minWidth: 0,
+    height: '100%',
+    flex: 1,
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    overflowY: 'auto' as const, // Cho phép cuộn dọc nội dung khi danh sách bài hát quá dài
+    backgroundColor: '#121212', // Màu nền tối cho vùng trung tâm giống Spotify
+    borderRadius: 8,            // Bo góc đồng bộ với các khối khác
+  }
+};
+
+export default MainLayout;
+</file>
+
 <file path="frontend/src/components/layout/Sidebar.tsx">
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Folder, ListFilter, Library, Plus, Search, X } from 'lucide-react';
+import { ArrowRight, Folder, ListFilter, Library, Plus, Search, X, Music4 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
 type LibraryItemType = 'liked' | 'playlist' | 'podcast' | 'artist' | 'folder';
@@ -11886,47 +12452,54 @@ const Sidebar: React.FC = () => {
               onMouseEnter={() => setHoveredId(item.id)}
               onMouseLeave={() => setHoveredId(null)}
               style={{
-                ...styles.itemWrapper,
-                backgroundColor: isSelected
-                  ? '#2a2a2a'
-                  : isHovered
-                    ? '#1f1f1f'
-                    : 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: isExpanded ? '8px 12px' : '8px 0',
                 justifyContent: isExpanded ? 'flex-start' : 'center',
-                padding: isExpanded ? '8px' : '8px 0',
-                width: isExpanded ? '100%' : 48,
+                width: '100%',
+                cursor: 'pointer',
+                backgroundColor: isSelected ? '#2a2a2a' : isHovered ? '#1f1f1f' : 'transparent',
+                borderRadius: '6px', // Bo góc container
+                transition: 'background-color 0.2s'
               }}
             >
-              {item.type === 'folder' ? (
-                <div style={styles.folderIcon}>
-                  <Folder size={24} />
-                </div>
-              ) : (
-                <img
-                  src={item.src}
-                  alt={item.title}
-                  style={{
-                    ...styles.thumbnail,
-                    borderRadius: item.isCircle ? '50%' : '4px',
-                  }}
-                />
-              )}
+              {/* Khối chứa Icon/Ảnh - Đồng nhất cho mọi loại item */}
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: '4px', // Ép hình vuông bo góc 4px cho tất cả
+                backgroundColor: '#2a2a2a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                overflow: 'hidden'
+              }}>
+                {item.type === 'folder' ? (
+                  <Folder size={24} color="#b3b3b3" />
+                ) : (
+                  /* Mọi mục khác (Playlist, Liked, Artist) đều hiện icon nốt nhạc */
+                  <Music4 size={24} color="#b3b3b3" />
+                )}
+              </div>
 
+              {/* Phần chữ (Chỉ hiện khi mở rộng) */}
               {isExpanded && (
-                <div style={styles.itemInfo}>
-                  <span
-                    style={{
-                      ...styles.itemTitle,
-                      color: isSelected ? '#1db954' : '#ffffff',
-                    }}
-                  >
+                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  <span style={{ 
+                    fontSize: '15px', 
+                    fontWeight: 500, 
+                    color: isSelected ? '#1db954' : '#ffffff',
+                    whiteSpace: 'nowrap', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis' 
+                  }}>
                     {item.title}
                   </span>
-
-                  <div style={styles.subtitleRow}>
-                    {item.isPinned && <span style={styles.pinIcon}>•</span>}
-                    <span style={styles.itemSubtitle}>{item.subtitle}</span>
-                  </div>
+                  <span style={{ fontSize: '13px', color: '#b3b3b3' }}>
+                    {item.subtitle}
+                  </span>
                 </div>
               )}
             </div>
@@ -12299,7 +12872,7 @@ export default Sidebar;
 
 <file path="frontend/src/components/ui/rightpanel/NowPlayingPanel.tsx">
 import React, { useState } from 'react';
-import { currentTrack } from '../../../data/currentTrack';
+ 
 import PanelHeader from './PanelHeader';
 import TrackDetails from './TrackDetails';
 import ArtistAboutCard from './ArtistAboutCard';
@@ -12316,235 +12889,86 @@ interface NowPlayingPanelProps {
   } | null;
 }
 
-const queueData = [
-  {
-    id: 1,
-    title: 'The Lie',
-    artist: 'Long Afternoon',
-    cover: 'https://via.placeholder.com/60/1a1a1a/ffffff?text=Lie',
-  },
-  {
-    id: 2,
-    title: 'Painted Silence',
-    artist: 'Long Afternoon',
-    cover: 'https://via.placeholder.com/60/6366f1/ffffff?text=PS',
-  },
-  {
-    id: 3,
-    title: '2AM',
-    artist: 'JustaTee, BigDaddy',
-    cover: 'https://via.placeholder.com/60/1DB954/ffffff?text=2AM',
-  },
-];
-
 const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [showAllCredits, setShowAllCredits] = useState(false);
-  const [showQueue, setShowQueue] = useState(true);
   const [toast, setToast] = useState('');
-
-  const [selectedTrack, setSelectedTrack] = useState<{
-    title: string;
-    artist: string;
-    cover: string;
-  } | null>(null);
 
   const { currentTrack: currentTrackStore } = usePlayerStore();
 
-  // 1. Lưu lại track trước đó để so sánh (thay thế cho useEffect)
-  const [prevTrackTitle, setPrevTrackTitle] = useState(trackData?.title);
-
-  // 2. Kỹ thuật "Derived State" cập nhật ngay trong lúc Render -> KHÔNG BỊ LỖI ESLINT
-  if (trackData?.title !== prevTrackTitle) {
-    setPrevTrackTitle(trackData?.title);
-    setSelectedTrack(null);
-    setIsLiked(false);
-    setShowAllCredits(false);
-  }
-
-  // 3. Hợp nhất object activeTrack chuẩn hóa
-  const activeTrack = selectedTrack
-    ? {
-        playlistTitle: selectedTrack.artist,
-        artworkUrl: selectedTrack.cover,
-        title: selectedTrack.title,
-        artist: currentTrackStore?.artistName || currentTrackStore?.ownerName || currentTrack.artist,
-        artistImageUrl: currentTrack.artistImageUrl,
-        artistMonthlyListeners: currentTrack.artistMonthlyListeners,
-      }
-    : trackData
-      ? {
-          playlistTitle: trackData.type === 'artist' ? trackData.title : trackData.artist,
-          artworkUrl: trackData.cover,
-          title: trackData.title,
-          artist: trackData.artist,
-          artistImageUrl: trackData.cover,
-          artistMonthlyListeners: currentTrack.artistMonthlyListeners,
-        }
-      : {
-          playlistTitle: currentTrack.playlistTitle,
-          artworkUrl: currentTrackStore?.thumbnailPath || currentTrack.artworkUrl,
-          title: currentTrackStore?.title || currentTrack.title,
-          artist: currentTrackStore?.ownerName || currentTrack.artist,
-          artistImageUrl: currentTrackStore?.thumbnailPath || currentTrack.artistImageUrl,
-          artistMonthlyListeners: currentTrack.artistMonthlyListeners,
-        };
+  // Dữ liệu hiển thị ưu tiên:
+  // 1. Nếu có trackData từ trang Playlist Detail -> lấy từ đó
+  // 2. Nếu không, lấy từ bài hát đang phát (currentTrackStore)
+  const activeTrack = trackData || (currentTrackStore ? {
+    title: currentTrackStore.title,
+    artist: currentTrackStore.artistName || currentTrackStore.ownerName || 'Ẩn danh',
+    cover: currentTrackStore.thumbnailPath 
+      ? (currentTrackStore.thumbnailPath.startsWith('http') ? currentTrackStore.thumbnailPath : `http://localhost:5078${currentTrackStore.thumbnailPath}`)
+      : 'https://via.placeholder.com/300/121212/ffffff?text=No+Cover',
+    type: 'song' as const
+  } : null);
 
   const showToast = (message: string) => {
     setToast(message);
-    window.setTimeout(() => {
-      setToast('');
-    }, 1800);
+    window.setTimeout(() => setToast(''), 1800);
   };
 
-  const handleShare = async () => {
-    const fakeUrl = `${window.location.origin}/track/${encodeURIComponent(activeTrack.title)}`;
-    try {
-      await navigator.clipboard.writeText(fakeUrl);
-      showToast('Đã copy link chia sẻ.');
-    } catch {
-      showToast('Không thể copy link, nhưng nút Share đã hoạt động.');
-    }
-    setIsMenuOpen(false);
-  };
-
-  // 4. API Tương tác Like thực tế
   const handleToggleLike = async () => {
     const targetId = currentTrackStore?.id;
-    
-    if (!targetId) {
-      showToast('Không có bài hát từ hệ thống đang phát để yêu thích.');
-      return;
-    }
-
+    if (!targetId) return;
     try {
       const result = await mediaService.toggleFavorite(targetId);
       setIsLiked(result.data); 
       showToast(result.message);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      showToast('Thao tác tương tác yêu thích thất bại.');
-      console.error(error);
+      showToast('Thao tác yêu thích thất bại.');
     }
-    setIsMenuOpen(false);
   };
 
-  const handleToggleFollow = () => {
-    setIsFollowing((current) => {
-      const next = !current;
-      showToast(next ? `Đã theo dõi ${activeTrack.artist}.` : `Đã bỏ theo dõi ${activeTrack.artist}.`);
-      return next;
-    });
-  };
-
-  const handleExpand = () => {
-    showToast('Chế độ mở rộng panel sẽ phát triển sau.');
-  };
+  if (!activeTrack) {
+    return (
+      <aside style={styles.rightPanel}>
+        <PanelHeader playlistTitle="Đang phát" onClose={onClose} />
+        <div style={{ padding: 20, color: '#b3b3b3', textAlign: 'center' }}>
+          Không có bài hát nào đang được chọn.
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside style={styles.rightPanel}>
       <div style={styles.headerWrapper}>
         <PanelHeader
-          playlistTitle={activeTrack.playlistTitle}
+          playlistTitle={activeTrack.title}
           onClose={onClose}
-          onMenuClick={() => setIsMenuOpen((current) => !current)}
-          onExpandClick={handleExpand}
+          onMenuClick={() => setIsMenuOpen(!isMenuOpen)}
         />
-
-        {isMenuOpen && (
-          <div style={styles.menu}>
-            <button style={styles.menuItem} onClick={handleShare}>
-              Chia sẻ
-            </button>
-
-            <button style={styles.menuItem} onClick={handleToggleLike}>
-              {isLiked ? 'Bỏ khỏi thư viện' : 'Thêm vào thư viện'}
-            </button>
-
-            <button
-              style={styles.menuItem}
-              onClick={() => {
-                setShowAllCredits(true);
-                setIsMenuOpen(false);
-                showToast('Đã mở Credits.');
-              }}
-            >
-              Xem credits
-            </button>
-
-            <button
-              style={styles.menuItem}
-              onClick={() => {
-                setShowQueue((current) => !current);
-                setIsMenuOpen(false);
-              }}
-            >
-              {showQueue ? 'Ẩn queue' : 'Mở queue'}
-            </button>
-          </div>
-        )}
       </div>
 
       <section style={styles.scrollArea}>
         <TrackDetails
-          artworkUrl={activeTrack.artworkUrl}
+          artworkUrl={activeTrack.cover}
           title={activeTrack.title}
           artist={activeTrack.artist}
           isLiked={isLiked}
-          onShare={handleShare}
           onToggleLike={handleToggleLike}
         />
 
         <ArtistAboutCard
           artistName={activeTrack.artist}
-          artistImageUrl={activeTrack.artistImageUrl}
-          monthlyListeners={activeTrack.artistMonthlyListeners}
+          artistImageUrl={activeTrack.cover}
+          monthlyListeners="Đang cập nhật..."
           isFollowing={isFollowing}
           showAllCredits={showAllCredits}
-          onToggleFollow={handleToggleFollow}
-          onToggleCredits={() => setShowAllCredits((current) => !current)}
+          onToggleFollow={() => setIsFollowing(!isFollowing)}
+          onToggleCredits={() => setShowAllCredits(!showAllCredits)}
         />
-
-        <section style={styles.queueCard}>
-          <div style={styles.queueHeader}>
-            <h3 style={styles.queueTitle}>Next in queue</h3>
-
-            <button
-              style={styles.openQueueButton}
-              onClick={() => setShowQueue((current) => !current)}
-            >
-              {showQueue ? 'Hide queue' : 'Open queue'}
-            </button>
-          </div>
-
-          {showQueue && (
-            <div style={styles.queueList}>
-              {queueData.map((song) => (
-                <div
-                  key={song.id}
-                  style={styles.queueItem}
-                  onClick={() => {
-                    setSelectedTrack({
-                      title: song.title,
-                      artist: song.artist,
-                      cover: song.cover,
-                    });
-                    setIsLiked(false);
-                    showToast(`Đang xem: ${song.title}`);
-                  }}
-                >
-                  <img src={song.cover} alt={song.title} style={styles.queueCover} />
-
-                  <div style={styles.queueInfo}>
-                    <div style={styles.queueSongTitle}>{song.title}</div>
-                    <div style={styles.queueArtist}>{song.artist}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        
+        {/* Đã xóa bỏ phần Queue giả ở đây */}
       </section>
 
       {toast && <div style={styles.toast}>{toast}</div>}
@@ -12623,221 +13047,6 @@ const styles = {
 };
 
 export default NowPlayingPanel;
-</file>
-
-<file path="backend/TuneVault.API/appsettings.json">
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=TuneVault_DB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
-  },
-"JwtSettings": {
-    "Secret": "TuneVault_Super_Secret_Key_Do_Not_Share_123456789_ThisIsAVeryLongSecretKeyForJWTTokenGeneration_AtLeast64Characters!",
-    "Issuer": "TuneVaultAPI",
-    "Audience": "TuneVaultReactClient",
-    "ExpiryMinutes": "1440" 
-  },
-  "Anthropic": {
-    "ApiKey": ""
-  },
-  "MediaStorage": {
-    "BasePath": "wwwroot/media",
-    "MaxFileSizeMb": 100,
-    "AllowedAudioExtensions": [ ".mp3", ".wav", ".flac", ".aac", ".ogg" ],
-    "AllowedVideoExtensions": [ ".mp4", ".webm", ".mov", ".avi" ]
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-
-  "AllowedHosts": "*"
-}
-</file>
-
-<file path="backend/TuneVault.API/TuneVault.API.csproj">
-<Project Sdk="Microsoft.NET.Sdk.Web">
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.27" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="TagLibSharp" Version="2.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\TuneVault.Application\TuneVault.Application.csproj" />
-    <ProjectReference Include="..\TuneVault.Infrastructure\TuneVault.Infrastructure.csproj" />
-  </ItemGroup>
-
-</Project>
-</file>
-
-<file path="backend/TuneVault.Infrastructure/TuneVault.Infrastructure.csproj">
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\TuneVault.Application\TuneVault.Application.csproj" />
-    <ProjectReference Include="..\TuneVault.Domain\TuneVault.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Bogus" Version="35.6.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-  <ItemGroup>
-    </ItemGroup>
-
-</Project>
-</file>
-
-<file path="frontend/src/App.tsx">
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-// Layout chính
-import MainLayout from './components/layout/MainLayout';
-
-// Các trang có thanh nhạc (Nằm trong MainLayout)
-import HomeContent from './components/layout/MainContent';
-import PlaylistDetail from './pages/PlaylistDetail';
-import Search from './pages/Search';
-import Library from './pages/Library';
-import Profile from './pages/Profile';
-import Notifications from './pages/Notifications';
-import ShareInbox from './pages/ShareInbox';
-import VideoPlayer from './pages/VideoPlayer';
-import ProtectedRoute from './components/layout/ProtectedRoute';
-
-// 1. IMPORT TRANG QUẢN LÝ ADMIN
-import AdminMediaManager from './pages/AdminMediaManager';
-
-// Các trang độc lập
-import Login from './pages/Login';
-import Register from './pages/Register';
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public routes: login/register */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* Protected app routes - require auth */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<HomeContent />} />
-            <Route path="playlist/:id" element={<PlaylistDetail />} />
-            <Route path="search" element={<Search />} />
-            <Route path="library" element={<Library />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="share" element={<ShareInbox />} />
-            <Route path="video" element={<VideoPlayer />} />
-            <Route path="admin/media" element={<AdminMediaManager />} />
-            
-          </Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
-}
-</file>
-
-<file path="frontend/src/components/layout/MainLayout.tsx">
-import React from 'react';
-import { Outlet } from 'react-router-dom'; // ĐỒNG BỘ ROUTER: Cổng chờ cho vùng trung tâm
-import Navbar from './Navbar';
-import Sidebar from './Sidebar';
-import RightPanel from './RightPanel';
-import Playbar from './Playbar';
-import '../../styles/globals.css';
-
-const MainLayout: React.FC = () => {
-  return (
-    <div style={styles.layout}>
-      <Navbar />
-      <div style={styles.contentArea}>
-        {/* 1. Thanh điều hướng bên trái cố định */}
-        <Sidebar />
-        
-        {/* 2. VÙNG TRUNG TÂM TỰ ĐỘNG THAY ĐỔI: 
-            Thay <MainContent /> bằng <Outlet />. Khi URL thay đổi, 
-            các trang con (như HomeContent hoặc PlaylistDetail) sẽ tự động hiển thị ở đây. */}
-        <div style={styles.mainContentWrapper}>
-          <Outlet />
-        </div>
-        
-        {/* 3. Panel bên phải hiển thị chi tiết nghệ sĩ/bài hát */}
-        <RightPanel />
-      </div>
-      <Playbar />
-    </div>
-  );
-};
-
-const styles = {
-  layout: {
-    width: '100vw',
-    height: '100vh',
-    backgroundColor: '#000000',
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    overflow: 'hidden',
-  },
-  contentArea: {
-    display: 'flex' as const,
-    flex: 1,
-    minHeight: 0,
-    overflow: 'hidden',
-    gap: 8,             // ĐIỂM CỐT LÕI: Tạo rãnh đen 8px giữa 3 cột
-    padding: '0 8px',   // Đẩy 3 cột thụt vào so với mép màn hình trái/phải 8px
-  },
-  // Thêm style bọc ngoài Outlet để đảm bảo vùng trung tâm có thể cuộn nội dung độc lập
-  mainContentWrapper: {
-    minWidth: 0,
-    height: '100%',
-    flex: 1,
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    overflowY: 'auto' as const, // Cho phép cuộn dọc nội dung khi danh sách bài hát quá dài
-    backgroundColor: '#121212', // Màu nền tối cho vùng trung tâm giống Spotify
-    borderRadius: 8,            // Bo góc đồng bộ với các khối khác
-  }
-};
-
-export default MainLayout;
 </file>
 
 <file path="frontend/src/services/mediaService.ts">
@@ -12952,6 +13161,37 @@ export const mediaService = {
 
 
 };
+</file>
+
+<file path="backend/TuneVault.API/appsettings.json">
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=LAPTOP-28582O6R\\SQLEXPRESS;Database=TuneVault_DB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  },
+"JwtSettings": {
+    "Secret": "TuneVault_Super_Secret_Key_Do_Not_Share_123456789_ThisIsAVeryLongSecretKeyForJWTTokenGeneration_AtLeast64Characters!",
+    "Issuer": "TuneVaultAPI",
+    "Audience": "TuneVaultReactClient",
+    "ExpiryMinutes": "1440" 
+  },
+  "Anthropic": {
+    "ApiKey": ""
+  },
+  "MediaStorage": {
+    "BasePath": "wwwroot/media",
+    "MaxFileSizeMb": 100,
+    "AllowedAudioExtensions": [ ".mp3", ".wav", ".flac", ".aac", ".ogg" ],
+    "AllowedVideoExtensions": [ ".mp4", ".webm", ".mov", ".avi" ]
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+
+  "AllowedHosts": "*"
+}
 </file>
 
 <file path="backend/TuneVault.API/Controllers/MediaController.cs">
@@ -13451,6 +13691,79 @@ export default Navbar;
 }
 </file>
 
+<file path="frontend/src/components/layout/RightPanel.tsx">
+import React, { useState } from 'react';
+import NowPlayingPanel from '../ui/rightpanel/NowPlayingPanel';
+import { ChevronLeft } from 'lucide-react';
+import { useAppContext } from '../../context/AppContext'; // ĐÃ THÊM: Import context tổng để lắng nghe bài hát
+
+const RightPanel: React.FC = () => {
+  // Trạng thái: Mặc định là mở (true)
+  const [isExpanded, setIsExpanded] = useState(true);
+  
+  // ĐÃ THÊM: Lấy dữ liệu bài hát được chọn từ Context
+  const { rightPanelData } = useAppContext();
+
+  return (
+    <div style={{
+      ...styles.container,
+      // Đổi chiều rộng linh hoạt. Khi đóng lại nó chỉ còn 60px
+      width: isExpanded ? 372 : 60,
+    }}>
+      {isExpanded ? (
+        // ĐÃ CHỈNH SỬA: Truyền thêm prop trackData xuống cho component hiển thị giao diện
+        <NowPlayingPanel 
+          onClose={() => setIsExpanded(false)} 
+          trackData={rightPanelData} 
+        />
+      ) : (
+        // Khối hiển thị khi đã ẩn (thanh mỏng có mũi tên)
+        <aside style={styles.collapsedPanel}>
+          <button 
+            style={styles.expandButton} 
+            onClick={() => setIsExpanded(true)} 
+            title="Mở rộng panel"
+          >
+            <ChevronLeft size={28} />
+          </button>
+        </aside>
+      )}
+    </div>
+  );
+};
+
+const styles = {
+  container: {
+    height: '100%',
+    flexShrink: 0,
+    transition: 'width 0.3s ease', // Hiệu ứng co giãn mượt mà
+    marginLeft: 8, // Tạo một rãnh hở với MainContent
+  },
+  collapsedPanel: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#121212', // Màu đen chuẩn Spotify
+    borderRadius: 8,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    paddingTop: 24, // Cách lề trên một chút cho icon
+  },
+  expandButton: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    color: '#b3b3b3',
+    cursor: 'pointer',
+    padding: 8,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+};
+
+export default RightPanel;
+</file>
+
 <file path="frontend/src/components/layout/MainContent.tsx">
 import React, { useState, useEffect } from 'react';
 import FilterPill from '../ui/maincontent/FilterPill';
@@ -13560,17 +13873,18 @@ const formatDuration = (seconds?: number): string => {
         {firstHalf.length > 0 && (
           <section style={styles.section}>
             <SectionHeader title="Mới nhất" />
-            <div style={styles.gridContainer}>
-              {firstHalf.map((item) => (
-                <MediaCard
-              key={item.id}
-              title={item.title}
-             subtitle={`${item.artistName || 'Nghệ sĩ ẩn danh'}${item.duration ? ` • ${formatDuration(item.duration)}` : ''}`}
-              imageUrl={getImageUrl(item.thumbnailPath)}
-              onClick={() => handleMediaClick(item)}
-            />
-              ))}
-            </div>
+          <div style={styles.gridContainer}>
+            {mediaItems.map((item) => (
+              <MediaCard
+                key={item.id}
+                title={item.title}
+                // Hiển thị nghệ sĩ thực tế từ DB
+                subtitle={item.artistName || 'Nghệ sĩ ẩn danh'} 
+                imageUrl={getImageUrl(item.thumbnailPath)}
+                onClick={() => handleMediaClick(item)}
+              />
+            ))}
+          </div>
           </section>
         )}
 
@@ -13637,79 +13951,6 @@ const styles = {
 export default MainContent;
 </file>
 
-<file path="frontend/src/components/layout/RightPanel.tsx">
-import React, { useState } from 'react';
-import NowPlayingPanel from '../ui/rightpanel/NowPlayingPanel';
-import { ChevronLeft } from 'lucide-react';
-import { useAppContext } from '../../context/AppContext'; // ĐÃ THÊM: Import context tổng để lắng nghe bài hát
-
-const RightPanel: React.FC = () => {
-  // Trạng thái: Mặc định là mở (true)
-  const [isExpanded, setIsExpanded] = useState(true);
-  
-  // ĐÃ THÊM: Lấy dữ liệu bài hát được chọn từ Context
-  const { rightPanelData } = useAppContext();
-
-  return (
-    <div style={{
-      ...styles.container,
-      // Đổi chiều rộng linh hoạt. Khi đóng lại nó chỉ còn 60px
-      width: isExpanded ? 372 : 60,
-    }}>
-      {isExpanded ? (
-        // ĐÃ CHỈNH SỬA: Truyền thêm prop trackData xuống cho component hiển thị giao diện
-        <NowPlayingPanel 
-          onClose={() => setIsExpanded(false)} 
-          trackData={rightPanelData} 
-        />
-      ) : (
-        // Khối hiển thị khi đã ẩn (thanh mỏng có mũi tên)
-        <aside style={styles.collapsedPanel}>
-          <button 
-            style={styles.expandButton} 
-            onClick={() => setIsExpanded(true)} 
-            title="Mở rộng panel"
-          >
-            <ChevronLeft size={28} />
-          </button>
-        </aside>
-      )}
-    </div>
-  );
-};
-
-const styles = {
-  container: {
-    height: '100%',
-    flexShrink: 0,
-    transition: 'width 0.3s ease', // Hiệu ứng co giãn mượt mà
-    marginLeft: 8, // Tạo một rãnh hở với MainContent
-  },
-  collapsedPanel: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#121212', // Màu đen chuẩn Spotify
-    borderRadius: 8,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    paddingTop: 24, // Cách lề trên một chút cho icon
-  },
-  expandButton: {
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: '#b3b3b3',
-    cursor: 'pointer',
-    padding: 8,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-};
-
-export default RightPanel;
-</file>
-
 <file path="backend/TuneVault.API/Program.cs">
 using Microsoft.OpenApi.Models;
 using TuneVault.Application;
@@ -13724,6 +13965,8 @@ using Microsoft.AspNetCore.Http.Features;
 
 using TuneVault.API.Services;
 using TuneVault.Application.Common.Interfaces;
+
+using TuneVault.Infrastructure.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13825,6 +14068,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 // ĐOẠN CODE KÍCH HOẠT DATA SEEDER
 using (var scope = app.Services.CreateScope())
@@ -13922,6 +14166,9 @@ namespace TuneVault.Infrastructure
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<ITokenService, TokenService>();
+
+            services.AddSignalR();
+            services.AddScoped<INotificationRealtimeService, NotificationRealtimeService>();
             
             // services.AddScoped<IAnthropicService, AnthropicService>(); // Dùng cho AI sau này
             
@@ -13944,7 +14191,24 @@ namespace TuneVault.Infrastructure
                     ValidateAudience = true,
                     ValidAudience = configuration["JwtSettings:Audience"],
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero // Bỏ qua 5 phút trễ mặc định của token
+                    ClockSkew = TimeSpan.Zero //Bỏ qua 5 giây chờ của token
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs/notifications"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -13960,7 +14224,7 @@ import PlaybackControls from '../ui/playbar/PlaybackControls';
 import PlaybarUtilities from '../ui/playbar/PlaybarUtilities';
 import TrackInfo from '../ui/playbar/TrackInfo';
 import { usePlayerStore } from '../../store/playerStore';
-import FavoriteButton from '../ui/FavoriteButton';
+import FavoriteButton from '../ui/playbar/FavoriteButton';
 import { mediaService } from '../../services/mediaService';
 
 const formatTime = (seconds: number): string => {

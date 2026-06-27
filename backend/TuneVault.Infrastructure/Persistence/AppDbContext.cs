@@ -10,7 +10,7 @@ namespace TuneVault.Infrastructure.Persistence
     public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IAppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
+        public DbSet<ApplicationUser> Users => base.Users;
         public DbSet<Album> Albums => Set<Album>();
         public DbSet<MediaItem> MediaItems => Set<MediaItem>();
         public DbSet<Playlist> Playlists => Set<Playlist>();
