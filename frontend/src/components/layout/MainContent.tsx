@@ -42,6 +42,7 @@ const MainContent: React.FC = () => {
 
 const handleMediaClick = (item: MediaItem) => {
     setRightPanelData({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       id: (item as any).id || (item as any).mediaItemId,
       title: item.title,
       // Tự động nhận diện chuẩn mới hoặc cũ

@@ -32,6 +32,21 @@ namespace TuneVault.Infrastructure.Persistence
                 throw new Exception($"Không thể tạo user mặc định: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
             }
 
+            var receiverUser = new ApplicationUser
+            {
+                Id = Guid.Parse("A0EF217F-EE43-4547-4391-08DED3F2BDDF"),
+                UserName = "testuser2",
+                Email = "testuser2@tunevault.com",
+                EmailConfirmed = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var receiverCreateResult = await userManager.CreateAsync(receiverUser, "User2@123");
+            if (!receiverCreateResult.Succeeded)
+            {
+                throw new Exception($"Không thể tạo user chia sẻ mẫu: {string.Join(", ", receiverCreateResult.Errors.Select(e => e.Description))}");
+            }
+
             // 2. Tạo danh sách 10 Người dùng mẫu
             var userFaker = new Faker<ApplicationUser>()
                 .RuleFor(u => u.Id, f => Guid.NewGuid())

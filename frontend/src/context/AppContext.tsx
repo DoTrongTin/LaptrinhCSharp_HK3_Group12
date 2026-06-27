@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 
 // Định nghĩa kiểu dữ liệu cho mục đang chọn hiển thị bên phải
 interface RightPanelState {
+  id?: string;
   title: string;
   artist: string;
   cover: string;

@@ -108,7 +108,7 @@ const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData })
 
   const handleShare = async () => {
   try {
-    const receiverId = 'A0EF217F-EE43-4547-4391-08DED3F2BDDF';
+    const receiverId = '6556FD35-55B4-4694-FBC3-08DED324D1C4';
     const mediaItemId = activeTrack.id;
 
     if (!mediaItemId) {

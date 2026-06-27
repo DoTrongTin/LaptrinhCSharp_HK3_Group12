@@ -137,6 +137,7 @@ const Sidebar: React.FC = () => {
 
     if (item.type === 'artist') {
       setRightPanelData({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         id: (item as any).id || (item as any).mediaItemId,
         title: item.title,
         artist: 'Nghệ sĩ',

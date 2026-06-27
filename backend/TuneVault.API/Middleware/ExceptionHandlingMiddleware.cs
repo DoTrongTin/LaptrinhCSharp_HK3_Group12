@@ -51,9 +51,15 @@ namespace TuneVault.API.Middleware
                     break;
                     
                 case UnauthorizedAccessException:
-                    // Lỗi chưa đăng nhập
+                    // Lỗi chưa đăng nhập hoặc truy cập trái phép
                     statusCode = HttpStatusCode.Unauthorized;
                     message = exception.Message;
+                    break;
+
+                case KeyNotFoundException:
+                    statusCode = HttpStatusCode.NotFound;
+                    message = exception.Message;
+                    errors.Add(exception.Message);
                     break;
                     
                 // (Bạn có thể thêm các case lỗi custom khác ở đây)

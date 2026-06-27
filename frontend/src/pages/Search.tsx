@@ -46,6 +46,7 @@ const Search: React.FC = () => {
   const handleItemClick = (item: MediaItem) => {
     // 1. Cập nhật Panel bên phải
     setRightPanelData({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       id: (item as any).id || (item as any).mediaItemId,
       title: item.title,
       artist: item.ownerName || 'Unknown User',

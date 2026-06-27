@@ -29,6 +29,7 @@ const PlaylistDetail: React.FC = () => {
             <div 
               key={song.id}
               onClick={() => setRightPanelData({
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 id: (song as any).id || (song as any).mediaItemId,
                 title: song.title,
                 artist: song.artist,
