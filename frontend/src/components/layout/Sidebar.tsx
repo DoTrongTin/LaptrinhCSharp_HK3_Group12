@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Folder, ListFilter, Library, Plus, Search, X } from 'lucide-react';
+import { ArrowRight, Folder, ListFilter, Library, Plus, Search, X, Music4 } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
 type LibraryItemType = 'liked' | 'playlist' | 'podcast' | 'artist' | 'folder';
@@ -370,47 +370,54 @@ const Sidebar: React.FC = () => {
               onMouseEnter={() => setHoveredId(item.id)}
               onMouseLeave={() => setHoveredId(null)}
               style={{
-                ...styles.itemWrapper,
-                backgroundColor: isSelected
-                  ? '#2a2a2a'
-                  : isHovered
-                    ? '#1f1f1f'
-                    : 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: isExpanded ? '8px 12px' : '8px 0',
                 justifyContent: isExpanded ? 'flex-start' : 'center',
-                padding: isExpanded ? '8px' : '8px 0',
-                width: isExpanded ? '100%' : 48,
+                width: '100%',
+                cursor: 'pointer',
+                backgroundColor: isSelected ? '#2a2a2a' : isHovered ? '#1f1f1f' : 'transparent',
+                borderRadius: '6px', // Bo góc container
+                transition: 'background-color 0.2s'
               }}
             >
-              {item.type === 'folder' ? (
-                <div style={styles.folderIcon}>
-                  <Folder size={24} />
-                </div>
-              ) : (
-                <img
-                  src={item.src}
-                  alt={item.title}
-                  style={{
-                    ...styles.thumbnail,
-                    borderRadius: item.isCircle ? '50%' : '4px',
-                  }}
-                />
-              )}
+              {/* Khối chứa Icon/Ảnh - Đồng nhất cho mọi loại item */}
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: '4px', // Ép hình vuông bo góc 4px cho tất cả
+                backgroundColor: '#2a2a2a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                overflow: 'hidden'
+              }}>
+                {item.type === 'folder' ? (
+                  <Folder size={24} color="#b3b3b3" />
+                ) : (
+                  /* Mọi mục khác (Playlist, Liked, Artist) đều hiện icon nốt nhạc */
+                  <Music4 size={24} color="#b3b3b3" />
+                )}
+              </div>
 
+              {/* Phần chữ (Chỉ hiện khi mở rộng) */}
               {isExpanded && (
-                <div style={styles.itemInfo}>
-                  <span
-                    style={{
-                      ...styles.itemTitle,
-                      color: isSelected ? '#1db954' : '#ffffff',
-                    }}
-                  >
+                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  <span style={{ 
+                    fontSize: '15px', 
+                    fontWeight: 500, 
+                    color: isSelected ? '#1db954' : '#ffffff',
+                    whiteSpace: 'nowrap', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis' 
+                  }}>
                     {item.title}
                   </span>
-
-                  <div style={styles.subtitleRow}>
-                    {item.isPinned && <span style={styles.pinIcon}>•</span>}
-                    <span style={styles.itemSubtitle}>{item.subtitle}</span>
-                  </div>
+                  <span style={{ fontSize: '13px', color: '#b3b3b3' }}>
+                    {item.subtitle}
+                  </span>
                 </div>
               )}
             </div>

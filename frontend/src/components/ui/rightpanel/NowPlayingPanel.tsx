@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { currentTrack } from '../../../data/currentTrack';
+ 
 import PanelHeader from './PanelHeader';
 import TrackDetails from './TrackDetails';
 import ArtistAboutCard from './ArtistAboutCard';
@@ -16,235 +16,86 @@ interface NowPlayingPanelProps {
   } | null;
 }
 
-const queueData = [
-  {
-    id: 1,
-    title: 'The Lie',
-    artist: 'Long Afternoon',
-    cover: 'https://via.placeholder.com/60/1a1a1a/ffffff?text=Lie',
-  },
-  {
-    id: 2,
-    title: 'Painted Silence',
-    artist: 'Long Afternoon',
-    cover: 'https://via.placeholder.com/60/6366f1/ffffff?text=PS',
-  },
-  {
-    id: 3,
-    title: '2AM',
-    artist: 'JustaTee, BigDaddy',
-    cover: 'https://via.placeholder.com/60/1DB954/ffffff?text=2AM',
-  },
-];
-
 const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [showAllCredits, setShowAllCredits] = useState(false);
-  const [showQueue, setShowQueue] = useState(true);
   const [toast, setToast] = useState('');
-
-  const [selectedTrack, setSelectedTrack] = useState<{
-    title: string;
-    artist: string;
-    cover: string;
-  } | null>(null);
 
   const { currentTrack: currentTrackStore } = usePlayerStore();
 
-  // 1. Lưu lại track trước đó để so sánh (thay thế cho useEffect)
-  const [prevTrackTitle, setPrevTrackTitle] = useState(trackData?.title);
-
-  // 2. Kỹ thuật "Derived State" cập nhật ngay trong lúc Render -> KHÔNG BỊ LỖI ESLINT
-  if (trackData?.title !== prevTrackTitle) {
-    setPrevTrackTitle(trackData?.title);
-    setSelectedTrack(null);
-    setIsLiked(false);
-    setShowAllCredits(false);
-  }
-
-  // 3. Hợp nhất object activeTrack chuẩn hóa
-  const activeTrack = selectedTrack
-    ? {
-        playlistTitle: selectedTrack.artist,
-        artworkUrl: selectedTrack.cover,
-        title: selectedTrack.title,
-        artist: currentTrackStore?.artistName || currentTrackStore?.ownerName || currentTrack.artist,
-        artistImageUrl: currentTrack.artistImageUrl,
-        artistMonthlyListeners: currentTrack.artistMonthlyListeners,
-      }
-    : trackData
-      ? {
-          playlistTitle: trackData.type === 'artist' ? trackData.title : trackData.artist,
-          artworkUrl: trackData.cover,
-          title: trackData.title,
-          artist: trackData.artist,
-          artistImageUrl: trackData.cover,
-          artistMonthlyListeners: currentTrack.artistMonthlyListeners,
-        }
-      : {
-          playlistTitle: currentTrack.playlistTitle,
-          artworkUrl: currentTrackStore?.thumbnailPath || currentTrack.artworkUrl,
-          title: currentTrackStore?.title || currentTrack.title,
-          artist: currentTrackStore?.ownerName || currentTrack.artist,
-          artistImageUrl: currentTrackStore?.thumbnailPath || currentTrack.artistImageUrl,
-          artistMonthlyListeners: currentTrack.artistMonthlyListeners,
-        };
+  // Dữ liệu hiển thị ưu tiên:
+  // 1. Nếu có trackData từ trang Playlist Detail -> lấy từ đó
+  // 2. Nếu không, lấy từ bài hát đang phát (currentTrackStore)
+  const activeTrack = trackData || (currentTrackStore ? {
+    title: currentTrackStore.title,
+    artist: currentTrackStore.artistName || currentTrackStore.ownerName || 'Ẩn danh',
+    cover: currentTrackStore.thumbnailPath 
+      ? (currentTrackStore.thumbnailPath.startsWith('http') ? currentTrackStore.thumbnailPath : `http://localhost:5078${currentTrackStore.thumbnailPath}`)
+      : 'https://via.placeholder.com/300/121212/ffffff?text=No+Cover',
+    type: 'song' as const
+  } : null);
 
   const showToast = (message: string) => {
     setToast(message);
-    window.setTimeout(() => {
-      setToast('');
-    }, 1800);
+    window.setTimeout(() => setToast(''), 1800);
   };
 
-  const handleShare = async () => {
-    const fakeUrl = `${window.location.origin}/track/${encodeURIComponent(activeTrack.title)}`;
-    try {
-      await navigator.clipboard.writeText(fakeUrl);
-      showToast('Đã copy link chia sẻ.');
-    } catch {
-      showToast('Không thể copy link, nhưng nút Share đã hoạt động.');
-    }
-    setIsMenuOpen(false);
-  };
-
-  // 4. API Tương tác Like thực tế
   const handleToggleLike = async () => {
     const targetId = currentTrackStore?.id;
-    
-    if (!targetId) {
-      showToast('Không có bài hát từ hệ thống đang phát để yêu thích.');
-      return;
-    }
-
+    if (!targetId) return;
     try {
       const result = await mediaService.toggleFavorite(targetId);
       setIsLiked(result.data); 
       showToast(result.message);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      showToast('Thao tác tương tác yêu thích thất bại.');
-      console.error(error);
+      showToast('Thao tác yêu thích thất bại.');
     }
-    setIsMenuOpen(false);
   };
 
-  const handleToggleFollow = () => {
-    setIsFollowing((current) => {
-      const next = !current;
-      showToast(next ? `Đã theo dõi ${activeTrack.artist}.` : `Đã bỏ theo dõi ${activeTrack.artist}.`);
-      return next;
-    });
-  };
-
-  const handleExpand = () => {
-    showToast('Chế độ mở rộng panel sẽ phát triển sau.');
-  };
+  if (!activeTrack) {
+    return (
+      <aside style={styles.rightPanel}>
+        <PanelHeader playlistTitle="Đang phát" onClose={onClose} />
+        <div style={{ padding: 20, color: '#b3b3b3', textAlign: 'center' }}>
+          Không có bài hát nào đang được chọn.
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside style={styles.rightPanel}>
       <div style={styles.headerWrapper}>
         <PanelHeader
-          playlistTitle={activeTrack.playlistTitle}
+          playlistTitle={activeTrack.title}
           onClose={onClose}
-          onMenuClick={() => setIsMenuOpen((current) => !current)}
-          onExpandClick={handleExpand}
+          onMenuClick={() => setIsMenuOpen(!isMenuOpen)}
         />
-
-        {isMenuOpen && (
-          <div style={styles.menu}>
-            <button style={styles.menuItem} onClick={handleShare}>
-              Chia sẻ
-            </button>
-
-            <button style={styles.menuItem} onClick={handleToggleLike}>
-              {isLiked ? 'Bỏ khỏi thư viện' : 'Thêm vào thư viện'}
-            </button>
-
-            <button
-              style={styles.menuItem}
-              onClick={() => {
-                setShowAllCredits(true);
-                setIsMenuOpen(false);
-                showToast('Đã mở Credits.');
-              }}
-            >
-              Xem credits
-            </button>
-
-            <button
-              style={styles.menuItem}
-              onClick={() => {
-                setShowQueue((current) => !current);
-                setIsMenuOpen(false);
-              }}
-            >
-              {showQueue ? 'Ẩn queue' : 'Mở queue'}
-            </button>
-          </div>
-        )}
       </div>
 
       <section style={styles.scrollArea}>
         <TrackDetails
-          artworkUrl={activeTrack.artworkUrl}
+          artworkUrl={activeTrack.cover}
           title={activeTrack.title}
           artist={activeTrack.artist}
           isLiked={isLiked}
-          onShare={handleShare}
           onToggleLike={handleToggleLike}
         />
 
         <ArtistAboutCard
           artistName={activeTrack.artist}
-          artistImageUrl={activeTrack.artistImageUrl}
-          monthlyListeners={activeTrack.artistMonthlyListeners}
+          artistImageUrl={activeTrack.cover}
+          monthlyListeners="Đang cập nhật..."
           isFollowing={isFollowing}
           showAllCredits={showAllCredits}
-          onToggleFollow={handleToggleFollow}
-          onToggleCredits={() => setShowAllCredits((current) => !current)}
+          onToggleFollow={() => setIsFollowing(!isFollowing)}
+          onToggleCredits={() => setShowAllCredits(!showAllCredits)}
         />
-
-        <section style={styles.queueCard}>
-          <div style={styles.queueHeader}>
-            <h3 style={styles.queueTitle}>Next in queue</h3>
-
-            <button
-              style={styles.openQueueButton}
-              onClick={() => setShowQueue((current) => !current)}
-            >
-              {showQueue ? 'Hide queue' : 'Open queue'}
-            </button>
-          </div>
-
-          {showQueue && (
-            <div style={styles.queueList}>
-              {queueData.map((song) => (
-                <div
-                  key={song.id}
-                  style={styles.queueItem}
-                  onClick={() => {
-                    setSelectedTrack({
-                      title: song.title,
-                      artist: song.artist,
-                      cover: song.cover,
-                    });
-                    setIsLiked(false);
-                    showToast(`Đang xem: ${song.title}`);
-                  }}
-                >
-                  <img src={song.cover} alt={song.title} style={styles.queueCover} />
-
-                  <div style={styles.queueInfo}>
-                    <div style={styles.queueSongTitle}>{song.title}</div>
-                    <div style={styles.queueArtist}>{song.artist}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        
+        {/* Đã xóa bỏ phần Queue giả ở đây */}
       </section>
 
       {toast && <div style={styles.toast}>{toast}</div>}

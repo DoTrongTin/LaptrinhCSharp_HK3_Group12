@@ -1,59 +1,81 @@
-import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { profileService } from '../services/profileService';
 
 const Profile: React.FC = () => {
-  const navigate = useNavigate();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const { user, isAuthenticated, setAuth } = useAuthStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ 
+    userName: user?.userName || '', 
+    bio: user?.bio || '' 
+  });
 
-  if (!isAuthenticated) {
-    return (
-      <div style={styles.page}>
-        <h2 style={{ marginBottom: 12 }}>Bạn chưa đăng nhập</h2>
-        <p style={{ color: '#b3b3b3' }}>Đăng nhập để xem hồ sơ, danh sách phát và lịch sử nghe.</p>
-        <div style={{ marginTop: 18, display: 'flex', gap: 8 }}>
-          <button style={styles.authBtn} onClick={() => navigate('/login')}>Đăng nhập</button>
-          <Link to="/register" style={{ textDecoration: 'none' }}><button style={styles.createBtn}>Đăng ký</button></Link>
-        </div>
-      </div>
-    );
-  }
+  const handleUpdate = async () => {
+    try {
+      const updatedUser = await profileService.updateProfile(formData);
+      // Giả sử service trả về user mới, cập nhật lại store
+      setAuth({ ...user!, ...updatedUser }, localStorage.getItem('token')!);
+      setIsEditing(false);
+      alert("Cập nhật thành công!");
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      alert("Có lỗi xảy ra khi cập nhật.");
+    }
+  };
+
+  if (!isAuthenticated) return <div style={styles.container}>Vui lòng đăng nhập.</div>;
 
   return (
-    <div style={styles.page}>
+    <div style={styles.container}>
       <div style={styles.header}>
-        <div style={styles.avatar}>{user?.userName?.[0]?.toUpperCase() || 'U'}</div>
-        <div>
-          <p style={styles.type}>Hồ sơ</p>
-          <h1 style={styles.name}>{user?.userName || 'Người dùng'}</h1>
-          <p style={styles.stats}>{user?.email || ''}</p>
+        <div style={styles.avatarLarge}>{user?.userName?.[0]?.toUpperCase()}</div>
+        <div style={styles.info}>
+          <p style={styles.subTitle}>Hồ sơ</p>
+          {isEditing ? (
+            <input 
+              style={styles.input} 
+              value={formData.userName} 
+              onChange={(e) => setFormData({...formData, userName: e.target.value})} 
+            />
+          ) : (
+            <h1 style={styles.title}>{user?.userName}</h1>
+          )}
         </div>
       </div>
 
-      <div>
-        <button
-          style={{ ...styles.createBtn, marginTop: 12 }}
-          onClick={() => {
-            logout();
-            navigate('/');
-          }}
-        >
-          Đăng xuất
-        </button>
+      <div style={styles.bioSection}>
+        <h3>Bio</h3>
+        {isEditing ? (
+          <textarea 
+            style={styles.textarea} 
+            value={formData.bio} 
+            onChange={(e) => setFormData({...formData, bio: e.target.value})} 
+          />
+        ) : (
+          <p style={styles.bioText}>{user?.bio || "Chưa có tiểu sử."}</p>
+        )}
       </div>
+
+      <button style={styles.editButton} onClick={() => isEditing ? handleUpdate() : setIsEditing(true)}>
+        {isEditing ? "Lưu thay đổi" : "Chỉnh sửa hồ sơ"}
+      </button>
     </div>
   );
 };
 
 const styles = {
-  page: { padding: 24, color: '#ffffff', minHeight: '100%', backgroundColor: '#121212' },
-  header: { display: 'flex', alignItems: 'flex-end', gap: '24px', marginBottom: '32px' },
-  avatar: { width: '192px', height: '192px', borderRadius: '50%', backgroundColor: '#282828', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '64px', fontWeight: 'bold', boxShadow: '0 4px 60px rgba(0,0,0,.5)' },
-  type: { margin: 0, fontSize: '14px', fontWeight: 700 },
-  name: { margin: '8px 0', fontSize: '72px', fontWeight: 900, letterSpacing: '-0.04em' },
-  stats: { margin: 0, color: '#b3b3b3', fontSize: '14px' }
+  container: { padding: '40px', color: '#fff', backgroundColor: '#121212', minHeight: '100vh' },
+  header: { display: 'flex', alignItems: 'center', gap: '32px', marginBottom: '40px' },
+  avatarLarge: { width: '150px', height: '150px', borderRadius: '50%', backgroundColor: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '60px' },
+  title: { fontSize: '60px', fontWeight: 900 },
+  subTitle: { color: '#b3b3b3', textTransform: 'uppercase' as const },
+  // THÊM THUỘC TÍNH NÀY VÀO:
+  info: { display: 'flex', flexDirection: 'column' as const, gap: '8px' }, 
+  input: { fontSize: '40px', background: 'transparent', color: '#fff', border: '1px solid #555', padding: '5px' },
+  bioSection: { backgroundColor: '#181818', padding: '20px', borderRadius: '8px', maxWidth: '600px' },
+  textarea: { width: '100%', height: '100px', background: '#333', color: '#fff', padding: '10px', marginTop: '10px' },
+  bioText: { color: '#b3b3b3', marginTop: '10px' },
+  editButton: { marginTop: '20px', padding: '10px 25px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }
 };
 
 export default Profile;

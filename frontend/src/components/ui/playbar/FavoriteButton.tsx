@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Heart } from 'lucide-react';
-import { mediaService } from '../../services/mediaService'; 
-import { useAuthStore } from '../../store/authStore';
+import { mediaService } from '../../../services/mediaService'; 
+import { useAuthStore } from '../../../store/authStore';
 
 interface FavoriteButtonProps {
   mediaId: string;

@@ -2,10 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import PlaybackControls from '../ui/playbar/PlaybackControls';
 import PlaybarUtilities from '../ui/playbar/PlaybarUtilities';
 import TrackInfo from '../ui/playbar/TrackInfo';
-import { currentTrack } from '../../data/currentTrack';
 import { usePlayerStore } from '../../store/playerStore';
-import FavoriteButton from '../ui/FavoriteButton';
-import { mediaService } from '../../services/mediaService'; // Import service để gọi API
+import FavoriteButton from '../ui/playbar/FavoriteButton';
+import { mediaService } from '../../services/mediaService';
 
 const formatTime = (seconds: number): string => {
   if (!seconds || isNaN(seconds)) return '0:00';
@@ -26,7 +25,6 @@ const Playbar: React.FC = () => {
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  // Xử lý link nhạc và ảnh an toàn tuyệt đối
   const rawAudioPath = currentTrackStore?.previewUrl || currentTrackStore?.filePath;
   const safeAudioUrl = rawAudioPath?.startsWith('http')
     ? rawAudioPath
@@ -37,20 +35,29 @@ const Playbar: React.FC = () => {
     ? rawImgPath
     : rawImgPath ? `http://localhost:5078${rawImgPath}` : 'https://via.placeholder.com/64/1a1a1a/ffffff?text=Music';
 
+  // LOẠI BỎ TOÀN BỘ MOCK DATA
   const activeTrack = currentTrackStore
     ? {
         artworkUrl: safeImgUrl,
         title: currentTrackStore.title,
-        artist: currentTrackStore.artistName || 'Nghệ sĩ ẩn danh',
+        artist: currentTrackStore.artistName || currentTrackStore.ownerName || 'Nghệ sĩ ẩn danh',
         previewUrl: safeAudioUrl,
         currentTime: formatTime(currentTime),
         duration: formatTime(duration ?? currentTrackStore.duration ?? 0),
         progress: progressPercent,
         volume: volume,
       }
-    : { ...currentTrack, previewUrl: null };
+    : { 
+        artworkUrl: 'https://via.placeholder.com/64/121212/121212', // Ảnh rỗng màu đen
+        title: '--', 
+        artist: '--', 
+        previewUrl: null, 
+        currentTime: '0:00', 
+        duration: '0:00', 
+        progress: 0, 
+        volume: volume 
+      };
 
-  // ĐỒNG BỘ PLAY/PAUSE
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = activeTrack.volume / 100;
@@ -62,7 +69,6 @@ const Playbar: React.FC = () => {
     }
   }, [isPlaying, activeTrack.previewUrl, activeTrack.volume]);
 
-  // 2. Reset bộ đếm lịch sử mỗi khi chuyển sang bài hát khác
   useEffect(() => {
     hasRecordedRef.current = null;
   }, [currentTrackStore?.id]);
@@ -80,9 +86,8 @@ const Playbar: React.FC = () => {
               const cTime = currentObj.currentTime;
               setCurrentTime(cTime);
 
-              // 3. THỰC THI RecordPlayHistoryCommand: Ghi nhận lịch sử nghe khi bài hát trôi qua 10 giây
               if (cTime > 10 && currentTrackStore?.id && hasRecordedRef.current !== currentTrackStore.id) {
-                hasRecordedRef.current = currentTrackStore.id; // Đánh dấu là đã lưu
+                hasRecordedRef.current = currentTrackStore.id;
                 mediaService.recordPlayHistory(currentTrackStore.id).catch(e => console.log('Không thể lưu lịch sử:', e));
               }
             }
@@ -99,20 +104,19 @@ const Playbar: React.FC = () => {
         />
       )}
 
-      {/* 4. THỰC THI ToggleFavoriteCommand: Gắn nút thả tim vào giao diện */}
       <div style={styles.leftColumn}>
         <TrackInfo
           artworkUrl={activeTrack.artworkUrl}
           title={activeTrack.title}
           artist={activeTrack.artist}
         />
-      {currentTrackStore?.id && (
-        <FavoriteButton 
-          key={currentTrackStore.id} 
-          mediaId={currentTrackStore.id} 
-          size={20} 
-        />
-      )}
+        {currentTrackStore?.id && (
+          <FavoriteButton 
+            key={currentTrackStore.id} 
+            mediaId={currentTrackStore.id} 
+            size={20} 
+          />
+        )}
       </div>
 
       <PlaybackControls
@@ -140,12 +144,11 @@ const styles = {
     boxSizing: 'border-box' as const,
     color: '#ffffff',
   },
-  // Bổ sung style cho cột chứa thông tin bài hát và nút tim
   leftColumn: {
     display: 'flex',
     alignItems: 'center',
     gap: 16,
-    minWidth: 0, // Giữ cho nội dung không bị đẩy tràn khỏi grid
+    minWidth: 0,
   }
 };
 

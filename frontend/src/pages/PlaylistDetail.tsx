@@ -1,57 +1,123 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { usePlayerStore } from '../store/playerStore';import { playlistService } from '../services/playlistService';
+import type { Playlist } from '../types/playlist';
+import { mediaService } from '../services/mediaService';
+import type { MediaItem } from '../types/media';
 
-// Dữ liệu mẫu khớp với danh sách phát bên Sidebar của Đỗ Trọng Tín để bạn test logic
-const mockSongs = [
-  { id: 's1', playlistId: '1', title: 'Detective Conan Main Theme', artist: 'Katsuo Ono', cover: 'https://via.placeholder.com/150/6366f1/ffffff?text=Conan' },
-  { id: 's2', playlistId: '1', title: 'Chịu Cách Mình Nói Thua', artist: 'RHYDER, CoolKid, BAN', cover: 'https://via.placeholder.com/150/1DB954/ffffff?text=Rhyder' },
-  { id: 's3', playlistId: '2', title: 'IELTS Listening Practice', artist: 'Podcourses', cover: 'https://via.placeholder.com/150/5555bb/ffffff?text=IELTS' },
-  { id: 's4', playlistId: '4', title: 'Nụ Cười Chút Nắng', artist: 'Vũ Phụng Tiên', cover: 'https://via.placeholder.com/150/333333/ffffff?text=VPT' },
-];
+// Hàm xử lý đường dẫn ảnh (Chống lỗi vỡ hình)
+const getImageUrl = (path?: string | null) => {
+  if (!path) return 'https://via.placeholder.com/40/1a1a1a/ffffff?text=Music';
+  if (path.startsWith('http')) return path;
+  return `http://localhost:5078${path}`;
+};
 
 const PlaylistDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // Lấy ID từ URL /playlist/:id
+  const { id } = useParams<{ id: string }>();
   const { setRightPanelData } = useAppContext();
+  const play = usePlayerStore((s) => s.play);
+  
+  const [playlist, setPlaylist] = useState<Playlist | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Lọc ra các bài hát thuộc Playlist đang xem
-  const songs = mockSongs.filter(song => song.playlistId === id);
+  useEffect(() => {
+    const fetchDetail = async () => {
+      if (!id) return;
+
+      try {
+        setLoading(true);
+        
+        // Phân nhánh: Nếu là danh sách "Bài hát đã thích"
+        if (id === 'liked') {
+          const favorites = await mediaService.getFavorites();
+          setPlaylist({
+            id: 'liked',
+            title: 'Bài hát đã thích',
+            coverImageUrl: 'https://via.placeholder.com/150/6366f1/ffffff?text=♥',
+            tracks: favorites
+          });
+        } 
+        // Nếu là Playlist bình thường
+        else {
+          const data = await playlistService.getPlaylistDetail(id);
+          setPlaylist(data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách phát:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetail();
+  }, [id]);
+
+  const handlePlayTrack = (song: MediaItem) => {
+    // 1. Đẩy thông tin lên Panel bên phải
+    setRightPanelData({
+      title: song.title,
+      artist: song.artistName || song.ownerName || 'Ẩn danh',
+      cover: getImageUrl(song.thumbnailPath),
+      type: 'song'
+    });
+    
+    // 2. Chuyển bài hát xuống Playbar để phát
+    play(song);
+  };
+
+  // Trạng thái chờ
+  if (loading) {
+    return <div style={{ padding: 24, color: '#fff' }}>Đang tải danh sách phát...</div>;
+  }
+
+  // Trạng thái lỗi không tìm thấy
+  if (!playlist) {
+    return <div style={{ padding: 24, color: '#fff' }}>Không tìm thấy danh sách phát này.</div>;
+  }
+
+  const songs = playlist.tracks || [];
 
   return (
-    <div style={{ padding: '24px', color: '#ffffff', backgroundColor: '#121212', minHeight: '100%', borderRadius: '8px' }}>
-      <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>Chi tiết Danh sách phát #{id}</h2>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <img 
+          src={getImageUrl(playlist.coverImageUrl)} 
+          alt="Playlist Cover" 
+          style={styles.coverImage} 
+        />
+        <div style={styles.headerInfo}>
+          <span style={styles.typeText}>Danh sách phát</span>
+          <h2 style={styles.title}>{playlist.title}</h2>
+          <p style={styles.stats}>{songs.length} bài hát</p>
+        </div>
+      </div>
       
       {songs.length === 0 ? (
-        <p style={{ color: '#b3b3b3', fontSize: '14px' }}>Chưa có bài hát nào trong danh sách phát này hoặc ID không khớp.</p>
+        <p style={{ color: '#b3b3b3', fontSize: '14px', marginTop: '24px' }}>
+          Chưa có bài hát nào trong danh sách phát này.
+        </p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={styles.trackList}>
           {songs.map((song, index) => (
             <div 
               key={song.id}
-              onClick={() => setRightPanelData({
-                title: song.title,
-                artist: song.artist,
-                cover: song.cover,
-                type: 'song'
-              })}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                padding: '12px 16px',
-                backgroundColor: '#181818',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s',
-              }}
+              onClick={() => handlePlayTrack(song)}
+              style={styles.trackItem}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2a2a2a')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#181818')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
-              <span style={{ color: '#b3b3b3', width: '24px', textAlign: 'center' }}>{index + 1}</span>
-              <img src={song.cover} alt={song.title} style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: '600', fontSize: '15px', color: '#ffffff' }}>{song.title}</div>
-                <div style={{ fontSize: '13px', color: '#b3b3b3', marginTop: '4px' }}>{song.artist}</div>
+              <span style={styles.trackIndex}>{index + 1}</span>
+              <img 
+                src={getImageUrl(song.thumbnailPath)} 
+                alt={song.title} 
+                style={styles.trackImage} 
+              />
+              <div style={styles.trackInfo}>
+                <div style={styles.trackTitle}>{song.title}</div>
+                <div style={styles.trackArtist}>
+                  {song.artistName || song.ownerName || 'Ẩn danh'}
+                </div>
               </div>
             </div>
           ))}
@@ -59,6 +125,23 @@ const PlaylistDetail: React.FC = () => {
       )}
     </div>
   );
+};
+
+const styles = {
+  container: { padding: '24px', color: '#ffffff', backgroundColor: '#121212', minHeight: '100%', borderRadius: '8px' },
+  header: { display: 'flex', alignItems: 'flex-end', gap: '24px', paddingBottom: '24px', borderBottom: '1px solid #282828' },
+  coverImage: { width: '192px', height: '192px', borderRadius: '4px', objectFit: 'cover' as const, boxShadow: '0 4px 60px rgba(0,0,0,.5)' },
+  headerInfo: { display: 'flex', flexDirection: 'column' as const },
+  typeText: { fontSize: '14px', fontWeight: 700, marginBottom: '8px' },
+  title: { fontSize: '64px', fontWeight: 900, margin: '0 0 16px 0', letterSpacing: '-0.04em' },
+  stats: { color: '#b3b3b3', fontSize: '14px', margin: 0 },
+  trackList: { display: 'flex', flexDirection: 'column' as const, gap: '4px', marginTop: '24px' },
+  trackItem: { display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', transition: 'background-color 0.2s' },
+  trackIndex: { color: '#b3b3b3', width: '24px', textAlign: 'center' as const, fontSize: '16px' },
+  trackImage: { width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' as const },
+  trackInfo: { flex: 1 },
+  trackTitle: { fontWeight: 600, fontSize: '16px', color: '#ffffff', marginBottom: '4px' },
+  trackArtist: { fontSize: '14px', color: '#b3b3b3' }
 };
 
 export default PlaylistDetail;

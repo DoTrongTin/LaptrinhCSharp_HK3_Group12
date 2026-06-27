@@ -32,13 +32,20 @@ const MainContent: React.FC = () => {
     fetchMedia();
   }, []);
 
+  // 1. THÊM HÀM NÀY ĐỂ XỬ LÝ URL ẢNH
+  const getImageUrl = (path?: string | null) => {
+    if (!path) return 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Music';
+    if (path.startsWith('http')) return path; 
+    return `http://localhost:5078${path}`;   
+  };
+
 
 const handleMediaClick = (item: MediaItem) => {
     setRightPanelData({
       title: item.title,
       // Tự động nhận diện chuẩn mới hoặc cũ
       artist: item.artistName || item.ownerName || 'Unknown Artist',
-      cover: item.thumbnailPath || 'https://via.placeholder.com/300/1a1a1a/ffffff?text=Music',
+      cover: getImageUrl(item.thumbnailPath),
       type: 'song',
     });
     play(item);
@@ -99,17 +106,18 @@ const formatDuration = (seconds?: number): string => {
         {firstHalf.length > 0 && (
           <section style={styles.section}>
             <SectionHeader title="Mới nhất" />
-            <div style={styles.gridContainer}>
-              {firstHalf.map((item) => (
-                <MediaCard
-              key={item.id}
-              title={item.title}
-             subtitle={`${item.artistName || 'Nghệ sĩ ẩn danh'}${item.duration ? ` • ${formatDuration(item.duration)}` : ''}`}
-              imageUrl={item.thumbnailPath || 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Music'}
-              onClick={() => handleMediaClick(item)}
-            />
-              ))}
-            </div>
+          <div style={styles.gridContainer}>
+            {mediaItems.map((item) => (
+              <MediaCard
+                key={item.id}
+                title={item.title}
+                // Hiển thị nghệ sĩ thực tế từ DB
+                subtitle={item.artistName || 'Nghệ sĩ ẩn danh'} 
+                imageUrl={getImageUrl(item.thumbnailPath)}
+                onClick={() => handleMediaClick(item)}
+              />
+            ))}
+          </div>
           </section>
         )}
 
@@ -123,7 +131,7 @@ const formatDuration = (seconds?: number): string => {
                   key={item.id}
                   title={item.title}
                   subtitle={`${item.artistName || 'Nghệ sĩ ẩn danh'}${item.duration ? ` • ${formatDuration(item.duration)}` : ''}`}
-                  imageUrl={item.thumbnailPath || 'https://via.placeholder.com/150/1a1a1a/ffffff?text=Music'}
+                  imageUrl={getImageUrl(item.thumbnailPath)}
                   onClick={() => handleMediaClick(item)}
                 />
               ))}
