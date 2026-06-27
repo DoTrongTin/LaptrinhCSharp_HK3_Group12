@@ -14,5 +14,10 @@ public class UpdateProfileValidator : AbstractValidator<UpdateProfileCommand>
         // Kiểm tra Bio
         RuleFor(x => x.Bio)
             .MaximumLength(200).WithMessage("Tiểu sử không được vượt quá 200 ký tự.");
+            
+        // (Tùy chọn) Kiểm tra định dạng AvatarPath nếu bạn muốn
+        RuleFor(x => x.AvatarPath)
+            .MaximumLength(500).WithMessage("Đường dẫn ảnh quá dài.")
+            .When(x => !string.IsNullOrEmpty(x.AvatarPath));
     }
 }

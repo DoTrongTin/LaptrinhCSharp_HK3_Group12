@@ -10,7 +10,7 @@ namespace TuneVault.Infrastructure.Persistence
     public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IAppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-        public DbSet<ApplicationUser> Users => base.Users;
+         public override DbSet<ApplicationUser> Users { get => base.Users; set => base.Users = value; }
         public DbSet<Album> Albums => Set<Album>();
         public DbSet<MediaItem> MediaItems => Set<MediaItem>();
         public DbSet<Playlist> Playlists => Set<Playlist>();
@@ -32,10 +32,10 @@ namespace TuneVault.Infrastructure.Persistence
             builder.Entity<IdentityUserRole<Guid>>().ToTable("AppUserRoles");
             builder.Entity<MediaItem>().HasQueryFilter(m => !m.IsDeleted);
 
-            builder.Entity<Favorite>().HasQueryFilter(f => !f.MediaItem.IsDeleted);
-            builder.Entity<PlayHistory>().HasQueryFilter(p => !p.MediaItem.IsDeleted);
-            builder.Entity<PlaylistTrack>().HasQueryFilter(pt => !pt.MediaItem.IsDeleted);
-            builder.Entity<MediaTag>().HasQueryFilter(mt => !mt.MediaItem.IsDeleted);
+            builder.Entity<Favorite>().HasQueryFilter(f => !f.MediaItem!.IsDeleted);
+            builder.Entity<PlayHistory>().HasQueryFilter(p => !p.MediaItem!.IsDeleted);
+            builder.Entity<PlaylistTrack>().HasQueryFilter(pt => !pt.MediaItem!.IsDeleted);
+            builder.Entity<MediaTag>().HasQueryFilter(mt => !mt.MediaItem!.IsDeleted);
 
             // Tự động quét và áp dụng tất cả các file trong thư mục Configurations
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

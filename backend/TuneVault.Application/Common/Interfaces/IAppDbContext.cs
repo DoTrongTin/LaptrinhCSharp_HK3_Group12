@@ -8,6 +8,7 @@ public interface IAppDbContext
     DbSet<ApplicationUser> Users { get; }
     DbSet<MediaItem> MediaItems { get; }
     DbSet<Playlist> Playlists { get; }
+    DbSet<PlaylistTrack> PlaylistTracks { get; }
     DbSet<MediaShare> MediaShares { get; }
     DbSet<Notification> Notifications { get; }
 

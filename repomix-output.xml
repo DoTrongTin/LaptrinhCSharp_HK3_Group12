@@ -346,46 +346,6 @@ This section contains the contents of the repository's files.
 
 </file>
 
-<file path="backend/TuneVault.API/Controllers/ProfileController.cs">
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using TuneVault.Application.Features.Profile.Commands.UpdateProfile;
-using TuneVault.Application.Features.Profile.DTOs;
-using TuneVault.Application.Features.Profile.Queries.GetProfile;
-
-namespace TuneVault.API.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-[Authorize]
-public class ProfileController : ControllerBase
-{
-    private readonly IMediator _mediator;
-
-    public ProfileController(IMediator mediator) => _mediator = mediator;
-
-    [HttpGet]
-    public async Task<IActionResult> GetProfile()
-    {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var result = await _mediator.Send(new GetProfileQuery(userId));
-        return Ok(result);
-    }
-
-    [HttpPut]
-    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
-    {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var command = new UpdateProfileCommand { UserId = userId, UserName = dto.UserName, Bio = dto.Bio };
-        
-        var success = await _mediator.Send(command);
-        return success ? Ok() : BadRequest("Cập nhật thất bại.");
-    }
-}
-</file>
-
 <file path="backend/TuneVault.API/Hubs/NotificationHubRegistration.cs">
 
 </file>
@@ -693,98 +653,6 @@ namespace TuneVault.Application.Features.Media.Queries.GetTrendingMedia
 </file>
 
 <file path="backend/TuneVault.Application/Features/Playlist/Queries/GetPlaylistDetail/GetPlaylistDetailQuery.cs">
-
-</file>
-
-<file path="backend/TuneVault.Application/Features/Profile/Commands/UpdateProfile/UpdateProfileCommand.cs">
-using MediatR;
-
-namespace TuneVault.Application.Features.Profile.Commands.UpdateProfile;
-
-public class UpdateProfileCommand : IRequest<bool>
-{
-    public Guid UserId { get; set; }
-    public string UserName { get; set; } = string.Empty;
-    public string Bio { get; set; } = string.Empty;
-}
-</file>
-
-<file path="backend/TuneVault.Application/Features/Profile/Commands/UpdateProfile/UpdateProfileHandler.cs">
-using MediatR;
-using TuneVault.Application.Common.Interfaces;
-using TuneVault.Domain.Entities;
-
-namespace TuneVault.Application.Features.Profile.Commands.UpdateProfile;
-
-public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, bool>
-{
-    private readonly IAppDbContext _context;
-
-    public UpdateProfileHandler(IAppDbContext context) => _context = context;
-
-    public async Task<bool> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
-    {
-        var user = await _context.Users.FindAsync(new object[] { request.UserId }, cancellationToken);
-        if (user == null) return false;
-
-        user.UserName = request.UserName;
-        user.Bio = request.Bio;
-
-        await _context.SaveChangesAsync(cancellationToken);
-        return true;
-    }
-}
-</file>
-
-<file path="backend/TuneVault.Application/Features/Profile/Commands/UpdateProfile/UpdateProfileValidator.cs">
-using FluentValidation;
-
-namespace TuneVault.Application.Features.Profile.Commands.UpdateProfile;
-
-public class UpdateProfileValidator : AbstractValidator<UpdateProfileCommand>
-{
-    public UpdateProfileValidator()
-    {
-        // Kiểm tra UserName
-        RuleFor(x => x.UserName)
-            .NotEmpty().WithMessage("Tên người dùng không được để trống.")
-            .MaximumLength(50).WithMessage("Tên người dùng không được vượt quá 50 ký tự.");
-
-        // Kiểm tra Bio
-        RuleFor(x => x.Bio)
-            .MaximumLength(200).WithMessage("Tiểu sử không được vượt quá 200 ký tự.");
-    }
-}
-</file>
-
-<file path="backend/TuneVault.Application/Features/Profile/DTOs/ProfileDto.cs">
-namespace TuneVault.Application.Features.Profile.DTOs;
-
-public class ProfileDto
-{
-    public Guid UserId { get; set; }
-    public string UserName { get; set; } = string.Empty;
-    public string Bio { get; set; } = string.Empty;
-    public string? Email { get; set; }
-    // Bạn có thể thêm các trường khác như AvatarUrl nếu có
-}
-</file>
-
-<file path="backend/TuneVault.Application/Features/Profile/DTOs/UpdateProfileDto.cs">
-namespace TuneVault.Application.Features.Profile.DTOs;
-
-public class UpdateProfileDto
-{
-    public string UserName { get; set; } = string.Empty;
-    public string Bio { get; set; } = string.Empty;
-}
-</file>
-
-<file path="backend/TuneVault.Application/Features/Profile/Queries/GetProfile/GetProfileHandler.cs">
-
-</file>
-
-<file path="backend/TuneVault.Application/Features/Profile/Queries/GetProfile/GetProfileQuery.cs">
 
 </file>
 
@@ -6320,6 +6188,96 @@ public class NotificationsController : ControllerBase
 }
 </file>
 
+<file path="backend/TuneVault.API/Controllers/ProfileController.cs">
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using TuneVault.Application.Features.Profile.Commands.UpdateProfile;
+using TuneVault.Application.Features.Profile.Queries.GetProfile;
+
+namespace TuneVault.API.Controllers;
+
+// 1. TẠO CLASS REQUEST TẠI TẦNG API ĐỂ NHẬN FILE
+public class UpdateProfileRequest
+{
+    public string UserName { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+    public IFormFile? AvatarFile { get; set; } // IFormFile không bị lỗi ở đây
+}
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class ProfileController : ControllerBase
+{
+    private readonly IMediator _mediator;
+    private readonly IWebHostEnvironment _env;
+
+    public ProfileController(IMediator mediator, IWebHostEnvironment env)
+    {
+        _mediator = mediator;
+        _env = env;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetProfile(CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        var result = await _mediator.Send(new GetProfileQuery(userId), cancellationToken);
+        return Ok(new { data = result });
+    }
+
+    [HttpPut]
+    // 2. SỬ DỤNG LỚP REQUEST VỪA TẠO
+    public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileRequest request, CancellationToken cancellationToken)
+    {
+        var userId = GetCurrentUserId();
+        string? avatarPath = null;
+
+        // 3. XỬ LÝ LƯU FILE NGAY TRONG CONTROLLER
+        if (request.AvatarFile != null && request.AvatarFile.Length > 0)
+        {
+            var webRoot = string.IsNullOrEmpty(_env.WebRootPath) ? Path.Combine(_env.ContentRootPath, "wwwroot") : _env.WebRootPath;
+            var coverDir = Path.Combine(webRoot, "uploads", "covers");
+            
+            if (!Directory.Exists(coverDir)) Directory.CreateDirectory(coverDir);
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(request.AvatarFile.FileName);
+            var filePath = Path.Combine(coverDir, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await request.AvatarFile.CopyToAsync(stream);
+            }
+            
+            avatarPath = $"/uploads/covers/{fileName}";
+        }
+
+        // 4. GỬI XUỐNG APPLICATION TẦNG DƯỚI (Lúc này chỉ gửi chuỗi AvatarPath)
+        var command = new UpdateProfileCommand 
+        { 
+            UserId = userId, 
+            UserName = request.UserName, 
+            Bio = request.Bio,
+            AvatarPath = avatarPath
+        };
+        
+        var result = await _mediator.Send(command, cancellationToken);
+        
+        return Ok(new { data = result });
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdValue))
+            throw new UnauthorizedAccessException("Không tìm thấy thông tin người dùng.");
+        return Guid.Parse(userIdValue);
+    }
+}
+</file>
+
 <file path="backend/TuneVault.API/Controllers/ShareController.cs">
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -6967,6 +6925,177 @@ public class NotificationDto
 
     public bool IsRead { get; set; }
     public DateTime CreatedAt { get; set; }
+}
+</file>
+
+<file path="backend/TuneVault.Application/Features/Profile/Commands/UpdateProfile/UpdateProfileCommand.cs">
+using MediatR;
+using TuneVault.Application.Features.Profile.DTOs;
+
+namespace TuneVault.Application.Features.Profile.Commands.UpdateProfile;
+
+// Lưu ý: Đổi IRequest<bool> thành IRequest<ProfileDto> để trả về dữ liệu user mới
+public class UpdateProfileCommand : IRequest<ProfileDto>
+{
+    public Guid UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+    
+    // THÊM DÒNG NÀY ĐỂ FIX LỖI CS0117
+    public string? AvatarPath { get; set; } 
+}
+</file>
+
+<file path="backend/TuneVault.Application/Features/Profile/Commands/UpdateProfile/UpdateProfileHandler.cs">
+using MediatR;
+using TuneVault.Application.Common.Interfaces;
+using TuneVault.Application.Features.Profile.DTOs; 
+
+namespace TuneVault.Application.Features.Profile.Commands.UpdateProfile;
+
+
+public class UpdateProfileHandler : IRequestHandler<UpdateProfileCommand, ProfileDto>
+{
+    private readonly IAppDbContext _context;
+
+    public UpdateProfileHandler(IAppDbContext context) => _context = context;
+
+    public async Task<ProfileDto> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
+    {
+        var user = await _context.Users.FindAsync(new object[] { request.UserId }, cancellationToken);
+        
+        if (user == null) 
+            throw new UnauthorizedAccessException("Không tìm thấy tài khoản người dùng.");
+        user.UserName = request.UserName;
+        user.Bio = request.Bio;
+
+
+        if (!string.IsNullOrEmpty(request.AvatarPath))
+        {
+            user.AvatarPath = request.AvatarPath;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // 3. Trả về thông tin mới nhất cho Frontend
+        return new ProfileDto
+        {
+            UserId = user.Id,
+            UserName = user.UserName ?? string.Empty,
+            Bio = user.Bio ?? string.Empty,
+            Email = user.Email,
+           
+        };
+    }
+}
+</file>
+
+<file path="backend/TuneVault.Application/Features/Profile/Commands/UpdateProfile/UpdateProfileValidator.cs">
+using FluentValidation;
+
+namespace TuneVault.Application.Features.Profile.Commands.UpdateProfile;
+
+public class UpdateProfileValidator : AbstractValidator<UpdateProfileCommand>
+{
+    public UpdateProfileValidator()
+    {
+        // Kiểm tra UserName
+        RuleFor(x => x.UserName)
+            .NotEmpty().WithMessage("Tên người dùng không được để trống.")
+            .MaximumLength(50).WithMessage("Tên người dùng không được vượt quá 50 ký tự.");
+
+        // Kiểm tra Bio
+        RuleFor(x => x.Bio)
+            .MaximumLength(200).WithMessage("Tiểu sử không được vượt quá 200 ký tự.");
+            
+        // (Tùy chọn) Kiểm tra định dạng AvatarPath nếu bạn muốn
+        RuleFor(x => x.AvatarPath)
+            .MaximumLength(500).WithMessage("Đường dẫn ảnh quá dài.")
+            .When(x => !string.IsNullOrEmpty(x.AvatarPath));
+    }
+}
+</file>
+
+<file path="backend/TuneVault.Application/Features/Profile/DTOs/ProfileDto.cs">
+namespace TuneVault.Application.Features.Profile.DTOs;
+
+public class ProfileDto
+{
+    public Guid UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    // Bạn có thể thêm các trường khác như AvatarUrl nếu có
+}
+</file>
+
+<file path="backend/TuneVault.Application/Features/Profile/DTOs/UpdateProfileDto.cs">
+namespace TuneVault.Application.Features.Profile.DTOs;
+
+public class UpdateProfileDto
+{
+    public string UserName { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+}
+</file>
+
+<file path="backend/TuneVault.Application/Features/Profile/Queries/GetProfile/GetProfileHandler.cs">
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
+using System.Threading.Tasks;
+using TuneVault.Application.Common.Interfaces;
+using TuneVault.Application.Features.Profile.DTOs;
+
+namespace TuneVault.Application.Features.Profile.Queries.GetProfile;
+
+public class GetProfileHandler : IRequestHandler<GetProfileQuery, ProfileDto?>
+{
+    private readonly IAppDbContext _context;
+
+    public GetProfileHandler(IAppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<ProfileDto?> Handle(GetProfileQuery request, CancellationToken cancellationToken)
+    {
+        // Sử dụng AsNoTracking vì chúng ta chỉ đọc dữ liệu, giúp tối ưu hiệu suất
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+
+        if (user == null) return null;
+
+        // Map dữ liệu từ Entity sang DTO để trả về cho Frontend
+        return new ProfileDto
+        {
+            UserId = user.Id,
+            UserName = user.UserName ?? string.Empty,
+            Bio = user.Bio ?? string.Empty,
+            Email = user.Email
+            // Nếu sau này ProfileDto có thêm AvatarPath, bạn có thể bổ sung:
+            // AvatarPath = user.AvatarPath
+        };
+    }
+}
+</file>
+
+<file path="backend/TuneVault.Application/Features/Profile/Queries/GetProfile/GetProfileQuery.cs">
+using MediatR;
+using System;
+using TuneVault.Application.Features.Profile.DTOs;
+
+namespace TuneVault.Application.Features.Profile.Queries.GetProfile;
+
+public class GetProfileQuery : IRequest<ProfileDto>
+{
+    public Guid UserId { get; set; }
+
+    public GetProfileQuery(Guid userId)
+    {
+        UserId = userId;
+    }
 }
 </file>
 
@@ -11648,103 +11777,6 @@ const styles = {
 export default Search;
 </file>
 
-<file path="frontend/src/services/authService.ts">
-import api from './api';
-import { useAuthStore } from '../store/authStore';
-import type { LoginDto, RegisterDto } from '../types/auth';
-import type { User } from '../types/user';
-import { jwtDecode } from 'jwt-decode'; // 1. THÊM IMPORT NÀY
-
-// 2. KHAI BÁO CẤU TRÚC TOKEN TỪ BACKEND TRẢ VỀ
-interface MyJwtPayload {
-  nameid: string;
-  unique_name: string;
-  role?: string | string[]; // ASP.NET Core tự động map quyền vào key 'role'
-  exp: number;
-}
-
-export const authService = {
-  login: async (credentials: LoginDto): Promise<User> => {
-    try {
-      const response = await api.post('/auth/login', credentials);
-      
-      const data = response.data.data; 
-      const token = data.token;
-      
-      // 3. GIẢI MÃ TOKEN ĐỂ LẤY ROLE
-      const decoded = jwtDecode<MyJwtPayload>(token);
-      const userRole = Array.isArray(decoded.role) ? decoded.role[0] : decoded.role;
-      
-      const user: User = {
-        id: data.userId,
-        userName: data.userName,
-        email: data.email,
-        avatarPath: data.avatarPath,
-        role: userRole 
-      };
-
-      // Cập nhật State toàn cục
-      useAuthStore.getState().setAuth(user, token);
-      
-      // Chốt an toàn: Ghi thẳng vào ví trình duyệt 
-      localStorage.setItem('token', token);
-
-      return user;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!';
-      // eslint-disable-next-line preserve-caught-error
-      throw new Error(errorMessage);
-    }
-  },
-
-  register: async (credentials: RegisterDto): Promise<User> => {
-    try {
-      const response = await api.post('/auth/register', credentials);
-      
-      const data = response.data.data;
-      const token = data.token;
-      
-      // Tương tự, giải mã khi Đăng ký (nếu Backend trả về token ngay sau đăng ký)
-      const decoded = jwtDecode<MyJwtPayload>(token);
-      const userRole = Array.isArray(decoded.role) ? decoded.role[0] : decoded.role;
-      
-      const user: User = {
-        id: data.userId,
-        userName: data.userName,
-        email: data.email,
-        avatarPath: data.avatarPath,
-        role: userRole // 🌟 GÁN QUYỀN
-      };
-
-      useAuthStore.getState().setAuth(user, token);
-      localStorage.setItem('token', token);
-
-      return user;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại!';
-      // eslint-disable-next-line preserve-caught-error
-      throw new Error(errorMessage);
-    }
-  },
-
-  logout: () => {
-    // Dọn dẹp State trong Zustand
-    useAuthStore.getState().logout();
-    
-    // Dọn dẹp Token cứng
-    localStorage.removeItem('token');
-    
-    // Dọn dẹp bộ nhớ đệm của Zustand (nếu bạn có dùng devtools/persist)
-    localStorage.removeItem('auth-storage'); 
-    
-    // Tải lại trang và đá văng người dùng về trang chủ để reset mọi dữ liệu rác
-    window.location.href = '/'; 
-  }
-};
-</file>
-
 <file path="frontend/src/types/media.ts">
 export interface MediaItem {
   id: string;
@@ -11848,51 +11880,101 @@ public class MediaItem
 }
 </file>
 
-<file path="backend/TuneVault.Infrastructure/Persistence/AppDbContext.cs">
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using TuneVault.Domain.Entities;
-using TuneVault.Application.Common.Interfaces;
+<file path="frontend/src/services/authService.ts">
+import api from './api';
+import { useAuthStore } from '../store/authStore';
+import type { LoginDto, RegisterDto } from '../types/auth';
+import type { User } from '../types/user';
+import { jwtDecode } from 'jwt-decode'; // 1. THÊM IMPORT NÀY
 
-namespace TuneVault.Infrastructure.Persistence
-{
-    public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IAppDbContext
-    {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-        public DbSet<ApplicationUser> Users => base.Users;
-        public DbSet<Album> Albums => Set<Album>();
-        public DbSet<MediaItem> MediaItems => Set<MediaItem>();
-        public DbSet<Playlist> Playlists => Set<Playlist>();
-        public DbSet<PlaylistTrack> PlaylistTracks => Set<PlaylistTrack>();
-        public DbSet<Favorite> Favorites => Set<Favorite>();
-        public DbSet<PlayHistory> PlayHistories => Set<PlayHistory>();
-        public DbSet<Follow> Follows => Set<Follow>();
-        public DbSet<MediaShare> MediaShares => Set<MediaShare>();
-        public DbSet<Notification> Notifications => Set<Notification>();
-        public DbSet<MediaTag> MediaTags => Set<MediaTag>();
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder); 
-
-            // Đổi tên bảng Identity mặc định cho đẹp
-            builder.Entity<ApplicationUser>().ToTable("AppUsers");
-            builder.Entity<IdentityRole<Guid>>().ToTable("AppRoles");
-            builder.Entity<IdentityUserRole<Guid>>().ToTable("AppUserRoles");
-            builder.Entity<MediaItem>().HasQueryFilter(m => !m.IsDeleted);
-
-            builder.Entity<Favorite>().HasQueryFilter(f => !f.MediaItem.IsDeleted);
-            builder.Entity<PlayHistory>().HasQueryFilter(p => !p.MediaItem.IsDeleted);
-            builder.Entity<PlaylistTrack>().HasQueryFilter(pt => !pt.MediaItem.IsDeleted);
-            builder.Entity<MediaTag>().HasQueryFilter(mt => !mt.MediaItem.IsDeleted);
-
-            // Tự động quét và áp dụng tất cả các file trong thư mục Configurations
-            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        }
-    }
+// 2. KHAI BÁO CẤU TRÚC TOKEN TỪ BACKEND TRẢ VỀ
+interface MyJwtPayload {
+  nameid: string;
+  unique_name: string;
+  role?: string | string[]; // ASP.NET Core tự động map quyền vào key 'role'
+  exp: number;
 }
+
+export const authService = {
+  login: async (credentials: LoginDto): Promise<User> => {
+    try {
+      const response = await api.post('/auth/login', credentials);
+      
+      const data = response.data.data; 
+      const token = data.token;
+      
+      // 3. GIẢI MÃ TOKEN ĐỂ LẤY ROLE
+      const decoded = jwtDecode<MyJwtPayload>(token);
+      const userRole = Array.isArray(decoded.role) ? decoded.role[0] : decoded.role;
+      
+      const user: User = {
+        id: data.userId,
+        userName: data.userName,
+        email: data.email,
+        avatarPath: data.avatarPath,
+        role: userRole 
+      };
+
+      // Cập nhật State toàn cục
+      useAuthStore.getState().setAuth(user, token);
+      
+      // Chốt an toàn: Ghi thẳng vào ví trình duyệt 
+      localStorage.setItem('token', token);
+
+      return user;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!';
+      // eslint-disable-next-line preserve-caught-error
+      throw new Error(errorMessage);
+    }
+  },
+
+  register: async (credentials: RegisterDto): Promise<User> => {
+    try {
+      const response = await api.post('/auth/register', credentials);
+      
+      const data = response.data.data;
+      const token = data.token;
+      
+      // Tương tự, giải mã khi Đăng ký (nếu Backend trả về token ngay sau đăng ký)
+      const decoded = jwtDecode<MyJwtPayload>(token);
+      const userRole = Array.isArray(decoded.role) ? decoded.role[0] : decoded.role;
+      
+      const user: User = {
+        id: data.userId,
+        userName: data.userName,
+        email: data.email,
+        avatarPath: data.avatarPath,
+        role: userRole // 🌟 GÁN QUYỀN
+      };
+
+      useAuthStore.getState().setAuth(user, token);
+      localStorage.setItem('token', token);
+
+      return user;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại!';
+      // eslint-disable-next-line preserve-caught-error
+      throw new Error(errorMessage);
+    }
+  },
+
+  logout: () => {
+    // Dọn dẹp State trong Zustand
+    useAuthStore.getState().logout();
+    
+    // Dọn dẹp Token cứng
+    localStorage.removeItem('token');
+    
+    // Dọn dẹp bộ nhớ đệm của Zustand (nếu bạn có dùng devtools/persist)
+    localStorage.removeItem('auth-storage'); 
+    
+    // Tải lại trang và đá văng người dùng về trang chủ để reset mọi dữ liệu rác
+    window.location.href = '/'; 
+  }
+};
 </file>
 
 <file path="backend/TuneVault.API/TuneVault.API.csproj">
@@ -11922,6 +12004,53 @@ namespace TuneVault.Infrastructure.Persistence
   </ItemGroup>
 
 </Project>
+</file>
+
+<file path="backend/TuneVault.Infrastructure/Persistence/AppDbContext.cs">
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using TuneVault.Domain.Entities;
+using TuneVault.Application.Common.Interfaces;
+
+namespace TuneVault.Infrastructure.Persistence
+{
+    public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IAppDbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+         public override DbSet<ApplicationUser> Users { get => base.Users; set => base.Users = value; }
+        public DbSet<Album> Albums => Set<Album>();
+        public DbSet<MediaItem> MediaItems => Set<MediaItem>();
+        public DbSet<Playlist> Playlists => Set<Playlist>();
+        public DbSet<PlaylistTrack> PlaylistTracks => Set<PlaylistTrack>();
+        public DbSet<Favorite> Favorites => Set<Favorite>();
+        public DbSet<PlayHistory> PlayHistories => Set<PlayHistory>();
+        public DbSet<Follow> Follows => Set<Follow>();
+        public DbSet<MediaShare> MediaShares => Set<MediaShare>();
+        public DbSet<Notification> Notifications => Set<Notification>();
+        public DbSet<MediaTag> MediaTags => Set<MediaTag>();
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder); 
+
+            // Đổi tên bảng Identity mặc định cho đẹp
+            builder.Entity<ApplicationUser>().ToTable("AppUsers");
+            builder.Entity<IdentityRole<Guid>>().ToTable("AppRoles");
+            builder.Entity<IdentityUserRole<Guid>>().ToTable("AppUserRoles");
+            builder.Entity<MediaItem>().HasQueryFilter(m => !m.IsDeleted);
+
+            builder.Entity<Favorite>().HasQueryFilter(f => !f.MediaItem!.IsDeleted);
+            builder.Entity<PlayHistory>().HasQueryFilter(p => !p.MediaItem!.IsDeleted);
+            builder.Entity<PlaylistTrack>().HasQueryFilter(pt => !pt.MediaItem!.IsDeleted);
+            builder.Entity<MediaTag>().HasQueryFilter(mt => !mt.MediaItem!.IsDeleted);
+
+            // Tự động quét và áp dụng tất cả các file trong thư mục Configurations
+            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        }
+    }
+}
 </file>
 
 <file path="backend/TuneVault.Infrastructure/TuneVault.Infrastructure.csproj">
