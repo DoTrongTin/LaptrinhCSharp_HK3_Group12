@@ -9,11 +9,17 @@ using Microsoft.AspNetCore.Identity;
 using TuneVault.Domain.Entities;
 using Microsoft.AspNetCore.Http.Features;
 
+using TuneVault.API.Services;
+using TuneVault.Application.Common.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================
 // 1. KẾT NỐI CÁC TẦNG KIẾN TRÚC
 // ==========================================
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 

@@ -29,6 +29,8 @@ namespace TuneVault.Infrastructure
                     configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
+            services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+
             // ==========================================
             // 2. ĐĂNG KÝ IDENTITY (QUẢN LÝ USER)
             // Đã sửa thành ApplicationUser để khớp với thư mục Entities
