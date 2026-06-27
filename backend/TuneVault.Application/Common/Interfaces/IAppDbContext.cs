@@ -9,6 +9,7 @@ public interface IAppDbContext
     DbSet<MediaItem> MediaItems { get; }
     DbSet<Playlist> Playlists { get; }
     DbSet<MediaShare> MediaShares { get; }
+    DbSet<Notification> Notifications { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -67,6 +67,9 @@ namespace TuneVault.Infrastructure
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<ITokenService, TokenService>();
+
+            services.AddSignalR();
+            services.AddScoped<INotificationRealtimeService, NotificationRealtimeService>();
             
             // services.AddScoped<IAnthropicService, AnthropicService>(); // Dùng cho AI sau này
             
@@ -89,7 +92,24 @@ namespace TuneVault.Infrastructure
                     ValidateAudience = true,
                     ValidAudience = configuration["JwtSettings:Audience"],
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero // Bỏ qua 5 phút trễ mặc định của token
+                    ClockSkew = TimeSpan.Zero //Bỏ qua 5 giây chờ của token
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs/notifications"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

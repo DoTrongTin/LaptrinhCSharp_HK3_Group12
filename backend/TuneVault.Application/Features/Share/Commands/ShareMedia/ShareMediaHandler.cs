@@ -1,18 +1,25 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using TuneVault.Application.Common.Interfaces;
+using TuneVault.Application.Features.Notification.DTOs;
 using TuneVault.Application.Features.Share.DTOs;
 using TuneVault.Domain.Entities;
 
 namespace TuneVault.Application.Features.Share.Commands.ShareMedia;
+using NotificationEntity = TuneVault.Domain.Entities.Notification;
 
 public class ShareMediaHandler : IRequestHandler<ShareMediaCommand, ShareMediaDto>
 {
     private readonly IAppDbContext _context;
+    private readonly INotificationRealtimeService _notificationRealtimeService;
 
-    public ShareMediaHandler(IAppDbContext context)
+    public ShareMediaHandler(
+        IAppDbContext context,
+        INotificationRealtimeService notificationRealtimeService)
     {
         _context = context;
+        _notificationRealtimeService = notificationRealtimeService;
     }
 
     public async Task<ShareMediaDto> Handle(ShareMediaCommand request, CancellationToken cancellationToken)
@@ -111,8 +118,45 @@ public class ShareMediaHandler : IRequestHandler<ShareMediaCommand, ShareMediaDt
             SharedAt = DateTime.UtcNow
         };
 
+        var notification = new NotificationEntity
+        {
+            Id = Guid.NewGuid(),
+            UserId = request.ReceiverId,
+            Type = "share",
+            Payload = JsonSerializer.Serialize(new
+            {
+                shareId = share.Id,
+                senderId = sender.Id,
+                senderName = sender.UserName,
+                mediaItemId = share.MediaItemId,
+                playlistId = share.PlaylistId,
+                targetType,
+                targetTitle,
+                message = share.Message
+            }),
+            IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
         _context.MediaShares.Add(share);
+        _context.Notifications.Add(notification);
+
         await _context.SaveChangesAsync(cancellationToken);
+
+        var notificationDto = new NotificationDto
+        {
+            Id = notification.Id,
+            UserId = notification.UserId,
+            Type = notification.Type,
+            Payload = notification.Payload,
+            IsRead = notification.IsRead,
+            CreatedAt = notification.CreatedAt
+        };
+
+        await _notificationRealtimeService.SendNotificationAsync(
+            request.ReceiverId,
+            notificationDto,
+            cancellationToken);
 
         return new ShareMediaDto
         {

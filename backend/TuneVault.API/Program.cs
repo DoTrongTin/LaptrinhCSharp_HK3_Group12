@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Http.Features;
 using TuneVault.API.Services;
 using TuneVault.Application.Common.Interfaces;
 
+using TuneVault.Infrastructure.Hubs;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================
@@ -112,6 +114,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 // ĐOẠN CODE KÍCH HOẠT DATA SEEDER
 using (var scope = app.Services.CreateScope())
