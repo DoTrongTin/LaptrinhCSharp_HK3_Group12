@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { currentTrack } from '../../../data/currentTrack';
+
 import PanelHeader from './PanelHeader';
 import TrackDetails from './TrackDetails';
 import ArtistAboutCard from './ArtistAboutCard';
 import { mediaService } from '../../../services/mediaService';
 import { usePlayerStore } from '../../../store/playerStore';
-
 import api from '../../../services/api';
+
+type ShareUser = {
+  id: string;
+  userName: string;
+  email?: string;
+};
 
 interface NowPlayingPanelProps {
   onClose?: () => void;
@@ -19,267 +24,282 @@ interface NowPlayingPanelProps {
   } | null;
 }
 
-const queueData = [
-  {
-    id: 1,
-    title: 'The Lie',
-    artist: 'Long Afternoon',
-    cover: 'https://via.placeholder.com/60/1a1a1a/ffffff?text=Lie',
-  },
-  {
-    id: 2,
-    title: 'Painted Silence',
-    artist: 'Long Afternoon',
-    cover: 'https://via.placeholder.com/60/6366f1/ffffff?text=PS',
-  },
-  {
-    id: 3,
-    title: '2AM',
-    artist: 'JustaTee, BigDaddy',
-    cover: 'https://via.placeholder.com/60/1DB954/ffffff?text=2AM',
-  },
-];
-
 const NowPlayingPanel: React.FC<NowPlayingPanelProps> = ({ onClose, trackData }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [showAllCredits, setShowAllCredits] = useState(false);
-  const [showQueue, setShowQueue] = useState(true);
   const [toast, setToast] = useState('');
 
-  const [selectedTrack, setSelectedTrack] = useState<{
-    id?: string;
-    title: string;
-    artist: string;
-    cover: string;
-  } | null>(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [userSearchKeyword, setUserSearchKeyword] = useState('');
+  const [searchedUsers, setSearchedUsers] = useState<ShareUser[]>([]);
+  const [selectedReceivers, setSelectedReceivers] = useState<ShareUser[]>([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   const { currentTrack: currentTrackStore } = usePlayerStore();
 
-  // 1. Lưu lại track trước đó để so sánh (thay thế cho useEffect)
-  const [prevTrackTitle, setPrevTrackTitle] = useState(trackData?.title);
-
-  // 2. Kỹ thuật "Derived State" cập nhật ngay trong lúc Render -> KHÔNG BỊ LỖI ESLINT
-  if (trackData?.title !== prevTrackTitle) {
-    setPrevTrackTitle(trackData?.title);
-    setSelectedTrack(null);
-    setIsLiked(false);
-    setShowAllCredits(false);
-  }
-
-  // 3. Hợp nhất object activeTrack chuẩn hóa
-  const activeTrack = selectedTrack
-  ? {
-      id: selectedTrack.id,
-      playlistTitle: selectedTrack.artist,
-      artworkUrl: selectedTrack.cover,
-      title: selectedTrack.title,
-      artist: currentTrackStore?.artistName || currentTrackStore?.ownerName || currentTrack.artist,
-      artistImageUrl: currentTrack.artistImageUrl,
-      artistMonthlyListeners: currentTrack.artistMonthlyListeners,
-    }
-  : trackData
-    ? {
-        id: trackData.id,
-        playlistTitle: trackData.type === 'artist' ? trackData.title : trackData.artist,
-        artworkUrl: trackData.cover,
-        title: trackData.title,
-        artist: trackData.artist,
-        artistImageUrl: trackData.cover,
-        artistMonthlyListeners: currentTrack.artistMonthlyListeners,
-      }
-    : {
-        id: currentTrackStore?.id,
-        playlistTitle: currentTrack.playlistTitle,
-        artworkUrl: currentTrackStore?.thumbnailPath || currentTrack.artworkUrl,
-        title: currentTrackStore?.title || currentTrack.title,
-        artist: currentTrackStore?.ownerName || currentTrack.artist,
-        artistImageUrl: currentTrackStore?.thumbnailPath || currentTrack.artistImageUrl,
-        artistMonthlyListeners: currentTrack.artistMonthlyListeners,
-      };
+  const activeTrack = trackData || (currentTrackStore ? {
+    id: currentTrackStore.id,
+    title: currentTrackStore.title,
+    artist: currentTrackStore.artistName || currentTrackStore.ownerName || 'Ẩn danh',
+    cover: currentTrackStore.thumbnailPath
+      ? (currentTrackStore.thumbnailPath.startsWith('http') ? currentTrackStore.thumbnailPath : `http://localhost:5078${currentTrackStore.thumbnailPath}`)
+      : 'https://via.placeholder.com/300/121212/ffffff?text=No+Cover',
+    type: 'song' as const,
+  } : null);
 
   const showToast = (message: string) => {
     setToast(message);
-    window.setTimeout(() => {
-      setToast('');
-    }, 1800);
+    window.setTimeout(() => setToast(''), 1800);
   };
 
-  const handleShare = async () => {
-  try {
-    const receiverId = '6556FD35-55B4-4694-FBC3-08DED324D1C4';
-    const mediaItemId = activeTrack.id;
-
-    if (!mediaItemId) {
-      showToast('Không tìm thấy ID bài hát để chia sẻ.');
-      return;
-    }
-    const response = await api.post('/shares', {
-      receiverId,
-      mediaItemId,
-      playlistId: null,
-      message: `Nghe thử bài "${activeTrack.title}" nhé`,
-    });
-
-    const receiverName =
-      response.data?.data?.receiverName ||
-      response.data?.receiverName ||
-      'testuser2';
-
-    const alreadyExisted =
-      response.data?.data?.alreadyExisted ||
-      response.data?.alreadyExisted;
-
-    showToast(
-      alreadyExisted
-        ? `Bài này đã từng được chia sẻ cho ${receiverName}.`
-        : `Đã chia sẻ bài hát cho ${receiverName}.`
-    );
-  } catch (error) {
-    console.error('Share failed:', error);
-    showToast('Chia sẻ thất bại. Kiểm tra đăng nhập hoặc backend.');
-  }
-
-  setIsMenuOpen(false);
-};
-
-  // 4. API Tương tác Like thực tế
   const handleToggleLike = async () => {
     const targetId = currentTrackStore?.id;
-    
-    if (!targetId) {
-      showToast('Không có bài hát từ hệ thống đang phát để yêu thích.');
-      return;
-    }
+    if (!targetId) return;
 
     try {
       const result = await mediaService.toggleFavorite(targetId);
-      setIsLiked(result.data); 
+      setIsLiked(result.data);
       showToast(result.message);
     } catch (error) {
-      showToast('Thao tác tương tác yêu thích thất bại.');
-      console.error(error);
+      console.error('Toggle favorite failed:', error);
+      showToast('Thao tác yêu thích thất bại.');
     }
-    setIsMenuOpen(false);
   };
 
-  const handleToggleFollow = () => {
-    setIsFollowing((current) => {
-      const next = !current;
-      showToast(next ? `Đã theo dõi ${activeTrack.artist}.` : `Đã bỏ theo dõi ${activeTrack.artist}.`);
-      return next;
+  const handleSearchUsers = async () => {
+    try {
+      setIsSearchingUsers(true);
+
+      const response = await api.get('/users/search', {
+        params: {
+          keyword: userSearchKeyword,
+        },
+      });
+
+      const data = response.data?.data ?? response.data ?? [];
+      setSearchedUsers(data);
+    } catch (error) {
+      console.error('Search users failed:', error);
+      showToast('Không tìm được người dùng.');
+    } finally {
+      setIsSearchingUsers(false);
+    }
+  };
+
+  const handleToggleReceiver = (user: ShareUser) => {
+    setSelectedReceivers((prev) => {
+      const existed = prev.some((item) => item.id === user.id);
+
+      if (existed) {
+        return prev.filter((item) => item.id !== user.id);
+      }
+
+      return [...prev, user];
     });
   };
 
-  const handleExpand = () => {
-    showToast('Chế độ mở rộng panel sẽ phát triển sau.');
+  const handleOpenShareModal = () => {
+    setIsMenuOpen(false);
+    setIsShareModalOpen(true);
   };
+
+  const handleShare = async () => {
+    if (!activeTrack) return;
+
+    try {
+      const mediaItemId = activeTrack.id;
+
+      console.log('Sharing media:', {
+        mediaItemId,
+        title: activeTrack.title,
+        selectedReceivers,
+      });
+
+      if (!mediaItemId) {
+        showToast('Không tìm thấy ID bài hát để chia sẻ.');
+        return;
+      }
+
+      if (selectedReceivers.length === 0) {
+        showToast('Vui lòng chọn ít nhất một người nhận.');
+        return;
+      }
+
+      setIsSharing(true);
+
+      let successCount = 0;
+      let existedCount = 0;
+
+      for (const receiver of selectedReceivers) {
+        const response = await api.post('/shares', {
+          receiverId: receiver.id,
+          mediaItemId,
+          playlistId: null,
+          message: `Nghe thử bài "${activeTrack.title}" nhé`,
+        });
+
+        const data = response.data?.data ?? response.data;
+
+        if (data?.alreadyExisted) {
+          existedCount++;
+        } else {
+          successCount++;
+        }
+      }
+
+      if (successCount > 0 && existedCount > 0) {
+        showToast(`Đã chia sẻ cho ${successCount} người. ${existedCount} người đã từng nhận bài này.`);
+      } else if (successCount > 0) {
+        showToast(`Đã chia sẻ bài hát cho ${successCount} người.`);
+      } else {
+        showToast('Bài này đã từng được chia sẻ cho những người đã chọn.');
+      }
+
+      setIsShareModalOpen(false);
+      setSelectedReceivers([]);
+      setUserSearchKeyword('');
+      setSearchedUsers([]);
+    } catch (error: any) {
+      console.error('Share failed:', error);
+      console.error('Share response:', error.response?.data);
+
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.title ||
+        'Chia sẻ thất bại. Kiểm tra đăng nhập hoặc backend.';
+
+      showToast(message);
+    } finally {
+      setIsSharing(false);
+      setIsMenuOpen(false);
+    }
+  };
+
+  if (!activeTrack) {
+    return (
+      <aside style={styles.rightPanel}>
+        <PanelHeader playlistTitle="Đang phát" onClose={onClose} />
+        <div style={{ padding: 20, color: '#b3b3b3', textAlign: 'center' }}>
+          Không có bài hát nào đang được chọn.
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside style={styles.rightPanel}>
       <div style={styles.headerWrapper}>
         <PanelHeader
-          playlistTitle={activeTrack.playlistTitle}
+          playlistTitle={activeTrack.title}
           onClose={onClose}
-          onMenuClick={() => setIsMenuOpen((current) => !current)}
-          onExpandClick={handleExpand}
+          onMenuClick={() => setIsMenuOpen(!isMenuOpen)}
         />
-
-        {isMenuOpen && (
-          <div style={styles.menu}>
-            <button style={styles.menuItem} onClick={handleShare}>
-              Chia sẻ
-            </button>
-
-            <button style={styles.menuItem} onClick={handleToggleLike}>
-              {isLiked ? 'Bỏ khỏi thư viện' : 'Thêm vào thư viện'}
-            </button>
-
-            <button
-              style={styles.menuItem}
-              onClick={() => {
-                setShowAllCredits(true);
-                setIsMenuOpen(false);
-                showToast('Đã mở Credits.');
-              }}
-            >
-              Xem credits
-            </button>
-
-            <button
-              style={styles.menuItem}
-              onClick={() => {
-                setShowQueue((current) => !current);
-                setIsMenuOpen(false);
-              }}
-            >
-              {showQueue ? 'Ẩn queue' : 'Mở queue'}
-            </button>
-          </div>
-        )}
       </div>
 
       <section style={styles.scrollArea}>
         <TrackDetails
-          artworkUrl={activeTrack.artworkUrl}
+          artworkUrl={activeTrack.cover}
           title={activeTrack.title}
           artist={activeTrack.artist}
           isLiked={isLiked}
-          onShare={handleShare}
           onToggleLike={handleToggleLike}
+          onShare={handleOpenShareModal}
         />
 
         <ArtistAboutCard
           artistName={activeTrack.artist}
-          artistImageUrl={activeTrack.artistImageUrl}
-          monthlyListeners={activeTrack.artistMonthlyListeners}
+          artistImageUrl={activeTrack.cover}
+          monthlyListeners="Đang cập nhật..."
           isFollowing={isFollowing}
           showAllCredits={showAllCredits}
-          onToggleFollow={handleToggleFollow}
-          onToggleCredits={() => setShowAllCredits((current) => !current)}
+          onToggleFollow={() => setIsFollowing(!isFollowing)}
+          onToggleCredits={() => setShowAllCredits(!showAllCredits)}
         />
-
-        <section style={styles.queueCard}>
-          <div style={styles.queueHeader}>
-            <h3 style={styles.queueTitle}>Next in queue</h3>
-
-            <button
-              style={styles.openQueueButton}
-              onClick={() => setShowQueue((current) => !current)}
-            >
-              {showQueue ? 'Hide queue' : 'Open queue'}
-            </button>
-          </div>
-
-          {showQueue && (
-            <div style={styles.queueList}>
-              {queueData.map((song) => (
-                <div
-                  key={song.id}
-                  style={styles.queueItem}
-                  onClick={() => {
-                    setSelectedTrack({
-                      title: song.title,
-                      artist: song.artist,
-                      cover: song.cover,
-                    });
-                    setIsLiked(false);
-                    showToast(`Đang xem: ${song.title}`);
-                  }}
-                >
-                  <img src={song.cover} alt={song.title} style={styles.queueCover} />
-
-                  <div style={styles.queueInfo}>
-                    <div style={styles.queueSongTitle}>{song.title}</div>
-                    <div style={styles.queueArtist}>{song.artist}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
       </section>
+
+      {isShareModalOpen && (
+        <div style={styles.shareModalOverlay}>
+          <div style={styles.shareModal}>
+            <h3 style={styles.shareModalTitle}>Chia sẻ bài hát</h3>
+
+            <p style={styles.shareSongName}>{activeTrack.title}</p>
+
+            <div style={styles.shareSearchRow}>
+              <input
+                style={styles.shareSearchInput}
+                value={userSearchKeyword}
+                onChange={(e) => setUserSearchKeyword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearchUsers();
+                  }
+                }}
+                placeholder="Nhập username hoặc email..."
+              />
+
+              <button
+                style={styles.shareSearchButton}
+                onClick={handleSearchUsers}
+                disabled={isSearchingUsers}
+              >
+                {isSearchingUsers ? 'Đang tìm...' : 'Tìm'}
+              </button>
+            </div>
+
+            <div style={styles.shareUserList}>
+              {searchedUsers.length === 0 ? (
+                <p style={styles.shareEmptyText}>Chưa có người dùng nào.</p>
+              ) : (
+                searchedUsers.map((user) => {
+                  const selected = selectedReceivers.some((item) => item.id === user.id);
+
+                  return (
+                    <button
+                      key={user.id}
+                      style={{
+                        ...styles.shareUserItem,
+                        ...(selected ? styles.shareUserItemSelected : {}),
+                      }}
+                      onClick={() => handleToggleReceiver(user)}
+                    >
+                      <div>
+                        <div style={styles.shareUserName}>{user.userName}</div>
+                        <div style={styles.shareUserEmail}>{user.email}</div>
+                      </div>
+
+                      <span>{selected ? 'Đã chọn' : 'Chọn'}</span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            <div style={styles.shareSelectedText}>
+              Đã chọn: {selectedReceivers.length} người
+            </div>
+
+            <div style={styles.shareModalActions}>
+              <button
+                style={styles.shareCancelButton}
+                onClick={() => setIsShareModalOpen(false)}
+              >
+                Hủy
+              </button>
+
+              <button
+                style={styles.shareSubmitButton}
+                onClick={handleShare}
+                disabled={isSharing}
+              >
+                {isSharing ? 'Đang chia sẻ...' : 'Chia sẻ'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toast && <div style={styles.toast}>{toast}</div>}
     </aside>
@@ -301,7 +321,10 @@ const styles = {
     fontFamily: 'var(--font-primary)',
     position: 'relative' as const,
   },
-  headerWrapper: { position: 'relative' as const, flexShrink: 0 },
+  headerWrapper: {
+    position: 'relative' as const,
+    flexShrink: 0,
+  },
   menu: {
     position: 'absolute' as const,
     top: 52,
@@ -330,16 +353,6 @@ const styles = {
     overflowY: 'auto' as const,
     minHeight: 0,
   },
-  queueCard: { backgroundColor: '#1f1f1f', borderRadius: 8, padding: 18, marginBottom: 20 },
-  queueHeader: { display: 'flex' as const, justifyContent: 'space-between' as const, alignItems: 'center' as const, marginBottom: 16 },
-  queueTitle: { margin: 0, fontSize: 20, fontWeight: 900 },
-  openQueueButton: { background: 'transparent', border: 'none', color: '#b3b3b3', fontSize: 15, fontWeight: 800, cursor: 'pointer' },
-  queueList: { display: 'flex' as const, flexDirection: 'column' as const, gap: 12 },
-  queueItem: { display: 'flex' as const, alignItems: 'center' as const, gap: 12, cursor: 'pointer', borderRadius: 6, padding: 6 },
-  queueCover: { width: 48, height: 48, objectFit: 'cover' as const, borderRadius: 4 },
-  queueInfo: { minWidth: 0 },
-  queueSongTitle: { fontSize: 16, fontWeight: 800, color: '#ffffff' },
-  queueArtist: { fontSize: 14, color: '#b3b3b3', marginTop: 3 },
   toast: {
     position: 'absolute' as const,
     left: 20,
@@ -353,6 +366,123 @@ const styles = {
     fontWeight: 800,
     textAlign: 'center' as const,
     zIndex: 30,
+  },
+
+  shareModalOverlay: {
+    position: 'fixed' as const,
+    inset: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    zIndex: 9999,
+  },
+  shareModal: {
+    width: 420,
+    maxWidth: '90vw',
+    backgroundColor: '#181818',
+    border: '1px solid #333',
+    borderRadius: 12,
+    padding: 20,
+    color: '#ffffff',
+  },
+  shareModalTitle: {
+    margin: '0 0 8px 0',
+    fontSize: 20,
+    fontWeight: 800,
+  },
+  shareSongName: {
+    margin: '0 0 16px 0',
+    color: '#b3b3b3',
+    fontSize: 14,
+  },
+  shareSearchRow: {
+    display: 'flex' as const,
+    gap: 8,
+    marginBottom: 12,
+  },
+  shareSearchInput: {
+    flex: 1,
+    backgroundColor: '#242424',
+    border: '1px solid #3a3a3a',
+    borderRadius: 6,
+    padding: '10px 12px',
+    color: '#ffffff',
+    outline: 'none',
+  },
+  shareSearchButton: {
+    backgroundColor: '#1db954',
+    border: 'none',
+    borderRadius: 6,
+    padding: '10px 14px',
+    color: '#000000',
+    fontWeight: 700,
+    cursor: 'pointer' as const,
+  },
+  shareUserList: {
+    display: 'flex' as const,
+    flexDirection: 'column' as const,
+    gap: 8,
+    maxHeight: 240,
+    overflowY: 'auto' as const,
+    marginBottom: 12,
+  },
+  shareEmptyText: {
+    color: '#b3b3b3',
+    fontSize: 14,
+  },
+  shareUserItem: {
+    width: '100%',
+    display: 'flex' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+    backgroundColor: '#242424',
+    border: '1px solid #333',
+    borderRadius: 8,
+    padding: '10px 12px',
+    color: '#ffffff',
+    cursor: 'pointer' as const,
+    textAlign: 'left' as const,
+  },
+  shareUserItemSelected: {
+    borderColor: '#1db954',
+    backgroundColor: '#14301f',
+  },
+  shareUserName: {
+    fontSize: 14,
+    fontWeight: 700,
+  },
+  shareUserEmail: {
+    fontSize: 12,
+    color: '#b3b3b3',
+    marginTop: 2,
+  },
+  shareSelectedText: {
+    color: '#b3b3b3',
+    fontSize: 13,
+    marginBottom: 14,
+  },
+  shareModalActions: {
+    display: 'flex' as const,
+    justifyContent: 'flex-end' as const,
+    gap: 10,
+  },
+  shareCancelButton: {
+    backgroundColor: '#333',
+    border: 'none',
+    borderRadius: 6,
+    padding: '10px 14px',
+    color: '#ffffff',
+    cursor: 'pointer' as const,
+  },
+  shareSubmitButton: {
+    backgroundColor: '#1db954',
+    border: 'none',
+    borderRadius: 6,
+    padding: '10px 14px',
+    color: '#000000',
+    fontWeight: 800,
+    cursor: 'pointer' as const,
   },
 };
 

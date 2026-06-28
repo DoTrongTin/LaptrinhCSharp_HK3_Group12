@@ -9,7 +9,10 @@ const RightPanel: React.FC = () => {
   
   // ĐÃ THÊM: Lấy dữ liệu bài hát được chọn từ Context
   const { rightPanelData } = useAppContext();
-
+  if (!rightPanelData) {
+    return null;
+  }
+  
   return (
     <div style={{
       ...styles.container,
@@ -24,7 +27,7 @@ const RightPanel: React.FC = () => {
         />
       ) : (
         // Khối hiển thị khi đã ẩn (thanh mỏng có mũi tên)
-        <aside style={styles.collapsedPanel}>
+        <aside style={styles.collapsedPanel}> 
           <button 
             style={styles.expandButton} 
             onClick={() => setIsExpanded(true)} 
