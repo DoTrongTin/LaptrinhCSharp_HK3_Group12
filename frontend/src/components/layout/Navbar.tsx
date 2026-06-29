@@ -6,6 +6,7 @@ import { useNotifications } from '../../hooks/useNotifications';
 import { searchService, type SearchMediaItem } from '../../services/searchService';
 import { useAppContext } from '../../context/AppContext';
 
+import api from '../../services/api';
 import {
   MoreHorizontal,
   ChevronLeft,
@@ -87,6 +88,71 @@ const Navbar: React.FC = () => {
     setSearchResults([]);
     setActivePopup(null);
   };
+
+  const getCoverUrl = (thumbnailPath?: string) => {
+  if (!thumbnailPath) {
+    return 'https://via.placeholder.com/300/121212/ffffff?text=No+Cover';
+  }
+
+  return thumbnailPath.startsWith('http')
+    ? thumbnailPath
+    : `http://localhost:5078${thumbnailPath}`;
+};
+
+const handleNotificationClick = async (notification: any) => {
+  try {
+    await markAsRead(notification.id);
+
+    let payload: any = {};
+
+    try {
+      payload = JSON.parse(notification.payload || '{}');
+    } catch {
+      payload = {};
+    }
+
+    if (notification.type !== 'share' || !payload.mediaItemId) {
+      setActivePopup(null);
+      return;
+    }
+
+    let foundMedia: SearchMediaItem | undefined;
+
+    if (payload.targetTitle) {
+      const results = await searchService.searchMedia(payload.targetTitle);
+
+      foundMedia =
+        results.find(
+          (item) =>
+            item.id?.toLowerCase() === String(payload.mediaItemId).toLowerCase()
+        ) || results[0];
+    }
+
+    if (foundMedia) {
+      setRightPanelData({
+        id: foundMedia.id,
+        title: foundMedia.title,
+        artist: foundMedia.artistName || foundMedia.ownerName || 'Ẩn danh',
+        cover: getCoverUrl(foundMedia.thumbnailPath),
+        type: 'song',
+      });
+    } else {
+      setRightPanelData({
+        id: payload.mediaItemId,
+        title: payload.targetTitle || 'Bài hát được chia sẻ',
+        artist: payload.senderName
+          ? `Được chia sẻ bởi ${payload.senderName}`
+          : 'Bài hát được chia sẻ',
+        cover: 'https://via.placeholder.com/300/121212/ffffff?text=Shared+Song',
+        type: 'song',
+      });
+    }
+
+    setActivePopup(null);
+  } catch (error) {
+    console.error('Open shared media failed:', error);
+  }
+};
 
   const handleLogout = () => {
     logout();
@@ -291,7 +357,7 @@ const Navbar: React.FC = () => {
                             ...styles.notificationItem,
                             ...(notification.isRead ? {} : styles.notificationItemUnread),
                           }}
-                          onClick={() => markAsRead(notification.id)}
+                          onClick={() => handleNotificationClick(notification)}
                         >
                           <div style={styles.notificationText}>
                             {getNotificationText(notification)}
